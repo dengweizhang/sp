@@ -118,3 +118,16 @@ code{font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow
   .ai-launcher{right:12px;bottom:12px}
   .ai-panel{right:12px;bottom:61px;width:calc(100vw - 24px);height:min(510px,calc(100dvh - 95px))}
 }
+
+/* PK formulas: print-friendly, scrollable and intentionally unadorned */
+.article-body h3{font-size:17px;line-height:1.5;font-weight:600;margin:24px 0 11px;scroll-margin-top:65px}
+.pk-method{border-bottom:1px solid var(--line);padding:10px 0 14px}
+.pk-method:last-child{border-bottom:0}
+.pk-method-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px;margin-bottom:9px}
+.pk-method-title strong{font:600 14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.pk-method-title span{font-size:13px;color:var(--muted)}
+.pk-method p{font-size:14px;line-height:1.85;color:#565656;margin:10px 0 0}
+.pk-formula{font:14px/1.8 ui-monospace,SFMono-Regular,Menlo,Consolas,"Songti SC",serif;background:#f8f8f7;border-left:2px solid #d2d4d0;padding:8px 12px;margin:7px 0;overflow-x:auto;white-space:nowrap}
+.pk-references{font-size:13px;line-height:1.8}
+.pk-references a{text-decoration:underline;text-underline-offset:3px;text-decoration-color:#bfc8c8;color:var(--accent)}
+@media(max-width:700px){.article-body h3{font-size:16px;margin:22px 0 9px}.pk-formula{font-size:12px}.pk-method p{font-size:13px}}
