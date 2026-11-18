@@ -1,11 +1,12 @@
 # SP · Clinical Statistical Programming
 
-**V0.2.5** — 极简 SP 统计编程知识库、顶部 XPT/CT 快捷链接，AI 暂时隐藏。
+**V0.2.6** — 极简 SP 统计编程知识库、顶部 XPT/CT 快捷链接，AI 暂时隐藏。
 
 ## 页面与文件
 
 - `/`：文章索引（不展示搜索框或大幅介绍）
 - `/pk-parameters/`：常用 PK 参数文章，含 14 个参数的 NCA 计算方法、QC 注意事项和手算示例
+- `/indication-interview/`：治疗领域、适应症、受试者与研究目的的区别，SP 面试项目复盘、回答模板和自测
 - `public/assets/ai.js`：右下角 AI 面板源码（暂时停用）
 - `functions/api/chat.js`：Cloudflare Pages Function，调用 DeepSeek API
 - `public/knowledge-index.json`：本站公开文章的索引及检索关键词
@@ -27,7 +28,7 @@
 
 - 用户通过对话提问，后端先从索引中选择可能相关的**公开站内文章**，抽取页面正文作为上下文。
 - DeepSeek `deepseek-flash` 可以根据需要调用 DeepSeek 官方联网搜索和阅读链接工具，并返回可用来源链接。
-- 当前只有「常用 PK 参数」一篇文章已经入库；增加文章时更新 `public/knowledge-index.json`。
+- 当前已加入 PK 参数与临床试验适应症两篇文章；增加文章时更新 `public/knowledge-index.json`。
 - **不包含全套 CDISC PDF/XLS 标准库索引**，也不支持上传文件；这是后续版本的工作。
 - 聊天历史只保留在当前网页的内存中；刷新即清空。用户消息会发送到 Cloudflare Pages Function，再转发至 DeepSeek。
 
@@ -52,24 +53,30 @@
 
 文档参考：https://api-docs.deepseek.com/guides/web_tools/ 与 https://developers.cloudflare.com/pages/functions/get-started/ 。
 
-## V0.2.5：暂时隐藏 AI
+## V0.2.6：暂时隐藏 AI
 
 - 首页与 PK 文章都已移除 `/assets/ai.js` 引用，右下角不显示入口。
 - 服务端 `functions/api/chat.js` 中 `AI_ENABLED = false`，避免直接访问 API 产生 DeepSeek 消耗。
 - 恢复时：将 `AI_ENABLED` 改为 `true`，在需要显示的页面 `<head>` 中加入 `<script src="/assets/ai.js" defer></script>`，并部署；如使用 API，还需设置密钥与限流。
 - AI 源码与文章索引保留，不删除现有能力。
 
-## V0.2.5 · PK 交互图解
+## V0.2.6 · PK 交互图解
 
 - `public/assets/pk-interactive.js`：只加载在 PK 文章内的本地 SVG 交互图，无外部依赖或数据上报。
 - 浓度–时间图：点选 Cmax/Tmax、AUClst、AUCinf、Lambda_z、t½，显示不同强调状态与解释。
 - AUC 积分图：切换线性梯形法 / 对数梯形法；对相同两个采样点分别计算示意面积 3.750 与 3.607 ng·h/mL。
 - 图为模拟数据（非项目数据）；手机上图表可横向滑动。原有 AI 入口继续隐藏且接口暂停。
 
-## V0.2.5：PARAMCD 对照与点击式图解
+## V0.2.6：PARAMCD 对照与点击式图解
 
 - 参数表新增 PARAMCD（参考）列，按 SDTM PKPARMCD 控制术语 C85839 匹配；ADPP PARAMCD 最终以项目 Spec 为准。
 - AUCinf、MRTinf、CL 和 CL/F 按观测/预测、给药途径等展示多个候选代码，附可展开解释。
 - PK 浓度–时间图：点击参数按钮，切换 Cmax/Tmax、AUClst、AUCinf、Lambda_z 和 t½ 图解。
 - AUC 梯形法图：点击「线性梯形」/「对数梯形」按钮查看面积差异；不再支持拖动。
 - 图解数据均为示意，不可代替项目 PK 分析输出。AI 继续隐藏并停用。
+
+## V0.2.6：适应症与面试准备
+
+- 新增 `/indication-interview/`，按“概念区分→为什么不是每个项目都有患者适应症→5种项目背景→Protocol复盘→面试话术→自测”组织。
+- 例子是通用、匿名的学习示意，不泄露具体申办方与保密研究内容。
+- 首页文章数更新到 2，静态知识索引和 sitemap 同步更新。原 AI 入口继续隐藏。
