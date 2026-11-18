@@ -262,3 +262,42 @@ code{font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow
  .design-lane span,.design-lane b,.design-lane i{font-size:11px;padding:6px 7px}
  .design-practice{padding:11px 13px}
 }
+
+/* Statistics & pharmacology learning notes — compact reusable article components */
+.sp-learning-lead{border-left:2px solid #a9c6c2;background:#fafbfa;padding:12px 16px;margin:14px 0 25px}
+.sp-learning-lead strong{font-size:15px}
+.sp-learning-lead p{font-size:14px;line-height:1.85;margin:8px 0 0;color:#565b5a}
+.sp-learning-lead a,.sp-learning-example a,.article-body section>p>a{color:var(--accent);text-decoration:underline;text-underline-offset:3px;text-decoration-color:#b9c9c8}
+.learning-table{font-size:13px;line-height:1.7;min-width:590px}
+.learning-table td:first-child{font-family:var(--serif);white-space:normal;font-weight:600;font-size:13px;width:144px}
+.learning-table td:first-child small{font-size:11px;color:#888;font-weight:400}
+.learning-table code{font-size:11px}
+.sp-learning-hint{font-size:13px;color:#687373;margin:11px 0 2px!important}
+.sp-learning-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0 18px}
+.sp-learning-cell{min-width:0;border-top:1px solid #d6e0dd;background:#fafbfa;padding:12px 13px;display:flex;flex-direction:column;gap:6px}
+.sp-learning-cell strong{font-size:14px}
+.sp-learning-cell span{font-size:12px;line-height:1.8;color:#666}
+.sp-learning-example{border-left:2px solid #ddd5c8;background:#fbfaf8;padding:12px 16px;margin:16px 0 21px}
+.sp-learning-example strong{font-size:14px}
+.sp-learning-example p{font-size:13px;line-height:1.85;margin:8px 0 0}
+.pharm-flow{display:flex;align-items:stretch;gap:8px;max-width:800px;margin:17px 0 19px}
+.pharm-flow>div{min-width:0;flex:1;border-top:2px solid #bdccc8;padding:11px 12px 13px;background:#f9faf9;display:flex;flex-direction:column;gap:6px}
+.pharm-flow>div span{color:#8d9997;font:600 10px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.1em}
+.pharm-flow>div strong{font-size:14px;line-height:1.45}
+.pharm-flow>div small{color:#747c7b;line-height:1.7;font-size:11px}
+.pharm-flow>em{font:20px/1 Georgia,serif;color:#a0aaa6;align-self:center;font-style:normal}
+@media(max-width:700px){
+ .sp-learning-lead{padding:10px 12px}
+ .sp-learning-lead p{font-size:13px}
+ .sp-learning-grid{gap:7px}
+ .sp-learning-cell{padding:10px}
+ .sp-learning-cell span{font-size:11px}
+ .learning-table{min-width:560px}
+ .pharm-flow{flex-wrap:wrap;gap:6px}
+ .pharm-flow>div{flex-basis:100%;padding:9px 11px;gap:3px}
+ .pharm-flow>em{width:100%;text-align:center;font-size:17px}
+}
+@media print{
+ .sp-learning-lead,.sp-learning-cell,.pharm-flow>div,.sp-learning-example{background:white}
+ .table-wrap{overflow:visible}
+}
