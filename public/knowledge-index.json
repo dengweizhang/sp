@@ -1,5 +1,5 @@
 {
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "公开文章索引；新增文章时维护此文件和首页目录。",
   "articles": [
     {
@@ -56,6 +56,46 @@
         "MRTIBIFO",
         "FLUCP",
         "交互图解"
+      ]
+    },
+    {
+      "title": "如何理解临床试验适应症",
+      "url": "/indication-interview/",
+      "keywords": [
+        "适应症",
+        "indication",
+        "治疗领域",
+        "therapeutic area",
+        "TA",
+        "Trial Arms",
+        "study population",
+        "研究人群",
+        "研究目的",
+        "临床试验",
+        "面试",
+        "CRO",
+        "SP",
+        "SAD",
+        "MAD",
+        "健康受试者",
+        "小细胞肺癌",
+        "SCLC",
+        "2型糖尿病",
+        "T2DM",
+        "前列腺癌",
+        "mCRPC",
+        "PSMA",
+        "减重",
+        "肥胖",
+        "PK",
+        "PD",
+        "疗效终点",
+        "项目复盘",
+        "入排标准",
+        "Protocol",
+        "SAP",
+        "TFL",
+        "ADaM"
       ]
     }
   ]
