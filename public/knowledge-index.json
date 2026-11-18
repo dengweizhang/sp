@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "description": "公开文章索引；新增文章时维护此文件和首页目录。",
+  "articles": [
+    {
+      "title": "常用 PK 参数",
+      "url": "/pk-parameters/",
+      "keywords": [
+        "PK",
+        "药代动力学",
+        "Tmax",
+        "Cmax",
+        "Ctrough",
+        "Lambda_z",
+        "HL_Lambda_z",
+        "AUCinf",
+        "AUClst",
+        "AUCtau",
+        "AUCint",
+        "MRTinf",
+        "Rsq_adj",
+        "CL",
+        "CL/F",
+        "DF",
+        "半衰期",
+        "清除率",
+        "波动指数",
+        "终末消除",
+        "最佳拟合"
+      ]
+    }
+  ]
+}
