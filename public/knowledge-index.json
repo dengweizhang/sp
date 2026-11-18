@@ -1,5 +1,5 @@
 {
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "公开文章索引；新增文章时维护此文件和首页目录。",
   "articles": [
     {
@@ -55,7 +55,7 @@
         "MRTEVIFO",
         "MRTIBIFO",
         "FLUCP",
-        "拖动图解"
+        "交互图解"
       ]
     }
   ]
