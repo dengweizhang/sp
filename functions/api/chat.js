@@ -52,8 +52,8 @@ async function getLocalSources(env, request, question) {
       .filter(x => typeof x.url === "string" && /^\/[a-z0-9\/-]+\/$/i.test(x.url))
       .map(x => ({...x, score: relevance(x, question)}))
       .sort((a, b) => b.score - a.score);
-    // With a tiny knowledge base, include all pages; later include only relevant pages.
-    const selected = (ranked.length <= 3 ? ranked : ranked.filter(x => x.score > 0)).slice(0, 3);
+    // Only inject relevant published pages; avoid unrelated reference links.
+    const selected = ranked.filter(x => x.score > 0).slice(0, 3);
     const sources = [];
     for (const article of selected) {
       const contentResp = await env.ASSETS.fetch(new URL(article.url, base));
@@ -158,7 +158,9 @@ export async function onRequestPost({ request, env }) {
       const cite = annotation?.url_citation;
       if (!cite || typeof cite.url !== "string" || !/^https:\/\//i.test(cite.url)) continue;
       if (!sources.some(s => s.url === cite.url)) {
-        sources.push({title:String(cite.title || new URL(cite.url).hostname).slice(0,130), url:cite.url, type:"web"});
+        let title = cite.title;
+        if (!title) { try { title = new URL(cite.url).hostname; } catch (_) { continue; } }
+        sources.push({title:String(title).slice(0,130), url:cite.url, type:"web"});
       }
       if (sources.length >= 10) break;
     }
