@@ -12,9 +12,11 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-of
 .main-nav{display:flex;gap:22px;align-items:center;margin-left:auto}
 .main-nav a{font-size:14px;color:#555;white-space:nowrap}
 .main-nav a:hover{color:var(--accent)}
+.main-nav a[aria-current="page"]{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:1px}
 .header-right{font-size:12px;color:var(--muted);white-space:nowrap}
-.home-main{padding-top:28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:46px;align-items:start}
-.home-section{margin:0;min-width:0}
+.directory-main{padding-top:22px;min-height:200px;max-width:920px}
+.directory-main h1{margin:0 0 14px;font-size:26px}
+
 .section-label{font:650 14px/1.5 var(--serif);color:#555;letter-spacing:0;margin:0 0 9px}
 .home-list{list-style:none;margin:0;padding:0}
 .home-item{border-bottom:1px solid var(--line)}
@@ -22,7 +24,7 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-of
 .home-item .arrow{font-size:14px;color:#aaa;flex-shrink:0}
 .home-item a:hover .arrow{color:var(--accent)}
 .home-footer,.site-footer{color:#999;font-size:11px;border-top:1px solid var(--line);padding:12px 0 18px;display:flex;justify-content:space-between;gap:16px}
-.home-footer{margin-top:46px}
+.home-footer{margin-top:18px}
 .article-header{padding-top:22px;margin-bottom:14px}
 .breadcrumb{font-size:12px;color:var(--muted);margin:0 0 13px}
 h1{font-size:28px;letter-spacing:-.018em;font-weight:650;line-height:1.4;margin:0 0 9px}
@@ -57,8 +59,8 @@ code{font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow
   .main-nav{gap:15px}
   .main-nav a{font-size:13px}
   .header-right{font-size:11px}
-  .home-main{padding-top:21px;grid-template-columns:1fr;gap:26px}
-  .home-footer{margin-top:30px}
+  .directory-main{padding-top:18px;min-height:170px}
+  .home-footer{margin-top:14px}
   .article-header{padding-top:18px;margin-bottom:13px}
   .article-body h2{margin-top:25px}
   h1{font-size:25px}
