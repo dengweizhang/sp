@@ -49,7 +49,7 @@ async function getLocalSources(env, request, question) {
     const index = await resp.json();
     const articles = Array.isArray(index.articles) ? index.articles.slice(0, 80) : [];
     const ranked = articles
-      .filter(x => typeof x.url === "string" && /^\/[a-z0-9-/]+\/$/i.test(x.url))
+      .filter(x => typeof x.url === "string" && /^\/[a-z0-9/-]+\/$/i.test(x.url))
       .map(x => ({...x, score: relevance(x, question)}))
       .sort((a, b) => b.score - a.score);
     // With a tiny knowledge base, include all pages; later include only relevant pages.
