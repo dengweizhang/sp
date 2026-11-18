@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://sp.769967.xyz/</loc></url>
-<url><loc>https://sp.769967.xyz/pk-parameters/</loc></url>
+  <url><loc>https://sp.769967.xyz/tools/</loc></url>
+  <url><loc>https://sp.769967.xyz/knowledge/</loc></url>
+  <url><loc>https://sp.769967.xyz/pk-parameters/</loc></url>
 </urlset>
