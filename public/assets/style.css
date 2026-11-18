@@ -189,3 +189,28 @@ code{font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow
   .pk-code{min-width:140px}
   .pk-ct-note,.pk-ct-detail{font-size:12px}
 }
+
+/* Indication interview guide: clean notes, not a dashboard */
+.indication-lead{border-left:2px solid #bdc9c6;background:#fafbfa;padding:12px 17px;margin:14px 0 26px}
+.indication-lead strong{font-size:15px}
+.indication-lead p{font-size:14px;line-height:1.85;color:#555;margin:9px 0 0}
+.indication-table{min-width:630px;font-size:13px}
+.indication-table th:first-child,.indication-table td:first-child{width:155px}
+.indication-table td:first-child{font:inherit;white-space:normal;font-size:13px;font-weight:600}
+.indication-table td small{color:#888;font-size:11px;font-weight:400}
+.indication-case{border-top:1px solid var(--line);padding:13px 0 11px}
+.indication-case>strong{font-size:15px;font-weight:600}
+.indication-case p{font-size:14px;line-height:1.85;color:#555;margin:7px 0 0}
+.indication-case .indication-phrase{color:#476264}
+.indication-steps{padding-left:24px;margin:15px 0 20px}
+.indication-steps li{padding:0 0 0 4px;margin:10px 0}
+.indication-template{padding:14px 17px;border:1px solid var(--line);background:var(--soft);font-size:13px;line-height:2}
+.indication-template strong{display:block;font-size:14px;margin:0 0 7px}
+.indication-script{border-left:2px solid #d6d9d5;padding:8px 0 10px 15px;margin:18px 0}
+.indication-script p{font-size:14px;line-height:1.9;margin:6px 0 0}
+.script-kicker{color:#777;font-size:12px;letter-spacing:.01em}
+.indication-quiz{border-top:1px solid var(--line);margin:17px 0 23px}
+.indication-quiz details{border-bottom:1px solid var(--line);padding:10px 0}
+.indication-quiz summary{cursor:pointer;font-size:14px;line-height:1.7}
+.indication-quiz p{font-size:13px;color:#555;line-height:1.85;padding-left:19px;margin:10px 0 4px}
+@media(max-width:700px){.indication-lead{padding:10px 13px}.indication-table{min-width:600px}.indication-script p,.indication-case p,.indication-lead p{font-size:13px}}
