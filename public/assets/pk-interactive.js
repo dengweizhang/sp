@@ -95,6 +95,7 @@
     line(svg,x,y,x,box.bottom,{stroke:"#d1aa6c","stroke-width":1.1,"stroke-dasharray":"3 4",class:"pk-cursor-guide"});
     add(svg,"circle",{cx:x,cy:y,r:10,fill:"#fff",stroke:"#b08040","stroke-width":2, "data-pk-dragger":"curve",class:"pk-cursor-grip"});
     add(svg,"circle",{cx:x,cy:y,r:3,fill:"#b08040","pointer-events":"none"});
+    add(svg,"circle",{cx:x,cy:y,r:15,fill:"transparent","data-pk-dragger":"curve",class:"pk-cursor-hit"});
     text(svg,x>box.right-145?x-12:x+12,Math.max(box.top+14,y-14),
        "拖动 ◉",{"text-anchor":x>box.right-145?"end":"start",class:"pk-viz-drag-label","pointer-events":"none"});
   }
@@ -192,6 +193,7 @@
     handle.setAttribute("aria-valuemin","0.25");
     handle.setAttribute("aria-valuemax","2.4");
     handle.setAttribute("aria-valuenow",fmt(endC,2));
+    add(svg,"circle",{cx:sx(2),cy:sy(endC),r:18,fill:"transparent","data-pk-dragger":"end",class:"pk-cursor-hit"});
     text(svg,left+9,sy(2.5)-12,"2.5",{class:"pk-viz-value"});
     text(svg,right-10,sy(endC)-13,fmt(endC,2),{"text-anchor":"end",class:"pk-viz-value","pointer-events":"none"});
     text(svg,(left+right)/2,top+24,(linear?"AUC = ":"AUC ≈ ")+fmt(linear?linearArea:logArea,3),{"text-anchor":"middle",class:"pk-viz-value"});
