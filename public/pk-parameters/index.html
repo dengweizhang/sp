@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="常用药代动力学（PK）参数速查：Tmax、Cmax、AUCinf、AUClst、Lambda_z、CL 等，以及末端消除速率常数的实践注意事项。">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://sp.769967.xyz/pk-parameters/">
+  <link rel="stylesheet" href="/assets/style.css">
+  <title>常用 PK 参数 · SP</title>
+</head>
+<body>
+  <div class="shell">
+    <header class="site-header"><a class="brand" href="/" aria-label="SP 首页">SP.</a><span class="header-right">by dw</span></header>
+    <header class="article-header">
+      <nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / 常用 PK 参数</nav>
+      <h1>常用 PK 参数</h1>
+      <p class="article-lead">用于工作中的快速查阅。具体参数定义、计算区间、判定阈值，应以研究方案、SAP、PK 分析计划及软件配置为准。</p>
+    </header>
+    <div class="article-layout">
+      <main class="article-body" id="main-content">
+        <details class="mobile-toc"><summary>本页目录</summary><nav aria-label="移动端本页目录"><a href="#parameters">1. 常用参数</a><a href="#lambda-z">2. Lambda_z 相关</a><a href="#scope">3. 使用说明</a></nav></details>
+        <section aria-labelledby="parameters">
+          <h2 id="parameters">1. 常用参数</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">参数</th><th scope="col">含义</th></tr></thead>
+              <tbody>
+                <tr><td>Tmax</td><td>达峰时间</td></tr>
+                <tr><td>Cmax</td><td>峰浓度</td></tr>
+                <tr><td>Ctrough</td><td>谷浓度</td></tr>
+                <tr><td>Lambda_z</td><td>末端消除速率常数</td></tr>
+                <tr><td>HL_Lambda_z</td><td>末端消除半衰期（t½）</td></tr>
+                <tr><td>AUCinf</td><td>从 0 至无穷时间的血药浓度–时间曲线下面积</td></tr>
+                <tr><td>AUClst</td><td>从 0 至最后一个可测定浓度时间点的曲线下面积</td></tr>
+                <tr><td>AUCtau</td><td>一个给药间隔内的曲线下面积</td></tr>
+                <tr><td>AUCint</td><td>指定两个时间点之间的曲线下面积</td></tr>
+                <tr><td>MRTinf</td><td>平均滞留时间（外推至无穷时间）</td></tr>
+                <tr><td>Rsq_adj</td><td>调整后的决定系数</td></tr>
+                <tr><td>CL</td><td>清除率</td></tr>
+                <tr><td>CL/F</td><td>表观清除率</td></tr>
+                <tr><td>DF</td><td>波动指数</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section aria-labelledby="lambda-z">
+          <h2 id="lambda-z">2. Lambda_z 相关</h2>
+          <p>Lambda_z 通常由末端对数线性消除阶段的浓度数据拟合得到。原始笔记记录的实践要点如下：</p>
+          <ul>
+            <li>将浓度取对数后与时间进行线性回归，估计末端斜率。</li>
+            <li>仅使用能代表末端对数线性消除阶段的数据点，通常至少需要 3 个有效点。</li>
+            <li>可先尝试自动选择末端拟合范围；如不合适，再结合曲线检查并指定合理的时间范围。</li>
+          </ul>
+          <aside class="note" aria-label="项目笔记阈值说明">
+            <p><strong>原笔记中的判断参考（并非通用标准）</strong></p>
+            <p>拟合相关性：记录了 <code>R² ≥ 0.80</code> 的参考阈值；AUCinf 外推比例：记录了 <code>&lt; 20%</code> 的参考阈值，以及 <code>&gt; 40%</code> 时需特别审慎的情形。例外应具有记录和合理解释。</p>
+            <p>上述阈值可能因项目要求、软件、分析计划不同而变化；<code>R²</code> 也不等同于 <code>Rsq_adj</code>。</p>
+          </aside>
+        </section>
+        <section aria-labelledby="scope">
+          <h2 id="scope">3. 使用说明</h2>
+          <p>本页整理自个人 Notion「SP统计编程」笔记，用于快速查询与知识整理。尚未整理的参数计算方法暂不展示；不能代替研究专属 PK 分析规范。</p>
+        </section>
+      </main>
+      <aside class="toc" aria-label="本页目录">
+        <div class="toc-title">本页目录</div>
+        <nav><a href="#parameters">1. 常用参数</a><a href="#lambda-z">2. Lambda_z 相关</a><a href="#scope">3. 使用说明</a></nav>
+      </aside>
+    </div>
+    <footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.1</span></footer>
+  </div>
+</body>
+</html>
