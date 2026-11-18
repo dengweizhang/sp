@@ -1,6 +1,6 @@
 # SP · Clinical Statistical Programming
 
-**V0.2.3** — 极简 SP 统计编程知识库、顶部 XPT/CT 快捷链接，AI 暂时隐藏。
+**V0.2.4** — 极简 SP 统计编程知识库、顶部 XPT/CT 快捷链接，AI 暂时隐藏。
 
 ## 页面与文件
 
@@ -51,10 +51,25 @@
 公开访问者不要输入或上传未脱敏临床试验数据、申办方保密资料、个人医疗信息。引用 CDISC PDF、XLS 等文件应确认许可与版本来源；目前代码没有将这些文件加入 AI 知识库。
 
 文档参考：https://api-docs.deepseek.com/guides/web_tools/ 与 https://developers.cloudflare.com/pages/functions/get-started/ 。
-\n## V0.2.3：暂时隐藏 AI\n\n- 首页与 PK 文章都已移除 `/assets/ai.js` 引用，右下角不显示入口。\n- 服务端 `functions/api/chat.js` 中 `AI_ENABLED = false`，避免直接访问 API 产生 DeepSeek 消耗。\n- 恢复时：将 `AI_ENABLED` 改为 `true`，在需要显示的页面 `<head>` 中加入 `<script src="/assets/ai.js" defer></script>`，并部署；如使用 API，还需设置密钥与限流。\n- AI 源码与文章索引保留，不删除现有能力。\n
-## V0.2.3 · PK 交互图解
+
+## V0.2.4：暂时隐藏 AI
+
+- 首页与 PK 文章都已移除 `/assets/ai.js` 引用，右下角不显示入口。
+- 服务端 `functions/api/chat.js` 中 `AI_ENABLED = false`，避免直接访问 API 产生 DeepSeek 消耗。
+- 恢复时：将 `AI_ENABLED` 改为 `true`，在需要显示的页面 `<head>` 中加入 `<script src="/assets/ai.js" defer></script>`，并部署；如使用 API，还需设置密钥与限流。
+- AI 源码与文章索引保留，不删除现有能力。
+
+## V0.2.4 · PK 交互图解
 
 - `public/assets/pk-interactive.js`：只加载在 PK 文章内的本地 SVG 交互图，无外部依赖或数据上报。
 - 浓度–时间图：点选 Cmax/Tmax、AUClst、AUCinf、Lambda_z、t½，显示不同强调状态与解释。
 - AUC 积分图：切换线性梯形法 / 对数梯形法；对相同两个采样点分别计算示意面积 3.750 与 3.607 ng·h/mL。
 - 图为模拟数据（非项目数据）；手机上图表可横向滑动。原有 AI 入口继续隐藏且接口暂停。
+
+## V0.2.4：PARAMCD 对照与可拖动图解
+
+- 参数表新增 PARAMCD（参考）列，按 SDTM PKPARMCD 控制术语 C85839 匹配；ADPP PARAMCD 最终以项目 Spec 为准。
+- AUCinf、MRTinf、CL 和 CL/F 按观测/预测、给药途径等展示多个候选代码，附可展开解释。
+- PK 浓度–时间图：鼠标或触屏拖动图上的圆形游标，可查看该时间点的浓度和示意累计 AUC。
+- AUC 梯形法图：鼠标/触屏拖动右侧浓度圆点，实时重算线性与对数梯形法的面积；键盘可用方向键微调。
+- 图解数据均为示意，不可代替项目 PK 分析输出。AI 继续隐藏并停用。
