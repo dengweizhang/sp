@@ -1,15 +1,15 @@
 # SP · Clinical Statistical Programming
 
-一个极简临床统计编程知识库。当前版本：**V0.1.3**。
+一个极简临床统计编程知识库。当前版本：**V0.1.4**。
 
 ## 结构
 
-- 首页 `/`：文章检索与笔记列表
-- 顶部固定工具栏：直接打开 [XPT Viewer](https://xpt.769967.xyz) 与 [CT Mapping](https://ct.769967.xyz)
+- 首页 `/`：纯文章目录，不提供搜索框
+- 顶部固定工具栏（小字链接）：直接打开 [XPT Viewer](https://xpt.769967.xyz) 与 [CT Mapping](https://ct.769967.xyz)
 - 第一篇文章 `/pk-parameters/`：常用 PK 参数及 Lambda_z 注意事项
 - 旧路径 `/tools/` 与 `/knowledge/`：跳转回首页，避免旧书签失效
 
-搜索为**纯浏览器端关键词匹配**（文章标题、术语及关键词），没有服务端、数据收集或第三方脚本。新文章发布时，在 `public/index.html` 的 `article-list` 中添加新条目和 `data-search` 检索关键词。
+现在首页没有搜索；后续可单独部署 CDISC + 文章检索 Agent。新文章发布时，在 `public/index.html` 的 `article-list` 中添加一条链接。
 
 ## 部署 Cloudflare Pages
 
@@ -29,7 +29,7 @@ python3 -m http.server 8000
 
 ## 文件
 
-- `public/index.html`：主页及搜索
+- `public/index.html`：主页文章目录
 - `public/pk-parameters/index.html`：PK 文章
 - `public/assets/style.css`：全站紧凑 Serif 排版
 - `public/tools/index.html` 与 `public/knowledge/index.html`：旧链接兼容
