@@ -40,25 +40,36 @@
           <h2 id="parameters">1. 常用参数（14 个）</h2>
           <div class="table-wrap">
             <table>
-              <thead><tr><th scope="col">参数</th><th scope="col">含义</th></tr></thead>
+              <thead><tr><th scope="col">参数</th><th scope="col">PARAMCD（参考）</th><th scope="col">含义</th></tr></thead>
               <tbody>
-                <tr><td>Tmax</td><td>达峰时间</td></tr>
-                <tr><td>Cmax</td><td>峰浓度</td></tr>
-                <tr><td>Ctrough</td><td>谷浓度</td></tr>
-                <tr><td>Lambda_z</td><td>末端消除速率常数</td></tr>
-                <tr><td>HL_Lambda_z</td><td>末端消除半衰期（t½）</td></tr>
-                <tr><td>AUCinf</td><td>从 0 至无穷时间的血药浓度–时间曲线下面积</td></tr>
-                <tr><td>AUClst</td><td>从 0 至最后一个可测定浓度时间点的曲线下面积</td></tr>
-                <tr><td>AUCtau</td><td>一个给药间隔内的曲线下面积</td></tr>
-                <tr><td>AUCint</td><td>指定两个时间点之间的曲线下面积</td></tr>
-                <tr><td>MRTinf</td><td>平均滞留时间（外推至无穷时间）</td></tr>
-                <tr><td>Rsq_adj</td><td>调整后的决定系数</td></tr>
-                <tr><td>CL</td><td>清除率</td></tr>
-                <tr><td>CL/F</td><td>表观清除率</td></tr>
-                <tr><td>DF</td><td>波动指数</td></tr>
+                <tr><td>Tmax</td><td class="pk-code"><code>TMAX</code></td><td>达峰时间</td></tr>
+                <tr><td>Cmax</td><td class="pk-code"><code>CMAX</code></td><td>峰浓度</td></tr>
+                <tr><td>Ctrough</td><td class="pk-code"><code>CTROUGH</code></td><td>谷浓度</td></tr>
+                <tr><td>Lambda_z</td><td class="pk-code"><code>LAMZ</code></td><td>末端消除速率常数</td></tr>
+                <tr><td>HL_Lambda_z</td><td class="pk-code"><code>LAMZHL</code></td><td>末端消除半衰期（t½）</td></tr>
+                <tr><td>AUCinf</td><td class="pk-code"><code>AUCIFO</code> / <code>AUCIFP</code></td><td>从 0 至无穷时间的血药浓度–时间曲线下面积</td></tr>
+                <tr><td>AUClst</td><td class="pk-code"><code>AUCLST</code></td><td>从 0 至最后一个可测定浓度时间点的曲线下面积</td></tr>
+                <tr><td>AUCtau</td><td class="pk-code"><code>AUCTAU</code></td><td>一个给药间隔内的曲线下面积</td></tr>
+                <tr><td>AUCint</td><td class="pk-code"><code>AUCINT</code></td><td>指定两个时间点之间的曲线下面积</td></tr>
+                <tr><td>MRTinf</td><td class="pk-code"><code>MRTEVIFO</code> / <code>MRTIBIFO</code> / <code>MRTICIFO</code></td><td>平均滞留时间（外推至无穷时间）</td></tr>
+                <tr><td>Rsq_adj</td><td class="pk-code"><code>R2ADJ</code></td><td>调整后的决定系数</td></tr>
+                <tr><td>CL</td><td class="pk-code"><code>CLO</code> / <code>CLP</code></td><td>清除率</td></tr>
+                <tr><td>CL/F</td><td class="pk-code"><code>CLFO</code> / <code>CLFP</code></td><td>表观清除率</td></tr>
+                <tr><td>DF</td><td class="pk-code"><code>FLUCP</code></td><td>波动指数</td></tr>
               </tbody>
             </table>
           </div>
+          <p class="pk-ct-note">对应代码参考 CDISC SDTM <code>PPTESTCD</code> 使用的 <code>PKPARMCD</code> 术语表（C85839）；ADPP 中 <code>PARAMCD</code> 的最终取值须以项目 Spec 为准。含多个代码的参数需进一步区分观测值/预测值、给药途径或稳态条件。</p>
+          <details class="pk-ct-detail">
+            <summary>查看存在多种 PARAMCD 的原因</summary>
+            <ul>
+              <li><code>AUCIFO</code> / <code>AUCIFP</code>：分别采用最后实测浓度（Obs）/ 末端预测浓度（Pred）外推。</li>
+              <li><code>MRTEVIFO</code> / <code>MRTIBIFO</code> / <code>MRTICIFO</code>：依次适用于血管外给药、静脉推注、静脉恒速输注；这里列的是 Obs 类型。</li>
+              <li><code>CLO</code> / <code>CLP</code>，<code>CLFO</code> / <code>CLFP</code>：区分 Obs / Pred；稳态给药间隔可进一步使用 <code>CLTAU</code> / <code>CLFTAU</code>。</li>
+              <li><code>FLUCP</code> 表示以百分比表达的 Fluctuation%，不能把所有项目中自定义的 <code>DF</code> 都直接等同于该代码。</li>
+            </ul>
+            <p>参考：<a href="https://www.cdisc.org/standards/terminology/controlled-terminology" target="_blank" rel="noopener noreferrer">CDISC Controlled Terminology</a> · <a href="https://www.mycsg.in/meta_sdtm_ct_paired_master.php?codelist=C85839" target="_blank" rel="noopener noreferrer">PKPARMCD (C85839) 代码核查</a></p>
+          </details>
           <figure class="pk-viz" data-pk-demo="curve">
             <figcaption>浓度–时间曲线 <small>点击切换要观察的参数</small></figcaption>
             <div class="pk-viz-tabs" role="group" aria-label="浓度时间图解参数切换">
@@ -72,7 +83,7 @@
             <svg viewBox="0 0 640 216" role="img" aria-label="PK 浓度时间示例曲线" preserveAspectRatio="xMidYMid meet"></svg>
             </div>
             <p class="pk-viz-caption" data-pk-caption aria-live="polite">选择上方参数，查看曲线上的对应位置。</p>
-            <p class="pk-viz-footnote">示意数据：峰浓度 10 ng/mL，末端半衰期 2 h；仅为概念图，不代表真实研究数据。</p>
+            <p class="pk-viz-footnote">拖动图上的圆形游标，查看对应时间、浓度及线性梯形累计 AUC。示例数据不代表真实研究；右侧 AUCinf 尾部为外推示意。</p>
           </figure>
         </section>
 
@@ -119,7 +130,7 @@
             <svg viewBox="0 0 520 176" role="img" aria-label="AUC 梯形法计算示例" preserveAspectRatio="xMidYMid meet"></svg>
             </div>
             <p class="pk-viz-caption" data-pk-caption aria-live="polite">比较不同方法计算出的面积。</p>
-            <p class="pk-viz-footnote">示例：0 h 为 2.5 ng/mL，2 h 为 1.25 ng/mL。仅展示单个下降区间。</p>
+            <p class="pk-viz-footnote">拖动图中右侧圆点可调整 2 h 处的浓度，两种方法的面积会实时更新。左侧浓度固定为 2.5 ng/mL。</p>
           </figure>
           <div class="pk-method">
             <div class="pk-method-title"><strong>AUClst</strong><span>0 至最后可测定浓度时点</span></div>
@@ -222,7 +233,7 @@
           </ul>
         </section>
     </main>
-    <footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.2.3</span></footer>
+    <footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.2.4</span></footer>
     <a class="back-to-top" href="#top" aria-label="一键回到顶部" title="回到顶部" hidden>↑</a>
     <script>
       (() => {
