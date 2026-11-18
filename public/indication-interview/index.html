@@ -83,6 +83,12 @@
           <p>例如肥胖、超重伴合并症、器官功能损害等，通常还涉及具体人群限制。<strong>“减肥药”是日常称呼，不是足够准确的试验适应症。</strong>应回到方案中的目标疾病/状态和入排标准。</p>
         </div>
         <p>FDA 对Ⅰ期研究的说明明确涉及健康受试者及患者人群、剂量递增、代谢与药理作用评价。不能简单地把“Ⅰ期＝健康受试者”或“没有患者＝药物没有开发适应症”。</p>
+        <aside class="note">
+          <p><strong>CDISC SDTMIG v3.4 有一条非常实用的例子（TS 域，Trial Summary）。</strong></p>
+          <p>当 <code>TSPARMCD = "INDIC"</code> 时，<code>TSVAL</code> 用于表示<strong>这项试验</strong>拟研究或解决的疾病/状态。SDTMIG 举例：以收集 PK 数据为目的的健康志愿者临床药理试验，可以<strong>没有 Trial Indication</strong>；如果 TS 中包含该 <code>INDIC</code> 记录，则 <code>TSVAL</code> 为空、<code>TSVALNF = "NA"</code>。</p>
+          <p>但健康受试者试验并非都没有 Trial Indication：SDTMIG 同时举例，以预防流感为目的的疫苗研究即使招募健康受试者，<code>TSVAL</code> 也可为 <code>Influenza</code>。</p>
+          <p>这说明 <strong>Trial Indication 取决于试验的实际目的，而不是单凭“是否健康受试者”判断</strong>。另外，候选药物的长期目标适应症与单项试验的 Trial Indication 不应机械等同。参考 <a href="https://www.cdisc.org/standards/foundational/sdtmig/sdtmig-v3-4" target="_blank" rel="noopener noreferrer">CDISC SDTMIG v3.4，Trial Summary（TS）Assumptions 17</a>。</p>
+        </aside>
       </section>
 
       <section aria-labelledby="examples">
@@ -167,6 +173,7 @@
           <li><a href="https://www.fda.gov/drugs/investigational-new-drug-application-ind/drug-development-and-review-definitions" target="_blank" rel="noopener noreferrer">FDA — Drug Development and Review Definitions ↗</a></li>
           <li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/e8r1-general-considerations-clinical-studies" target="_blank" rel="noopener noreferrer">FDA / ICH E8(R1) — General Considerations for Clinical Studies ↗</a></li>
           <li><a href="https://www.cdisc.org/standards/foundational/sdtm/sdtm-v1-7/html" target="_blank" rel="noopener noreferrer">CDISC SDTM — TA（Trial Arms）域定义 ↗</a></li>
+          <li><a href="https://www.cdisc.org/standards/foundational/sdtmig/sdtmig-v3-4" target="_blank" rel="noopener noreferrer">CDISC SDTMIG v3.4 — TS / INDIC 处理规则 ↗</a></li>
         </ul>
         <p>请在公开场合和个人网站上使用脱敏、概括化的项目经验，不披露申办方保密的研究方案、研究药物信息或受试者数据。</p>
       </section>
