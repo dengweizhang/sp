@@ -1,12 +1,13 @@
 # SP · Clinical Statistical Programming
 
-极简临床统计编程知识库与工具导航。当前版本：**V0.1.1**。
+极简临床统计编程知识库与工具导航。当前版本：**V0.1.2**。
 
 ## 当前内容
 
-- 首页：XPT Viewer / CT Mapping 两个独立工具入口
-- 知识：常用 PK 参数（根据 Notion「SP统计编程」整理）
-- 首页：Tools / Knowledge 顶部导航，电脑端双栏展示，手机端单栏
+- Tools 独立页面：`/tools/`，提供 XPT Viewer / CT Mapping 入口
+- Knowledge 独立页面：`/knowledge/`，目前收录「常用 PK 参数」
+- 顶部 Tools / Knowledge 是跨页面导航，不是首页双栏或锚点跳转
+- 根路径 `/` 默认进入 Knowledge
 - 文章目录：置于正文上方、可展开或折叠；滚动后显示回到顶部按钮
 - 字体：本机 Serif 字体栈，兼顾中文与英文
 
@@ -31,15 +32,17 @@ cd public
 python3 -m http.server 8000
 ```
 
-浏览 `http://localhost:8000`。文章路径为 `/pk-parameters/`。
+浏览 `http://localhost:8000`（自动跳转 Knowledge）。工具路径 `/tools/`，文章路径 `/pk-parameters/`。
 
 ## 修改内容
 
-- 首页：`public/index.html`
+- 默认入口：`public/index.html`（跳转至 Knowledge）
+- 工具页面：`public/tools/index.html`
+- 笔记列表：`public/knowledge/index.html`
 - 第一篇文章：`public/pk-parameters/index.html`
 - 全站样式：`public/assets/style.css`
 
-新增文章时，在 `public/` 下创建新文件夹和 `index.html`，再把链接加入首页。等文章多到维护困难时再考虑 Markdown + 静态生成器。
+新增文章时，在 `public/` 下创建新文件夹和 `index.html`，再把链接加入 `public/knowledge/index.html`。等文章多到维护困难时再考虑 Markdown + 静态生成器。
 
 ## 内容边界
 
