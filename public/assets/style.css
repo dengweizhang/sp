@@ -214,3 +214,51 @@ code{font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow
 .indication-quiz summary{cursor:pointer;font-size:14px;line-height:1.7}
 .indication-quiz p{font-size:13px;color:#555;line-height:1.85;padding-left:19px;margin:10px 0 4px}
 @media(max-width:700px){.indication-lead{padding:10px 13px}.indication-table{min-width:600px}.indication-script p,.indication-case p,.indication-lead p{font-size:13px}}
+
+/* Trial design field guide — restrained flow selector and typography */
+.design-principle{border-left:2px solid #a9c3bf;background:#f9fbfa;padding:13px 16px;margin:18px 0 25px}
+.design-principle>strong{font-size:15px}
+.design-principle p{font-size:14px;line-height:1.8;margin:7px 0 0;color:#505957}
+.design-table{min-width:590px;font-size:13px;line-height:1.65}
+.design-table td:first-child{font-family:var(--serif);font-size:13px;font-weight:600;white-space:normal;width:152px}
+.design-table td:first-child small{font-size:11px;color:#888;font-weight:400}
+.design-table td{line-height:1.7}
+.design-switch{margin:18px 0 25px;max-width:760px;border:1px solid var(--line);border-radius:7px;padding:14px 15px;background:white}
+.design-switch figcaption{font-size:14px;font-weight:600;margin-bottom:11px}
+.design-tabbar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.design-tabbar button{font:12px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#666;border:1px solid #e6e7e5;background:#fafafa;border-radius:4px;padding:6px 10px;cursor:pointer}
+.design-tabbar button[aria-pressed="true"]{border-color:#a8bfbd;color:#315c62;background:#eff6f4;font-weight:600}
+.design-tabbar button:hover{border-color:#b6c8c5}
+.design-graphic{min-height:156px;max-width:710px;padding:6px 0 0}
+.design-diagram-intro{color:#787978;font-size:12px;margin:2px 0 13px!important}
+.design-lane{display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap;font-size:12px;line-height:1.5}
+.design-lane span,.design-lane b,.design-lane i{border:1px solid #dfebe8;background:#f8fbfa;border-radius:4px;padding:7px 10px;font-size:12px;font-weight:500;font-style:normal;white-space:normal}
+.design-lane b{border-color:#cadeda;background:#eef5f3;color:#345e62;font-weight:650}
+.design-lane i{border-color:#e8e4dc;background:#faf9f7;color:#806e5c}
+.design-lane em{font-style:normal;color:#a4aaa7}
+.design-viz-explain{font-size:12px;line-height:1.8;color:#626665;margin:13px 0 0!important}
+.design-figure-note{font-size:11px;color:#969895;margin:10px 0 0!important}
+.design-execution{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:15px 0 19px}
+.design-execution>div{min-width:0;padding:11px 10px;border-top:2px solid #cad8d5;background:#fafbf9;display:flex;flex-direction:column;gap:8px}
+.design-execution span{font-size:10px;letter-spacing:.06em;color:#97a7a3}
+.design-execution strong{font-size:13px;line-height:1.5;font-weight:600}
+.design-execution small{font-size:11px;line-height:1.65;color:#777}
+.design-practice{padding:13px 17px;border:1px solid var(--line);background:#fafafa;margin:18px 0 22px;font-size:13px;line-height:1.8}
+.design-practice>strong{font-size:14px}
+.design-practice p{font-size:13px;margin:5px 0 0}
+.design-practice ul{margin:9px 0 0!important}
+.design-practice li{margin:6px 0}
+@media(max-width:760px){
+ .design-execution{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .design-execution>div:last-child{grid-column:1/-1}
+}
+@media(max-width:700px){
+ .design-principle{padding:10px 12px}
+ .design-principle p{font-size:13px}
+ .design-table{min-width:560px}
+ .design-switch{padding:12px 10px}
+ .design-tabbar button{font-size:11px;padding:5px 8px}
+ .design-lane{gap:5px}
+ .design-lane span,.design-lane b,.design-lane i{font-size:11px;padding:6px 7px}
+ .design-practice{padding:11px 13px}
+}
