@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="临床试验设计入门：平行、交叉、单臂、析因、序贯设计；随机化、双盲、安慰剂对照、SAD/MAD、适应性设计与 SDTM/ADaM 实践。面向 CRO 统计编程岗位与项目面试。">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://sp.769967.xyz/trial-designs/">
+  <link rel="stylesheet" href="/assets/style.css">
+  <title>临床试验设计：从随机双盲到 SAD/MAD · SP</title>
+</head>
+<body>
+<div class="shell" id="top">
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="SP 首页">SP.</a>
+    <nav class="tool-links" aria-label="常用工具">
+      <a href="https://xpt.769967.xyz" target="_blank" rel="noopener noreferrer">XPT <span aria-hidden="true">↗</span></a>
+      <a href="https://ct.769967.xyz" target="_blank" rel="noopener noreferrer">CT <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+  <header class="article-header">
+    <nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / 临床试验设计</nav>
+    <h1>临床试验设计：从随机双盲到 SAD/MAD</h1>
+    <p class="article-lead">从“受试者如何分组、接受什么治疗、何时评价”出发，建立可用于 Protocol 阅读、SDTM/ADaM 编程与 SP 面试的试验设计框架。</p>
+  </header>
+
+  <main class="article-body" id="main-content">
+    <details class="toc-inline">
+      <summary>本页目录</summary>
+      <nav aria-label="本页目录">
+        <a href="#overview">1. 一项试验由哪些设计维度组成？</a>
+        <a href="#models">2. 五种常见研究结构</a>
+        <a href="#randomization">3. 随机化与分配隐藏</a>
+        <a href="#blinding">4. 开放、单盲和双盲</a>
+        <a href="#control">5. 对照组与比较目标</a>
+        <a href="#sadm">6. SAD/MAD 实际如何开展</a>
+        <a href="#advanced">7. 进阶设计</a>
+        <a href="#programming">8. SP 如何落地到数据</a>
+        <a href="#interview">9. 面试回答与复盘</a>
+        <a href="#references">10. 来源与范围</a>
+      </nav>
+    </details>
+
+    <aside class="design-principle">
+      <strong>先记住一句话</strong>
+      <p><strong>平行组、随机、双盲、安慰剂对照是四个不同维度，可以同时出现。</strong>例如“Ⅱ期、多中心、随机、双盲、安慰剂对照、平行组研究”，就是把研究阶段、中心、分配方式、盲态、对照和结构拼在一起。</p>
+      <p>本文的“最常见”指实务中需要优先掌握的典型设计，而不是所有临床试验类型的频率排行榜。ICH E9 明确将平行组列为确证性试验最常见的设计。</p>
+    </aside>
+
+    <section aria-labelledby="overview">
+      <h2 id="overview">1. 一项试验由哪些设计维度组成？</h2>
+      <p>不要把试验设计理解为只有“随机双盲”四个字。实际 Protocol 可以从以下七个维度拆解。</p>
+      <div class="table-wrap">
+        <table class="design-table">
+          <thead><tr><th>维度</th><th>常用选项</th><th>核心问题</th></tr></thead>
+          <tbody>
+            <tr><td>研究类型</td><td>干预性 / 观察性</td><td>是否由研究方案指定干预？</td></tr>
+            <tr><td>研究结构</td><td>单臂、平行、交叉、析因、序贯</td><td>受试者按什么路径接受干预？</td></tr>
+            <tr><td>分配方式</td><td>随机 / 非随机 / 不适用</td><td>如何决定进入哪个组或序列？</td></tr>
+            <tr><td>盲法</td><td>开放、单盲、双盲等</td><td>谁不知道治疗分配信息？</td></tr>
+            <tr><td>对照类型</td><td>安慰剂、阳性、剂量、无治疗、外部</td><td>用什么作为比较依据？</td></tr>
+            <tr><td>评价目的</td><td>安全性/PK/PD、探索、确证；优效、非劣效、等效</td><td>研究要得出什么结论？</td></tr>
+            <tr><td>执行方式</td><td>单/多中心、固定/适应性、队列递增等</td><td>试验在时间和中心上如何实施？</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>另一个经常混淆的维度是<strong>Ⅰ、Ⅱ、Ⅲ、Ⅳ期（Phase）</strong>：它描述临床开发阶段，不是平行组或交叉设计的同义词。Ⅰ期也可能随机、双盲和安慰剂对照；Ⅲ期也不必然采用完全相同的结构。</p>
+      <p>ICH E8(R1) 还会按研究目的区分临床药理（Human Pharmacology）、治疗探索（Therapeutic Exploratory）、治疗确证（Therapeutic Confirmatory）等。研究阶段与研究目的相关，却不是简单的一一对应。</p>
+    </section>
+
+    <section aria-labelledby="models">
+      <h2 id="models">2. 五种常见研究结构：受试者如何走完整个试验？</h2>
+      <p>ClinicalTrials.gov 的干预模型包括 <em>Single Group、Parallel、Crossover、Factorial、Sequential</em>。以下以简化示意讲解，实际实施需要服从 Protocol。</p>
+
+      <figure class="design-switch" aria-label="不同试验设计的受试者路径示意">
+        <figcaption>点击选择一种设计，观察路径变化</figcaption>
+        <div class="design-tabbar" role="group" aria-label="研究结构切换">
+          <button type="button" data-design="parallel" aria-pressed="true">平行组</button>
+          <button type="button" data-design="crossover" aria-pressed="false">交叉</button>
+          <button type="button" data-design="single" aria-pressed="false">单臂</button>
+          <button type="button" data-design="sequential" aria-pressed="false">序贯</button>
+          <button type="button" data-design="factorial" aria-pressed="false">析因</button>
+        </div>
+        <div class="design-graphic" data-design-panel="parallel">
+          <p class="design-diagram-intro">同一受试者只进入一个平行治疗组</p>
+          <div class="design-lane"><span>随机 1:1</span><b>治疗 A</b><em>→</em><span>评价 / 随访</span></div>
+          <div class="design-lane"><span>随机 1:1</span><b>对照 B</b><em>→</em><span>评价 / 随访</span></div>
+          <p class="design-viz-explain">主要比较组间差异。常见于确证性研究；应注意随机分配比、基线平衡、分析集与主要终点。</p>
+        </div>
+        <div class="design-graphic" data-design-panel="crossover" hidden>
+          <p class="design-diagram-intro">同一受试者按序列经历不同治疗周期</p>
+          <div class="design-lane"><span>序列 AB</span><b>周期 1：A</b><em>→</em><i>洗脱</i><em>→</em><b>周期 2：B</b></div>
+          <div class="design-lane"><span>序列 BA</span><b>周期 1：B</b><em>→</em><i>洗脱</i><em>→</em><b>周期 2：A</b></div>
+          <p class="design-viz-explain">随机化通常分配的是治疗序列，不是永久分到 A 或 B。需要关注 Period、Sequence、Washout 与潜在残留效应。</p>
+        </div>
+        <div class="design-graphic" data-design-panel="single" hidden>
+          <p class="design-diagram-intro">只有一个指定治疗组</p>
+          <div class="design-lane"><span>筛选 / 入组</span><em>→</em><b>治疗 A</b><em>→</em><span>评价 / 随访</span></div>
+          <p class="design-viz-explain">可以评估安全性、PK 或某些疗效信号，但缺乏同步随机对照，因果推断和外部比较需谨慎。</p>
+        </div>
+        <div class="design-graphic" data-design-panel="sequential" hidden>
+          <p class="design-diagram-intro">是否进入下一队列，取决于事先规定的前期评价</p>
+          <div class="design-lane"><b>低剂量队列</b><em>→</em><i>安全评估</i><em>→</em><b>中剂量队列</b><em>→</em><i>安全评估</i></div>
+          <div class="design-lane"><span>达到预设条件后</span><em>→</em><b>高剂量队列</b></div>
+          <p class="design-viz-explain">SAD/MAD 中常见逐队列评估后再递增，但是否随机、是否设安慰剂组，是另外两个维度。</p>
+        </div>
+        <div class="design-graphic" data-design-panel="factorial" hidden>
+          <p class="design-diagram-intro">以两个二元干预因素 A、B 为例（2×2）</p>
+          <div class="design-lane"><b>A + B</b><b>A + 无 B</b><b>无 A + B</b><b>无 A + 无 B</b></div>
+          <p class="design-viz-explain">可研究 A、B 各自的作用及交互作用。重点是组合、主效应和交互作用的解释，不等于四个无关的平行组。</p>
+        </div>
+        <p class="design-figure-note">所有图均为概念示意，不表示固定的入组数量、随机比例或研究流程。</p>
+      </figure>
+
+      <h3>2.1 平行组（Parallel-group）</h3>
+      <p>受试者在同一研究阶段分别接受不同治疗，各自沿本组流程完成观察。它是确证性试验中非常常见的结构。优点是容易比较同期治疗组；要处理治疗组、分层因素、随机比、失访及缺失数据。</p>
+      <h3>2.2 交叉（Crossover）</h3>
+      <p>同一受试者依次接受多种治疗，可能通过自身对照减少个体差异。经典例子是两治疗、两周期、两序列（2×2 crossover）：AB 与 BA。通常需要考虑洗脱期（Washout），也要评估周期、序列及残留效应；对于病情快速进展或药物作用长期不可逆的情形往往不合适。</p>
+      <h3>2.3 单臂（Single-arm / Single-group）</h3>
+      <p>没有研究内并行的对照治疗组。它可能出现在剂量探索、早期肿瘤研究或某些罕见病研究。<strong>单臂不等于单中心，也不等于开放标签</strong>，尽管实际研究中经常同时出现。</p>
+      <h3>2.4 序贯分配（Sequential assignment）</h3>
+      <p>后续队列的安排依赖前面预设的里程碑，例如审阅安全数据后开放下一剂量队列。<strong>注意：ClinicalTrials.gov 的 Sequential Intervention Model 与统计学的 Group Sequential Design（群序贯设计）不是同一个术语。</strong>后者主要讨论预设中期分析及停止边界。</p>
+      <h3>2.5 析因（Factorial）</h3>
+      <p>同时研究多个干预因素及其组合，例如 A、B 两个因素各设有/无两种水平，形成四种组合。应关注因素间交互作用，不是把四种治疗随意放在一起就自动成为析因设计。</p>
+    </section>
+
+    <section aria-labelledby="randomization">
+      <h2 id="randomization">3. 随机化（Randomization）到底解决什么问题？</h2>
+      <p>随机化是使用随机机制决定受试者进入哪个组、队列内分配哪个治疗、或交叉试验进入哪个序列。其作用是减少选择偏倚，并在概率意义上促进组间可比性；<strong>随机化并不能保证每个基线指标恰好相等</strong>。</p>
+      <div class="table-wrap">
+        <table class="design-table">
+          <thead><tr><th>常见方式</th><th>如何理解</th><th>SP 应关注</th></tr></thead>
+          <tbody>
+            <tr><td>简单随机<br><small>Simple</small></td><td>每次按给定概率分配，如 1:1</td><td>随机比；小样本不一定人数恰好对半</td></tr>
+            <tr><td>区组随机<br><small>Block</small></td><td>在区组内按预定规则平衡分配</td><td>区组大小可能保密；不要从数据反推盲底</td></tr>
+            <tr><td>分层随机<br><small>Stratified</small></td><td>按中心、疾病程度等因素分层分配</td><td>分层因素如何入分析模型、TFL</td></tr>
+            <tr><td>整群随机<br><small>Cluster</small></td><td>随机单位是中心/病区等群组，而不是每个个体</td><td>不能忽略群内相关性</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="note"><p><strong>不要混淆三个概念：</strong>Randomization（随机生成分配）≠ Allocation Concealment（入组前防止预知分配结果）≠ Blinding（给药后哪些角色不知道实际治疗）。一项研究可以随机但开放标签，也可能在非随机情形下采用部分盲态评价。</p></aside>
+      <p>临床常见 IRT/IWRS 系统负责随机化及药物分配管理。对于统计编程，必须遵守盲态数据权限：<strong>盲态阶段不能通过 TRT、药盒号或分组衍生意外泄露治疗分配。</strong>具体流程以项目盲态计划为准。</p>
+    </section>
+
+    <section aria-labelledby="blinding">
+      <h2 id="blinding">4. 开放、单盲、双盲：到底“谁不知道”？</h2>
+      <div class="table-wrap">
+        <table class="design-table">
+          <thead><tr><th>描述</th><th>含义</th><th>不能直接推出</th></tr></thead>
+          <tbody>
+            <tr><td>开放标签<br><small>Open-label</small></td><td>治疗身份未对相关人员实施盲法</td><td>不等于没有随机化或没有对照</td></tr>
+            <tr><td>单盲<br><small>Single-blind</small></td><td>至少有一类相关角色不知道治疗分配</td><td>不能单凭“单盲”就断定一定是受试者不知情</td></tr>
+            <tr><td>双盲<br><small>Double-blind</small></td><td>至少两类指定角色保持盲态；典型包括受试者和研究者</td><td>不等于所有工作人员、统计师或程序员都绝对不知情</td></tr>
+            <tr><td>三盲 / 四盲<br><small>Triple / Quadruple</small></td><td>更多指定角色保持盲态</td><td>没有统一到所有机构都完全相同的角色组合</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>ClinicalTrials.gov 会进一步记录谁被盲：<em>Participant、Care Provider、Investigator、Outcomes Assessor</em>。所以复盘方案时，最好回答<strong>“哪些角色盲、如何维持盲态、什么时候揭盲”</strong>，而不只背双盲这个名词。</p>
+      <p>维持盲法可能需要匹配安慰剂、双模拟（Double-dummy）等方案；必要时可能发生紧急揭盲。双模拟不是一种新的随机方式。不同配方或给药途径难以做出外观一致的盲法时，可能采用双模拟方案。</p>
+      <div class="indication-script">
+        <span class="script-kicker">面试高频问题</span>
+        <p>“随机、双盲和安慰剂对照有何区别？”——随机回答<strong>如何分配</strong>；双盲回答<strong>谁不知道分配结果</strong>；安慰剂对照回答<strong>拿什么比较</strong>。这三个属性可以同时存在，也可以彼此独立。</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="control">
+      <h2 id="control">5. 对照方式：为什么要有对照组？</h2>
+      <p>ICH E10 说明，对照用于尽量区分治疗效应与疾病自然变化、其他治疗、观察者或受试者预期等影响。不同对照的适用性和伦理要求不同。</p>
+      <div class="table-wrap">
+        <table class="design-table">
+          <thead><tr><th>对照类型</th><th>概念</th><th>典型注意点</th></tr></thead>
+          <tbody>
+            <tr><td>安慰剂<br><small>Placebo</small></td><td>不含研究药物活性成分的对照</td><td>伦理许可、背景标准治疗、盲态维持</td></tr>
+            <tr><td>阳性 / 活性<br><small>Active control</small></td><td>与现有有效治疗比较</td><td>比较目标是优效还是非劣效？</td></tr>
+            <tr><td>剂量对照<br><small>Dose comparison</small></td><td>比较同种药物不同剂量或方案</td><td>暴露–反应、剂量组如何定义</td></tr>
+            <tr><td>无治疗<br><small>No-treatment</small></td><td>对照组不接受试验干预</td><td>可能难以维持盲态，需考虑伦理与偏倚</td></tr>
+            <tr><td>外部 / 历史<br><small>External / Historical</small></td><td>引用试验外部或以往患者资料比较</td><td>人群差异、混杂偏倚、可比性</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>优效、非劣效、等效不是三种“对照方式”</h3>
+      <p><strong>Superiority（优效）</strong>旨在证明某治疗优于对照；<strong>Non-inferiority（非劣效）</strong>关注不劣于预先规定的界值；<strong>Equivalence（等效）</strong>要求差异位于预设双侧等效界值内。它们属于<strong>比较目标与假设</strong>，应结合主要终点、检验框架和置信区间判断，不能只看 P 值。</p>
+      <p>特别注意：PK 生物等效性研究中的等效性评价有专门的监管标准，不宜与所有临床疗效等效试验混为一谈。</p>
+    </section>
+
+    <section aria-labelledby="sadm">
+      <h2 id="sadm">6. SAD / MAD 试验到底是怎么一步一步做的？</h2>
+      <p>这部分对开展过早期临床研究的 SP 尤其重要。<strong>SAD（Single Ascending Dose）是逐队列的单次给药剂量递增；MAD（Multiple Ascending Dose）是逐队列的多次给药剂量递增。</strong>二者描述的是给药与递增策略，不是随机、双盲或平行/交叉的替代词。</p>
+      <div class="design-execution">
+        <div><span>Step 01</span><strong>筛选与入组</strong><small>满足入排标准，完成基线安全检查</small></div>
+        <div><span>Step 02</span><strong>队列内分配和给药</strong><small>可能设置研究药 / 安慰剂分配；FIH 可能包含哨兵给药</small></div>
+        <div><span>Step 03</span><strong>采集 PK / PD / 安全性</strong><small>实际给药时间、浓度时间点、AE、LB、EG、VS 等</small></div>
+        <div><span>Step 04</span><strong>预设安全性审阅</strong><small>评估停药、递增、重复当前剂量或调整方案的条件</small></div>
+        <div><span>Step 05</span><strong>下一队列或后续研究部分</strong><small>只有满足方案条件才推进；不能假定必然升到最高剂量</small></div>
+      </div>
+      <h3>SAD 与 MAD 对比</h3>
+      <div class="table-wrap">
+        <table class="design-table">
+          <thead><tr><th>问题</th><th>SAD</th><th>MAD</th></tr></thead>
+          <tbody>
+            <tr><td>主要给药特征</td><td>每名受试者通常在对应队列接受单次给药</td><td>在对应队列按方案进行多次给药</td></tr>
+            <tr><td>核心 PK 关注</td><td>单次暴露、剂量比例性、消除</td><td>稳态暴露、蓄积、峰谷浓度</td></tr>
+            <tr><td>风险控制</td><td>递增规则、哨兵给药、观察窗口</td><td>重复给药耐受性、蓄积风险、递增规则</td></tr>
+            <tr><td>SP 关注点</td><td>队列、实际剂量、给药后采样相对时间</td><td>给药日、周期与时间点、稳态指标、给药依从性</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="note"><p><strong>两个容易说错的点：</strong>① SAD 中“一个剂量队列”不意味着研究只有一组，队列内部也可以随机分配活性药与安慰剂；② 剂量递增的“Sequential Cohorts”不自动等于统计学上的 Group Sequential 检验。</p></aside>
+    </section>
+
+    <section aria-labelledby="advanced">
+      <h2 id="advanced">7. 进阶设计：知道名字，还要知道边界</h2>
+      <div class="table-wrap">
+        <table class="design-table">
+          <thead><tr><th>类型</th><th>核心特征</th><th>SP 关注</th></tr></thead>
+          <tbody>
+            <tr><td>适应性设计<br><small>Adaptive</small></td><td>依据预设规则利用积累数据对试验某些方面进行调整，如样本量重估、剂量/治疗组调整</td><td>中期分析权限、预设调整规则、版本/队列、错误率控制</td></tr>
+            <tr><td>群序贯设计<br><small>Group sequential</small></td><td>预设多次正式中期分析及停止边界</td><td>分析时点、统计界值、提前停止规则；与队列递增不同</td></tr>
+            <tr><td>篮式研究<br><small>Basket</small></td><td>某治疗跨多个疾病或肿瘤亚型探索</td><td>按癌种/亚组的分析集与效应解释</td></tr>
+            <tr><td>伞式研究<br><small>Umbrella</small></td><td>单一疾病下评价多个治疗方案，常依据标志物等分组</td><td>分层、亚研究、共享对照与方案版本</td></tr>
+            <tr><td>平台研究<br><small>Platform</small></td><td>在持续性框架下允许治疗方案进入、退出</td><td>同期对照、入组时期差异、方案修订</td></tr>
+            <tr><td>富集设计<br><small>Enrichment</small></td><td>选择更可能观察到治疗作用的目标受试者</td><td>标志物/特定亚群、入组定义、外推性</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>不是所有“做了中期分析”就属于适应性设计；FDA 强调适应规则须经过事先计划，并管理统计推断和操作偏倚风险。Basket、Umbrella、Platform 属于主方案（Master Protocol）常见框架，但彼此不能互换。</p>
+    </section>
+
+    <section aria-labelledby="programming">
+      <h2 id="programming">8. 站在 SP 角度：试验设计最后体现在哪里？</h2>
+      <p>这里是最需要掌握的部分。理解设计后，才能知道为什么同一个变量在不同项目不能照搬衍生逻辑。</p>
+      <div class="table-wrap">
+        <table class="design-table">
+          <thead><tr><th>层级</th><th>典型位置</th><th>核查重点</th></tr></thead>
+          <tbody>
+            <tr><td>计划设计</td><td><code>TS / TA / TE / TV</code></td><td>计划分组、Element、Epoch、计划访视与方案概况</td></tr>
+            <tr><td>受试者实际路径</td><td><code>DM / SE / SV / DS / EX</code></td><td>实际 Arm、进入/结束各阶段、访视及用药暴露</td></tr>
+            <tr><td>受试者级分析</td><td><code>ADSL</code></td><td>随机化/分析集、基线、计划与实际治疗、队列分组</td></tr>
+            <tr><td>疗效与安全</td><td><code>ADAE / ADLB / ADVS / ADTTE</code> 等</td><td>分析时段、治疗组、基线、事件归属、研究终点</td></tr>
+            <tr><td>PK / PD</td><td><code>ADPC / ADPP</code> 等</td><td>实际采样时间、给药时间、分析物、周期、剂量组</td></tr>
+            <tr><td>报表层</td><td>TFL</td><td>分组列、分析集、统计模型、跨周期和亚组汇总规则</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>平行组 vs 交叉设计，编程逻辑的核心差别</h3>
+      <p>平行组一般重点核对<strong>受试者所属治疗组与组间比较</strong>；交叉设计除了受试者身份，还要识别<strong>Sequence、Period、每个 Period 的实际治疗及周期特异的基线/终点</strong>，避免把两个周期当成两名独立受试者统计。</p>
+      <p>在 ADaM 中，<code>TRT01P</code> / <code>TRT01A</code>、<code>TRT02P</code> / <code>TRT02A</code> 等属于可能的期间治疗表示方式，<strong>不是看到两个剂量组就自动需要 TRT02*</strong>。实际使用的变量与分析结构须按 ADaMIG 及项目 ADaM Spec。</p>
+      <h3>为什么 TA、TE、TV、SE 不能混在一起？</h3>
+      <p>CDISC Trial Design Model 关注的是<strong>计划如何开展</strong>：<code>TA</code> 描述计划 Arm 与 Element 的顺序，<code>TE</code> 描述 Element，<code>TV</code> 描述计划访视；与之对应，受试者层的 <code>SE</code> 记录实际经历的 Element，<code>SV</code> 记录实际访视。<strong>计划 ≠ 实际</strong>。另外，SDTM 的 <code>TA</code> 指 Trial Arms，不是 Therapeutic Area（治疗领域）。</p>
+      <div class="design-practice">
+        <strong>按设计类型思考 QC</strong>
+        <ul>
+          <li><strong>随机双盲：</strong>随机化日期、盲态权限、计划/实际治疗、揭盲后 TFL 分组依据。</li>
+          <li><strong>交叉：</strong>序列与周期、洗脱期、分期治疗、给药时间与采样间隔。</li>
+          <li><strong>SAD/MAD：</strong>队列开放顺序、剂量递增、哨兵给药、MAD 多日给药与稳态采样。</li>
+          <li><strong>开放单臂：</strong>没有随机对照不意味着没有分析集；重点核对人群和研究终点。</li>
+          <li><strong>适应性 / 主方案：</strong>不同方案版本、亚研究、阶段/队列、分析时点及同期对照。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section aria-labelledby="interview">
+      <h2 id="interview">9. 面试怎么讲：先完整描述一项研究</h2>
+      <p>推荐记住这个顺序：<strong>阶段与人群 → 结构 → 随机化 → 盲法 → 对照 → 给药/访视安排 → 主要终点 → 编程职责</strong>。</p>
+      <div class="indication-script">
+        <span class="script-kicker">示例 A · 早期临床 SAD/MAD（仅为通用示例）</span>
+        <p>“这个项目是一项Ⅰ期健康受试者研究，采用单次和多次递增给药部分，按队列推进，并依据预设安全性审阅规则决定是否进入下一剂量水平。部分队列内可能随机分配研究药与安慰剂。主要评价安全性、耐受性以及 PK/PD。我负责相关的 ADSL、ADEX、ADPC/ADPP 和安全性 TFL，重点核查队列、实际给药剂量、给药时间与 PK 采样窗口。”</p>
+      </div>
+      <div class="indication-script">
+        <span class="script-kicker">示例 B · 随机双盲平行组（仅为通用示例）</span>
+        <p>“这是一项多中心、随机、双盲、安慰剂对照、平行组研究。受试者按预设比例随机分到试验药或对照组，按对应方案给药并完成随访；主要终点取决于研究疾病。编程工作需要同时区分计划与实际治疗、主要分析集、基线和关键终点，保证揭盲后 TFL 与 SAP 规定一致。”</p>
+      </div>
+      <div class="indication-script">
+        <span class="script-kicker">示例 C · 两周期交叉 PK 研究（仅为通用示例）</span>
+        <p>“这项研究采用两治疗、两周期、两序列交叉设计，受试者随机进入 AB 或 BA 序列，中间按方案设置洗脱期。分析时需要同时识别受试者、Sequence、Period、Treatment，并处理各周期的给药与采样关系，而不能像平行组一样只按一种治疗归类整个受试者。”</p>
+      </div>
+      <h3>六道适合复习的追问题</h3>
+      <div class="indication-quiz">
+        <details><summary>Q1. 一项双盲试验一定随机吗？</summary><p>不一定。盲态和随机化属于两个不同维度，虽然实际研究中经常一起采用。</p></details>
+        <details><summary>Q2. 随机开放标签研究算 RCT 吗？</summary><p>如果随机分配到不同干预组并进行对照，可以是随机对照试验；开放标签不妨碍随机化。</p></details>
+        <details><summary>Q3. AB/BA 交叉设计随机分配的是什么？</summary><p>通常是治疗序列（Sequence）。每名受试者在不同周期接受不同治疗，因此 SP 必须考虑 Period 与序列。</p></details>
+        <details><summary>Q4. SAD/MAD 是不是一种固定的随机双盲设计？</summary><p>不是。它们描述剂量递增与给药策略。研究可另行采用随机、开放或双盲、安慰剂对照等安排，须核对方案。</p></details>
+        <details><summary>Q5. “Sequential Assignment”是不是群序贯统计设计？</summary><p>不是。前者通常描述队列/干预安排基于前期里程碑推进；后者强调预设中期统计检验与停止界值。</p></details>
+        <details><summary>Q6. 在 ADaM 里为何不能只保留一个 TRT01A？</summary><p>对多周期交叉或转换治疗的试验，仅有一个受试者级治疗字段可能不足以表达每周期的实际治疗。是否需要周期特异字段或记录级治疗变量取决于数据结构与 SAP/Spec。</p></details>
+      </div>
+
+      <div class="design-practice">
+        <strong>项目复盘用的八行卡片</strong>
+        <p>① 研究阶段与人群：________</p>
+        <p>② 研究结构：________</p>
+        <p>③ 随机分配与分层因素：________</p>
+        <p>④ 盲态角色与揭盲安排：________</p>
+        <p>⑤ 对照类型与分配比：________</p>
+        <p>⑥ 给药、周期、队列、访视：________</p>
+        <p>⑦ 主要目标与终点：________</p>
+        <p>⑧ 本人负责的 SDTM / ADaM / TFL 与关键 QC：________</p>
+      </div>
+      <p>建议先用你最熟悉的三个项目各写一张卡片，要求能够用 60 秒说明“这项研究是如何开展的”；再选其中一个深入回答随机化、盲法或给药安排。</p>
+    </section>
+
+    <section aria-labelledby="references">
+      <h2 id="references">10. 主要依据与阅读顺序</h2>
+      <p>这是一篇<strong>基于官方指南整理的 SP 学习与面试文章</strong>。研究类型来自 ICH 与 ClinicalTrials.gov 的分类；项目编程部分为实践性归纳，不能取代具体试验方案、SAP、SDTM/ADaM Spec。</p>
+      <ul class="pk-references">
+        <li><a href="https://www.ema.europa.eu/en/scientific-guidelines/ich-e9-statistical-principles-clinical-trials" target="_blank" rel="noopener noreferrer">ICH E9 · Statistical Principles for Clinical Trials（研究结构、随机化、统计比较）↗</a></li>
+        <li><a href="https://clinicaltrials.gov/policy/protocol-definitions" target="_blank" rel="noopener noreferrer">ClinicalTrials.gov · Protocol Data Element Definitions（Intervention Model、Allocation、Masking）↗</a></li>
+        <li><a href="https://www.ema.europa.eu/en/scientific-guidelines/ich-e8-general-considerations-clinical-studies" target="_blank" rel="noopener noreferrer">ICH E8(R1) · General Considerations for Clinical Studies（研究目的与开发阶段）↗</a></li>
+        <li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/e10-choice-control-group-and-related-issues-clinical-trials" target="_blank" rel="noopener noreferrer">ICH E10 / FDA · Choice of Control Group（对照组选择）↗</a></li>
+        <li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/adaptive-design-clinical-trials-drugs-and-biologics-guidance-industry" target="_blank" rel="noopener noreferrer">FDA · Adaptive Design Clinical Trials（适应性设计）↗</a></li>
+        <li><a href="https://www.fda.gov/drugs/cder-small-business-industry-assistance-sbia/fda-modernizes-clinical-trials-master-protocols" target="_blank" rel="noopener noreferrer">FDA · Master Protocols（Basket、Umbrella、Platform）↗</a></li>
+        <li><a href="https://www.cdisc.org/standards/foundational/sdtm/sdtm-v1-7/html" target="_blank" rel="noopener noreferrer">CDISC SDTM · Trial Design Model（TA、TE、TV）↗</a></li>
+      </ul>
+      <p>所有研究流程图与面试例句均为匿名示意。真实项目的随机比、盲态、队列评估、分析变量和实际入组行为，必须以获批 Protocol 及相应版本的 SAP 为准。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.2.7</span></footer>
+  <a class="back-to-top" href="#top" aria-label="返回顶部" title="返回顶部" hidden>↑</a>
+  <script>
+  (() => {
+    const topButton = document.querySelector(".back-to-top");
+    const refreshTop = () => { topButton.hidden = window.scrollY < 280; };
+    window.addEventListener("scroll", refreshTop, {passive:true});
+    refreshTop();
+
+    const buttons = [...document.querySelectorAll("[data-design]")];
+    const panels = [...document.querySelectorAll("[data-design-panel]")];
+    buttons.forEach(button => button.addEventListener("click", () => {
+      const chosen = button.getAttribute("data-design");
+      buttons.forEach(b => b.setAttribute("aria-pressed",String(b === button)));
+      panels.forEach(p => { p.hidden = p.getAttribute("data-design-panel") !== chosen; });
+    }));
+  })();
+  </script>
+</div>
+</body>
+</html>
