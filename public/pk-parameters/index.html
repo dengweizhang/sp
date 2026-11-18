@@ -8,6 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="canonical" href="https://sp.769967.xyz/pk-parameters/">
   <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/pk-interactive.js" defer></script>
   <title>常用 PK 参数 · SP</title>
 </head>
 <body>
@@ -58,6 +59,19 @@
               </tbody>
             </table>
           </div>
+          <figure class="pk-viz" data-pk-demo="curve">
+            <figcaption>浓度–时间曲线 <small>点击切换要观察的参数</small></figcaption>
+            <div class="pk-viz-tabs" role="group" aria-label="浓度时间图解参数切换">
+              <button type="button" data-mode="peak" aria-pressed="true">Cmax / Tmax</button>
+              <button type="button" data-mode="auclst" aria-pressed="false">AUClst</button>
+              <button type="button" data-mode="aucinf" aria-pressed="false">AUCinf</button>
+              <button type="button" data-mode="lambda" aria-pressed="false">Lambda_z</button>
+              <button type="button" data-mode="half" aria-pressed="false">t½</button>
+            </div>
+            <svg viewBox="0 0 640 216" role="img" aria-label="PK 浓度时间示例曲线" preserveAspectRatio="xMidYMid meet"></svg>
+            <p class="pk-viz-caption" data-pk-caption aria-live="polite">选择上方参数，查看曲线上的对应位置。</p>
+            <p class="pk-viz-footnote">示意数据：峰浓度 10 ng/mL，末端半衰期 2 h；仅为概念图，不代表真实研究数据。</p>
+          </figure>
         </section>
 
         <section aria-labelledby="calculation">
@@ -93,6 +107,16 @@
             <div class="pk-formula">AUCᵢ = (Cᵢ − Cᵢ₊₁) / ln(Cᵢ / Cᵢ₊₁) × (tᵢ₊₁ − tᵢ)</div>
             <p>通常用于浓度下降且两端浓度均为正、不相等的区间。常见配置为 <em>Linear-up / Log-down</em>，但不能默认所有项目相同；不满足对数法计算条件时按软件规则使用线性法。</p>
           </div>
+          <figure class="pk-viz pk-viz-narrow" data-pk-demo="auc">
+            <figcaption>一段下降曲线的积分 <small>相同数据，不同计算规则</small></figcaption>
+            <div class="pk-viz-tabs" role="group" aria-label="AUC 计算方法切换">
+              <button type="button" data-mode="linear" aria-pressed="true">线性梯形</button>
+              <button type="button" data-mode="log" aria-pressed="false">对数梯形</button>
+            </div>
+            <svg viewBox="0 0 520 176" role="img" aria-label="AUC 梯形法计算示例" preserveAspectRatio="xMidYMid meet"></svg>
+            <p class="pk-viz-caption" data-pk-caption aria-live="polite">比较不同方法计算出的面积。</p>
+            <p class="pk-viz-footnote">示例：0 h 为 2.5 ng/mL，2 h 为 1.25 ng/mL。仅展示单个下降区间。</p>
+          </figure>
           <div class="pk-method">
             <div class="pk-method-title"><strong>AUClst</strong><span>0 至最后可测定浓度时点</span></div>
             <div class="pk-formula">AUClst = Σ AUCᵢ，积分范围为 0 → tlast</div>
@@ -194,7 +218,7 @@
           </ul>
         </section>
     </main>
-    <footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.2.2</span></footer>
+    <footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.2.3</span></footer>
     <a class="back-to-top" href="#top" aria-label="一键回到顶部" title="回到顶部" hidden>↑</a>
     <script>
       (() => {
