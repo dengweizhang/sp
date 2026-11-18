@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://sp.769967.xyz/sitemap.xml
