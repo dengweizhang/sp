@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="常用药代动力学（PK）参数速查：Tmax、Cmax、AUCinf、AUClst、Lambda_z、CL 等，以及末端消除速率常数的实践注意事项。">
+  <meta name="description" content="常用 PK 参数的定义与计算方法：Cmax、Tmax、AUC、Lambda_z、半衰期、清除率、MRT、波动指数与常见 NCA 注意事项。">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="canonical" href="https://sp.769967.xyz/pk-parameters/">
@@ -23,19 +23,21 @@
     <header class="article-header">
       <nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / 常用 PK 参数</nav>
       <h1>常用 PK 参数</h1>
-      <p class="article-lead">用于工作中的快速查阅。具体参数定义、计算区间、判定阈值，应以研究方案、SAP、PK 分析计划及软件配置为准。</p>
+      <p class="article-lead">14 个常用 PK 参数的定义、计算方法及 QC 注意事项。以常见 NCA 方法为基础，具体计算设置以研究方案、SAP 和 PK 分析计划为准。</p>
     </header>
     <main class="article-body" id="main-content">
       <details class="toc-inline">
         <summary>本页目录</summary>
         <nav aria-label="本页目录">
           <a href="#parameters">1. 常用参数</a>
-          <a href="#lambda-z">2. Lambda_z 相关</a>
-          <a href="#scope">3. 使用说明</a>
+          <a href="#calculation">2. 参数计算方法</a>
+          <a href="#lambda-z">3. Lambda_z 评估</a>
+          <a href="#example">4. 手算示例</a>
+          <a href="#scope">5. 使用说明与来源</a>
         </nav>
       </details>
         <section aria-labelledby="parameters">
-          <h2 id="parameters">1. 常用参数</h2>
+          <h2 id="parameters">1. 常用参数（14 个）</h2>
           <div class="table-wrap">
             <table>
               <thead><tr><th scope="col">参数</th><th scope="col">含义</th></tr></thead>
@@ -58,8 +60,106 @@
             </table>
           </div>
         </section>
+
+        <section aria-labelledby="calculation">
+          <h2 id="calculation">2. 参数计算方法</h2>
+          <p>以下采用血浆/血清浓度的非房室分析（NCA）框架。以给药时刻为 <code>t = 0</code>，<code>tᵢ</code> 为实际采样时间，<code>Cᵢ</code> 为对应可用于分析的浓度；<code>Dose</code> 为给药剂量，<code>τ</code> 为给药间隔。公式主要用于理解和独立 QC，不代替项目配置。</p>
+
+          <h3>2.1 直接从观测浓度读取</h3>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>Cmax</strong><span>峰浓度</span></div>
+            <div class="pk-formula">Cmax = max(Cᵢ)</div>
+            <p>分析时间范围内观测到的最大浓度，不需要拟合；若存在并列最大值，Tmax 的取值规则应在分析计划中明确。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>Tmax</strong><span>达峰时间</span></div>
+            <div class="pk-formula">Tmax = time at observed Cmax</div>
+            <p>对应 Cmax 的采样时间。Phoenix NCA 在并列峰值时选择第一次出现的时间；不是通过曲线插值得到的理论达峰时刻。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>Ctrough</strong><span>谷浓度</span></div>
+            <div class="pk-formula">Ctrough ≈ 给药间隔末端或下一次给药前的浓度</div>
+            <p>通常取规定的给药前样本或 τ 时点浓度；实际采用观测值还是估算值依 SAP / PK 分析计划。<strong>Ctrough 不必然等于给药间隔内最低的 Cmin。</strong></p>
+          </div>
+
+          <h3>2.2 先计算曲线下面积（AUC）</h3>
+          <p>相邻两个时间点的面积先逐段计算，再在指定区间求和。常用方法如下：</p>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>线性梯形法</strong><span>Linear trapezoidal</span></div>
+            <div class="pk-formula">AUCᵢ = (Cᵢ + Cᵢ₊₁) / 2 × (tᵢ₊₁ − tᵢ)</div>
+            <p>适用于线性计算规则下的相邻采样区间。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>对数梯形法</strong><span>Log trapezoidal</span></div>
+            <div class="pk-formula">AUCᵢ = (Cᵢ − Cᵢ₊₁) / ln(Cᵢ / Cᵢ₊₁) × (tᵢ₊₁ − tᵢ)</div>
+            <p>通常用于浓度下降且两端浓度均为正、不相等的区间。常见配置为 <em>Linear-up / Log-down</em>，但不能默认所有项目相同；不满足对数法计算条件时按软件规则使用线性法。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>AUClst</strong><span>0 至最后可测定浓度时点</span></div>
+            <div class="pk-formula">AUClst = Σ AUCᵢ，积分范围为 0 → tlast</div>
+            <p><code>tlast</code> 为最后可测定浓度对应时间。AUClst 不等于积分到最后一次采样时间的 AUCall，尤其当末次样本为 BQL 时。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>AUCtau</strong><span>一个给药间隔</span></div>
+            <div class="pk-formula">AUCtau = ∫₀ᵗᵃᵘ C(t) dt</div>
+            <p>积分区间为本次给药至 <code>τ</code>；通常用于多次给药/稳态评估。若 τ 处没有观测浓度，可能需要插值或外推，能否计算取决于分析规则和数据覆盖范围。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>AUCint</strong><span>指定时间区间</span></div>
+            <div class="pk-formula">AUCint(a, b) = ∫ₐᵇ C(t) dt，b &gt; a</div>
+            <p>例如计算 0–4 h、4–12 h 的部分 AUC。区间边界不落在实际采样点时，需要按指定插值或外推规则得到边界浓度。</p>
+          </div>
+
+          <h3>2.3 末端消除、半衰期与外推 AUC</h3>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>Lambda_z</strong><span>末端消除速率常数</span></div>
+            <div class="pk-formula">ln(C) = α − Lambda_z × t</div>
+            <div class="pk-formula">Lambda_z = − slope[ ln(C) ~ t ]</div>
+            <p>选择合理的末端对数线性阶段数据点，进行简单线性回归。斜率应为负，Lambda_z 为其相反数，单位一般为 <code>1/h</code>。通常至少使用 3 个有效浓度点。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>HL_Lambda_z</strong><span>末端消除半衰期</span></div>
+            <div class="pk-formula">t½ = ln(2) / Lambda_z ≈ 0.693147 / Lambda_z</div>
+            <p>依赖 Lambda_z 的有效估计。如果时间单位是 h，则半衰期单位也是 h。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>Rsq_adj</strong><span>调整后的决定系数</span></div>
+            <div class="pk-formula">R²adj = 1 − (1 − R²) × (n − 1) / (n − 2)</div>
+            <p>这里 <code>n</code> 为回归使用的末端数据点数，公式适用于一个自变量（时间）且包含截距的简单线性回归，要求 n ≥ 3。用于评估末端拟合，<strong>不等同于普通 R²</strong>。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>AUCinf</strong><span>0 至无穷时间的 AUC</span></div>
+            <div class="pk-formula">AUCinf = AUClst + Clast / Lambda_z</div>
+            <div class="pk-formula">%AUCextrap = 100 × (AUCinf − AUClst) / AUCinf</div>
+            <p><code>Clast</code> 可依据配置采用最后实测浓度（observed）或在 tlast 的回归预测浓度（predicted），两者结果可能不同。缺乏可信的 Lambda_z 时，不宜强行外推。</p>
+          </div>
+
+          <h3>2.4 滞留时间、清除率与波动指数</h3>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>MRTinf</strong><span>平均滞留时间</span></div>
+            <div class="pk-formula">AUMCinf = ∫₀∞ t × C(t) dt</div>
+            <div class="pk-formula">MRTinf = AUMCinf / AUCinf（非静脉输注）</div>
+            <p><code>AUMC</code> 为浓度乘时间的一阶矩曲线下面积。单次恒速静脉输注的 MRT 通常还需扣除 <code>输注时长 / 2</code>；血管外给药所得 MRT 也包含平均输入/吸收时间，不能简单解释为纯体内系统滞留时间。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>CL</strong><span>清除率，静脉给药</span></div>
+            <div class="pk-formula">CL = Dose / AUCinf（单次 IV 给药）</div>
+            <p>对于线性 PK 条件下的稳态静脉给药，也常使用 <code>CLss = Dose / AUCtau,ss</code>。确保 Dose 与 AUC 的质量和时间单位一致。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>CL/F</strong><span>表观清除率，血管外给药</span></div>
+            <div class="pk-formula">CL/F = Dose / AUCinf（单次给药）</div>
+            <p><code>F</code> 为绝对生物利用度；血管外给药而 F 未知时，通常只能得到 CL/F，不能直接写成 CL。稳态条件下可相应使用 <code>Dose / AUCtau,ss</code> 估计 CLss/F。</p>
+          </div>
+          <div class="pk-method">
+            <div class="pk-method-title"><strong>DF</strong><span>稳态波动指数</span></div>
+            <div class="pk-formula">Cavg,ss = AUCtau,ss / τ</div>
+            <div class="pk-formula">DF(%) = 100 × (Cmax,ss − Cmin,ss) / Cavg,ss</div>
+            <p>部分分析规定采用 <code>Ctau,ss</code> 代替 <code>Cmin,ss</code>：此时公式变为 <code>100 × (Cmax,ss − Ctau,ss) / Cavg,ss</code>。还应核对项目报告中 DF 是以百分数还是无量纲小数呈现。</p>
+          </div>
+        </section>
         <section aria-labelledby="lambda-z">
-          <h2 id="lambda-z">2. Lambda_z 相关</h2>
+          <h2 id="lambda-z">3. Lambda_z 评估注意事项</h2>
           <p>Lambda_z 通常由末端对数线性消除阶段的浓度数据拟合得到。原始笔记记录的实践要点如下：</p>
           <ul>
             <li>将浓度取对数后与时间进行线性回归，估计末端斜率。</li>
@@ -72,12 +172,29 @@
             <p>上述阈值可能因项目要求、软件、分析计划不同而变化；<code>R²</code> 也不等同于 <code>Rsq_adj</code>。</p>
           </aside>
         </section>
+
+        <section aria-labelledby="example">
+          <h2 id="example">4. 手算核对示例</h2>
+          <p>假设相邻样本分别为 <code>t₀ = 0 h, C₀ = 2 ng/mL</code> 和 <code>t₁ = 2 h, C₁ = 6 ng/mL</code>，采用线性梯形法：</p>
+          <div class="pk-formula">AUC₀–₂ = (2 + 6) / 2 × (2 − 0) = 8 ng·h/mL</div>
+          <p>另假设 <code>AUClst = 40 ng·h/mL</code>、<code>Clast = 1 ng/mL</code>、<code>Lambda_z = 0.2 h⁻¹</code>，按 observed 外推方式：</p>
+          <div class="pk-formula">AUCinf = 40 + 1 / 0.2 = 45 ng·h/mL</div>
+          <div class="pk-formula">%AUCextrap = (45 − 40) / 45 × 100 ≈ 11.11%</div>
+          <div class="pk-formula">t½ = 0.693147 / 0.2 ≈ 3.47 h</div>
+          <p>这些数值仅用于演示公式，不构成真实研究数据或参数合理性判定。</p>
+        </section>
         <section aria-labelledby="scope">
-          <h2 id="scope">3. 使用说明</h2>
-          <p>本页整理自个人 Notion「SP统计编程」笔记，用于快速查询与知识整理。尚未整理的参数计算方法暂不展示；不能代替研究专属 PK 分析规范。</p>
+          <h2 id="scope">5. 使用说明与来源</h2>
+          <p>参数清单及 Lambda_z 实务注意事项来自个人 Notion「SP统计编程」笔记；第 2 节计算公式与第 4 节示例为后续补充，主要依据 Phoenix WinNonlin 的 NCA 官方说明，并非原笔记内容。</p>
+          <p>适用范围以血浆/血清浓度的常见 NCA 为主。BQL 处理、采样时点、给药途径、首次给药与稳态、梯形法、末端拟合范围、obs/pred 外推方式及参数命名必须与具体 SAP / PK 分析计划一致。本文所列名称沿用个人笔记，<strong>不应直接视为 CDISC 规定的唯一 PARAMCD</strong>。</p>
+          <ul class="pk-references">
+            <li><a href="https://onlinehelp.certara.com/phoenix/8.3/topics/NCA_parameter_formulas.htm" target="_blank" rel="noopener noreferrer">Certara Phoenix · NCA parameter formulas ↗</a></li>
+            <li><a href="https://onlinehelp.certara.com/phoenix/8.3/topics/ncacomprules.htm" target="_blank" rel="noopener noreferrer">Certara Phoenix · NCA computation rules ↗</a></li>
+            <li><a href="https://onlinehelp.certara.com/phoenix/8.3/topics/ncaparamformulas.htm" target="_blank" rel="noopener noreferrer">Certara Phoenix · Noncompartmental analysis ↗</a></li>
+          </ul>
         </section>
     </main>
-    <footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.2.0</span></footer>
+    <footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.2.1</span></footer>
     <a class="back-to-top" href="#top" aria-label="一键回到顶部" title="回到顶部" hidden>↑</a>
     <script>
       (() => {
