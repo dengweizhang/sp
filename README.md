@@ -1,12 +1,12 @@
 # SP · Clinical Statistical Programming
 
-**V0.2.1** — 极简 SP 统计编程知识库、顶部 XPT/CT 快捷链接、右下角 SP AI。
+**V0.2.2** — 极简 SP 统计编程知识库、顶部 XPT/CT 快捷链接，AI 暂时隐藏。
 
 ## 页面与文件
 
 - `/`：文章索引（不展示搜索框或大幅介绍）
 - `/pk-parameters/`：常用 PK 参数文章，含 14 个参数的 NCA 计算方法、QC 注意事项和手算示例
-- `public/assets/ai.js`：右下角 AI 面板（全站可用）
+- `public/assets/ai.js`：右下角 AI 面板源码（暂时停用）
 - `functions/api/chat.js`：Cloudflare Pages Function，调用 DeepSeek API
 - `public/knowledge-index.json`：本站公开文章的索引及检索关键词
 - `public/_routes.json`：只有 `/api/*` 会调用 Function，其余静态请求不触发
@@ -51,3 +51,4 @@
 公开访问者不要输入或上传未脱敏临床试验数据、申办方保密资料、个人医疗信息。引用 CDISC PDF、XLS 等文件应确认许可与版本来源；目前代码没有将这些文件加入 AI 知识库。
 
 文档参考：https://api-docs.deepseek.com/guides/web_tools/ 与 https://developers.cloudflare.com/pages/functions/get-started/ 。
+\n## V0.2.2：暂时隐藏 AI\n\n- 首页与 PK 文章都已移除 `/assets/ai.js` 引用，右下角不显示入口。\n- 服务端 `functions/api/chat.js` 中 `AI_ENABLED = false`，避免直接访问 API 产生 DeepSeek 消耗。\n- 恢复时：将 `AI_ENABLED` 改为 `true`，在需要显示的页面 `<head>` 中加入 `<script src="/assets/ai.js" defer></script>`，并部署；如使用 API，还需设置密钥与限流。\n- AI 源码与文章索引保留，不删除现有能力。\n
