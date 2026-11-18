@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="面向临床统计编程 SP 的临床药理学：ADME、PK/PD、剂量暴露效应、SAD/MAD、稳态蓄积、DDI、BE、QTc、免疫原性及相关数据集 QC。">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="canonical" href="https://sp.769967.xyz/clinical-pharmacology/">
+<link rel="stylesheet" href="/assets/style.css">
+<title>临床药理学基础：从 ADME 到 PK/PD · SP</title>
+</head>
+<body>
+<div class="shell" id="top">
+<header class="site-header"><a class="brand" href="/" aria-label="SP 首页">SP.</a>
+<nav class="tool-links" aria-label="常用工具">
+<a href="https://xpt.769967.xyz" target="_blank" rel="noopener noreferrer">XPT <span aria-hidden="true">↗</span></a>
+<a href="https://ct.769967.xyz" target="_blank" rel="noopener noreferrer">CT <span aria-hidden="true">↗</span></a>
+</nav></header>
+<header class="article-header"><nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / 临床药理学基础</nav>
+<h1>临床药理学基础：从 ADME 到 PK/PD</h1>
+<p class="article-lead">学习药物为何需要这些给药、采样和安全性评价，再理解 PK/PD 与 ADPC、ADPP、ADLB、ADEG 和 TFL 的联系。</p></header>
+<main class="article-body" id="main-content">
+<details class="toc-inline"><summary>本页目录</summary><nav aria-label="本页目录">
+<a href="#pharm-map">1. 剂量–暴露–效应</a>
+<a href="#pharm-adme">2. ADME</a>
+<a href="#pharm-pk">3. PK 参数</a>
+<a href="#pharm-pd">4. PD 与作用机制</a>
+<a href="#pharm-steady">5. SAD/MAD 与稳态</a>
+<a href="#pharm-special">6. 专题研究与 DDI</a>
+<a href="#pharm-ba">7. BA/BE</a>
+<a href="#pharm-pop">8. NCA、PopPK、暴露–反应</a>
+<a href="#pharm-immune">9. 免疫原性</a>
+<a href="#pharm-programming">10. SP 编程与 QC</a>
+<a href="#pharm-interview">11. 面试自测</a>
+<a href="#pharm-references">12. 来源</a>
+</nav></details>
+
+<div class="sp-learning-lead">
+<strong>为什么 SP 需要懂一点药理学？</strong>
+<p>药理学决定“为什么这样给药、为什么在这些时点采血、为什么既有 PK 又有 PD、为什么还要看安全性”；统计编程则负责把这些科学问题准确映射为可追溯的数据和输出。</p>
+<p>这篇从临床试验真正高频的<strong>临床药理（Clinical Pharmacology）</strong>入手，而不是完整药理学教科书。<a href="/pk-parameters/">常用 PK 参数的详细计算公式与 PARAMCD</a> 已有专文，这里重点理解药物过程和临床意义；与之配套可读 <a href="/clinical-statistics/">临床试验统计学基础</a>。</p>
+</div>
+
+<section aria-labelledby="pharm-map">
+<h2 id="pharm-map">1. 一张图理解：剂量 → 暴露 → 效应</h2>
+<div class="pharm-flow" aria-label="从给药剂量到体内浓度，再到药效与安全性">
+<div><span>DOSE</span><strong>给药剂量</strong><small>mg、mg/kg、给药频率、途径</small></div>
+<em>→</em>
+<div><span>PK / EXPOSURE</span><strong>体内暴露</strong><small>Cmax、AUC、Ctrough、浓度–时间曲线</small></div>
+<em>→</em>
+<div><span>PD / RESPONSE</span><strong>药理效应</strong><small>生物标志物、疗效、毒性与耐受性</small></div>
+</div>
+<p>核心逻辑：<strong>给了相同剂量的人，体内暴露不一定相同；体内暴露相似的人，反应也可能不相同。</strong>器官功能、年龄、体重、遗传、合并用药和疾病状态都可能影响这个过程，因此需要临床药理研究。</p>
+<p><strong>PK（Pharmacokinetics）</strong>研究人体如何影响药物的浓度与时间过程；<strong>PD（Pharmacodynamics）</strong>研究药物对人体产生什么生物学作用。<strong>Exposure–Response</strong> 将药物暴露与有效性/安全性结果联系起来，帮助选择给药剂量和方案。</p>
+</section>
+
+<section aria-labelledby="pharm-adme">
+<h2 id="pharm-adme">2. ADME：药物进入人体后发生什么？</h2>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>阶段</th><th>是什么</th><th>对临床试验的影响</th></tr></thead>
+<tbody>
+<tr><td>A — Absorption<br><small>吸收</small></td><td>药物从给药部位进入系统循环</td><td>口服与静脉给药不同；食物影响研究、Tmax、Cmax、F</td></tr>
+<tr><td>D — Distribution<br><small>分布</small></td><td>药物在血液、组织及不同空间之间分配</td><td>表观分布容积、蛋白结合、组织分布与效应部位</td></tr>
+<tr><td>M — Metabolism<br><small>代谢</small></td><td>药物被生物转化；可形成活性或非活性代谢物</td><td>肝脏代谢、CYP、亲药物与代谢物的分析物区分</td></tr>
+<tr><td>E — Excretion<br><small>排泄</small></td><td>药物及其代谢物通过肾脏、胆汁等途径离开人体</td><td>肾功能损害研究、尿药浓度、排泄率、清除率</td></tr>
+</tbody></table></div>
+<p>ADME 的结果可以解释为什么需要肝/肾功能相关协变量、为什么排除某些合并用药、为什么采血时间覆盖多个半衰期。<strong>药物从体内“清除”（Elimination）通常涉及代谢和排泄，不能把代谢率直接当成尿排泄率。</strong></p>
+<div class="sp-learning-example">
+<strong>从 SP 数据理解 ADME</strong>
+<p>一次质量平衡研究可能涉及血浆、尿液、粪便以及原形药与代谢物。需要先区分<strong>样本基质、分析物、采集区间和单位</strong>，再计算适当参数。记录中仅有“药物浓度”四个字还不够。</p>
+</div>
+</section>
+
+<section aria-labelledby="pharm-pk">
+<h2 id="pharm-pk">3. PK 参数：先理解它代表什么，再看公式</h2>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>参数</th><th>直观解释</th><th>常见 SP 注意点</th></tr></thead>
+<tbody>
+<tr><td>Cmax / Tmax</td><td>观测峰浓度 / 达到观测峰的时间</td><td>采样时间、并列峰值、BLQ、单位</td></tr>
+<tr><td>AUC</td><td>浓度–时间曲线下面积，反映系统暴露</td><td>积分时间区间、梯形法、观测/外推</td></tr>
+<tr><td>t½ / Lambda_z</td><td>末端浓度下降速度及相应半衰期</td><td>末端拟合点、拟合可靠性、观察期</td></tr>
+<tr><td>CL / CL/F</td><td>药物从系统循环被清除的能力；血管外给药常报告表观清除率</td><td>给药途径、生物利用度、剂量与 AUC 单位</td></tr>
+<tr><td>V / V/F</td><td>描述浓度与体内药量关系的表观分布容积参数</td><td>依模型与给药途径而异，不等于真实器官体积</td></tr>
+<tr><td>AUCtau / Ctrough</td><td>给药间隔内暴露 / 间隔末端谷浓度</td><td>MAD、给药前样本、稳态时间窗</td></tr>
+<tr><td>Rac / 蓄积比</td><td>重复给药后相对于初次给药的暴露或浓度增加程度</td><td>参数定义须明确使用 AUC、Cmax 或 Ctrough</td></tr>
+</tbody></table></div>
+<p>常见表达式：单次静脉给药的 <code>CL = Dose / AUCinf</code>；血管外给药通常得到 <code>CL/F</code>。对于理想的一室线性消除模型，<code>t½ ≈ 0.693 × V / CL</code>，<strong>但不能对复杂多室或非线性药物直接当作普遍恒等式。</strong></p>
+<p>进入具体公式、单位换算、梯形法或 PARAMCD 映射，请阅读 <a href="/pk-parameters/">《常用 PK 参数》↗</a>。</p>
+</section>
+
+<section aria-labelledby="pharm-pd">
+<h2 id="pharm-pd">4. PD 与作用机制：药物如何产生效果？</h2>
+<p>药物可以作用于受体、酶、离子通道或其他生物靶点。<strong>作用机制（Mechanism of Action，MoA）</strong>解释为什么产生某种药理效应；<strong>PD 指标</strong>度量药物的生物学效应；而<strong>临床疗效终点</strong>则衡量对患者有意义的临床结果，三者可能相关，却不是同一个概念。</p>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>层级</th><th>典型例子</th><th>SP 关注</th></tr></thead>
+<tbody>
+<tr><td>靶点 / 机制</td><td>受体激动、拮抗，或酶抑制等</td><td>通常由 Protocol/IB 描述，不直接由 SP 推断</td></tr>
+<tr><td>PD 生物标志物</td><td>某类激素、细胞亚群、靶点占有率、生物学信号</td><td>参数、单位、访视、基线、百分比变化</td></tr>
+<tr><td>临床疗效终点</td><td>HbA1c、体重变化、肿瘤缓解、症状改善</td><td>主/次终点定义、分析集、时间窗、模型</td></tr>
+<tr><td>安全性响应</td><td>实验室异常、心率变化、QTc、特定 AE</td><td>暴露对应时间、基线、异常标志、事件时点</td></tr>
+</tbody></table></div>
+<p>常见浓度–效应模型之一是 <code>E(C) = E0 + Emax × C / (EC50 + C)</code>，但这是简化的直接效应 Emax 模型，不适用于所有药物；如果存在效应延迟、耐受或复杂反馈，通常需要其他模型。</p>
+<p><strong>记住：</strong>药物浓度提高并不意味着临床疗效一定线性增加，也不意味着毒性一定以相同方式增加。</p>
+</section>
+
+<section aria-labelledby="pharm-steady">
+<h2 id="pharm-steady">5. SAD、MAD、稳态与蓄积</h2>
+<p><strong>SAD</strong> 主要研究单次给药后的安全性与暴露；<strong>MAD</strong> 则更关心反复给药后的暴露变化、潜在蓄积、给药间隔和稳态情况。</p>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>概念</th><th>理解方式</th><th>SP 需要核查</th></tr></thead>
+<tbody>
+<tr><td>Steady State（稳态）</td><td>在重复规律给药下，药物输入和清除达到周期性平衡，浓度曲线周期间基本重复</td><td>给药日、实际给药时间、周期和稳态判定依据</td></tr>
+<tr><td>τ（给药间隔）</td><td>例如 q24h 对应 24 小时间隔</td><td>实际间隔、漏服/推迟给药、采样窗口</td></tr>
+<tr><td>Accumulation（蓄积）</td><td>多次给药后的暴露高于相同给药方案初次给药暴露</td><td>蓄积比用 AUCtau 还是 Cmax、使用哪两个评价日</td></tr>
+<tr><td>Dose Proportionality</td><td>剂量变化时暴露是否近似成比例变化</td><td>剂量实际值、AUC/Cmax、可能使用 Power Model</td></tr>
+</tbody></table></div>
+<p>对简单线性一阶动力学系统，经过约 4–5 个相关半衰期可能接近稳态，这是帮助理解的经验估计，<strong>不是所有药物都适用的硬性判定标准</strong>；长半衰期、多室、时间依赖性清除和生物大分子都可能使情况更复杂。</p>
+<p>固定给药间隔内的 <code>AUCtau</code> 以及稳态下的 <code>Cmax,ss / Cmin,ss / Cavg,ss</code> 可用于反映暴露和波动，但不能把 <code>Ctrough</code> 自动等同于整个周期最低的 <code>Cmin</code>。</p>
+</section>
+
+<section aria-labelledby="pharm-special">
+<h2 id="pharm-special">6. 为什么会做食物影响、DDI、肝肾功能和质量平衡研究？</h2>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>临床药理研究</th><th>研究问题</th><th>SP / PK 对应</th></tr></thead>
+<tbody>
+<tr><td>Food Effect（食物影响）</td><td>进食是否改变药物吸收程度或速度？</td><td>空腹/餐后、序列、周期、Cmax/AUC</td></tr>
+<tr><td>DDI（药物相互作用）</td><td>合并用药是否改变暴露或药理作用？</td><td>合并用药/给药时点、分析物、暴露比与 CI</td></tr>
+<tr><td>肝功能损害</td><td>代谢、蛋白结合等变化是否影响暴露？</td><td>肝功能分组与参数、暴露量及用药建议</td></tr>
+<tr><td>肾功能损害</td><td>肾排泄或相关生理过程变化是否影响暴露？</td><td>肾功能分组、eGFR、暴露变化</td></tr>
+<tr><td>Mass Balance / ADME</td><td>给药后原形药和代谢产物去了哪里？</td><td>血、尿、粪、放射性物质平衡、回收率</td></tr>
+<tr><td>QT / QTc</td><td>药物暴露是否影响心脏复极？</td><td>ECG 时间、QTcF、ΔQTc、浓度–QTc 关系</td></tr>
+</tbody></table></div>
+<p>DDI 常涉及药物作为<strong>底物（Substrate）</strong>、<strong>抑制剂（Inhibitor）</strong>或<strong>诱导剂（Inducer）</strong>，特别是 CYP 酶与转运体（例如 P-gp）。抑制/诱导可能改变药物清除或吸收，但影响方向和大小必须结合具体机制，不能凭药物类别机械推断。</p>
+<p>在临床试验中，QTc 是对心电图 QT 间期进行心率校正后的指标；例如 <code>QTcF = QT / RR^(1/3)</code>（QT、RR 单位需一致）。<strong>QTc 不是药物浓度，QTc 延长也不能等同于已经发生了恶性心律失常。</strong></p>
+</section>
+
+<section aria-labelledby="pharm-ba">
+<h2 id="pharm-ba">7. 生物利用度（BA）与生物等效性（BE）</h2>
+<p><strong>BA（Bioavailability）</strong>关注给药后活性药物成分进入系统循环的程度和速度；<strong>F（绝对生物利用度）</strong>通常以血管外与静脉给药的剂量校正 AUC 比值估计，在适宜的线性与可比条件下：</p>
+<div class="pk-formula">F = (AUC_extravascular / Dose_extravascular) / (AUC_IV / Dose_IV)</div>
+<p><strong>BE（Bioequivalence）</strong>比较试验制剂与参比制剂的生物利用度是否在规定标准内接近。常规平均 BE 的 PK 方法可能对 <code>AUC</code> 和 <code>Cmax</code> 进行对数变换，比较 Test/Reference 几何均值比（GMR）及其 90% CI。</p>
+<div class="sp-learning-example">
+<strong>如何理解 80%–125%？</strong>
+<p>在适用的常规 BE 监管情境中，通常要求相应 PK 参数的<strong>90% CI 整体</strong>落在预设的 80.00%–125.00% 区间。<strong>这不是说 80%–125% 的受试者等效，也不是“药物纯度在 80%–125% 之间”。</strong>高变异药物、窄治疗指数药物及特定产品另有规则，应使用当期适用指南。</p>
+</div>
+<p>交叉 BE 研究还要关注 <strong>Sequence、Period、Treatment、受试者嵌套/重复测量结构</strong>。SP 需要根据 SAP 构建可用的 PK 参数记录，而不能只简单求算术均值比。</p>
+</section>
+
+<section aria-labelledby="pharm-pop">
+<h2 id="pharm-pop">8. NCA、PopPK、暴露–反应：三者是什么关系？</h2>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>方法</th><th>解决什么问题</th><th>常见数据要求</th></tr></thead>
+<tbody>
+<tr><td>NCA</td><td>不预设明确房室结构，通过浓度–时间数据估计单个受试者的 PK 参数</td><td>精确给药和采样时间、浓度、分析物、BLQ 规则</td></tr>
+<tr><td>PopPK</td><td>用群体模型估计典型 PK 参数、个体差异及协变量影响；可处理较稀疏的采样设计</td><td>长期观测数据、剂量事件、协变量、个体 ID、给药途径</td></tr>
+<tr><td>Exposure–Response</td><td>将暴露与疗效或安全性结果联系起来，以支持剂量选择和风险评估</td><td>暴露指标、PD/疗效终点、安全性及相关协变量</td></tr>
+</tbody></table></div>
+<p>三者不是同义词，也不互相排斥。一项研究可能先做 NCA，再结合多研究数据做 PopPK 或暴露–反应分析。群体药代模型不意味着一定由 SAS SP 编写，但 SP 可能承担数据准备、集成、Listing 与 QC。</p>
+</section>
+
+<section aria-labelledby="pharm-immune">
+<h2 id="pharm-immune">9. 免疫原性、ADA 与 NAb</h2>
+<p>某些治疗性蛋白或生物制品可能激发针对药物的免疫反应。<strong>ADA（Anti-Drug Antibody）</strong>指抗药抗体；<strong>NAb（Neutralizing Antibody）</strong>是具有中和功能的抗体，属于 ADA 反应中的功能性类别，并非每个 ADA 阳性样本都一定有 NAb。</p>
+<p>免疫原性可能影响药物暴露、安全性和疗效，但不能从一次 ADA 阳性推断一定发生临床不良反应。研究中可能涉及基线状态、治疗后阳转、滴度和持久性等定义。</p>
+<p><strong>SP 关注：</strong>免疫原性分析集、检测时间点、阳性/阴性规则、基线反应、不同试剂盒的记录层级，以及与 PK 浓度或临床事件的对应分析。各标志和衍生算法必须按方案及分析计划实现。</p>
+</section>
+
+<section aria-labelledby="pharm-programming">
+<h2 id="pharm-programming">10. 这些药理知识对应哪些编程工作？</h2>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>药理问题</th><th>可能的 SDTM / ADaM 数据</th><th>关键 QC</th></tr></thead>
+<tbody>
+<tr><td>实际给了多少药？</td><td>EX、EC；ADSL / ADEX 或项目指定暴露分析结构</td><td>计划 vs 实际剂量、剂量单位、给药日/时间、漏服</td></tr>
+<tr><td>体内药物浓度如何变化？</td><td>PC；ADPC</td><td>给药后相对采样时间、分析物、浓度单位、BLQ</td></tr>
+<tr><td>PK 参数是什么？</td><td>PP；ADPP</td><td>PARAM/PARAMCD、剂量、给药途径、Obs/Pred 外推、周期</td></tr>
+<tr><td>药物引起了什么 PD 变化？</td><td>LB 或其他合适的 Findings 域；ADLB/其他 ADaM</td><td>PD 指标、基线、变化量、预设时间点与分析人群</td></tr>
+<tr><td>产生何种安全性反应？</td><td>AE、LB、EG、VS；ADAE、ADLB、ADEG 等</td><td>给药后时间窗口、异常等级、ECG 派生算法</td></tr>
+<tr><td>ADA / NAb 是否出现？</td><td>项目定义的免疫原性数据集或相应标准域</td><td>分析样本数、检测方法、阳转规则、检测缺失</td></tr>
+</tbody></table></div>
+<p><strong>注意：</strong>上述是常见编程数据流，不表示所有研究必须创建相同的 ADaM 数据集。药理学视角能帮助 SP 在查到不合理的采样时间、单位、剂量顺序或分析物映射时及时提出有意义的问题。</p>
+</section>
+
+<section aria-labelledby="pharm-interview">
+<h2 id="pharm-interview">11. 面试与自测：能解释“为什么这样做”吗？</h2>
+<div class="indication-quiz">
+<details><summary>Q1. PK 和 PD 最简单的区别？</summary><p>PK 研究体内药物浓度随时间变化及 ADME；PD 研究药物引起的生物效应。药物剂量、暴露、效应并非总有线性关系。</p></details>
+<details><summary>Q2. 为什么 SAD/MAD 会安排很多 PK 采血时点？</summary><p>需要覆盖吸收、峰值、分布及消除阶段，以尽量可靠地估计 Cmax、Tmax、AUC、半衰期等；MAD 还需观察给药间隔和稳态/蓄积。</p></details>
+<details><summary>Q3. 口服药为什么常报告 CL/F 而不是 CL？</summary><p>绝对生物利用度 F 未知时，血管外给药利用剂量和 AUC 能估计的是表观清除率 CL/F，不能直接视为真实系统清除率 CL。</p></details>
+<details><summary>Q4. QTc 延长与 TEAE 是一个意思吗？</summary><p>不是。QTc 是经过校正的 ECG 数值指标；TEAE 是根据治疗期和不良事件定义判断的治疗期间出现事件。两者可能有关，但不等价。</p></details>
+<details><summary>Q5. 药物 1 个半衰期后一定清除完吗？</summary><p>不是。在线性一阶消除的简化情况下，经过一个半衰期浓度约减少一半，不是归零；复杂动力学更不能套用固定清除时间。</p></details>
+<details><summary>Q6. ADA 阳性是否一定有中和抗体或疗效下降？</summary><p>不一定。NAb 是具有功能性中和作用的抗体，应以专门检测及临床关联分析判断，不能从 ADA 阳性直接推出疗效下降。</p></details>
+<details><summary>Q7. BE 的 80%–125% 是什么标准？</summary><p>在适用的常规平均生物等效性比较情境中，指规定 PK 参数的 Test/Reference GMR 的 90% CI 完全处于预设区间内，而非受试者达标比例。</p></details>
+</div>
+<p><strong>一段更完整的面试表达：</strong>“我参与过早期临床 PK 项目，理解 SAD/MAD 主要通过给药后浓度–时间资料评价安全性、耐受性和体内暴露，并关注重复给药的蓄积情况。在编程中，我尤其核对实际给药与采样时间、分析物、浓度单位、不同剂量/周期的参数及安全性时间窗口。”具体表述须与你真实参与的工作一致。</p>
+</section>
+
+<section aria-labelledby="pharm-references">
+<h2 id="pharm-references">12. 资料来源与进一步阅读</h2>
+<ul class="pk-references">
+<li><a href="https://www.ncbi.nlm.nih.gov/books/NBK557744/" target="_blank" rel="noopener noreferrer">NCBI Bookshelf — Pharmacokinetics / ADME ↗</a></li>
+<li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/exposure-response-relationships-study-design-data-analysis-and-regulatory-applications" target="_blank" rel="noopener noreferrer">FDA — Exposure–Response Relationships ↗</a></li>
+<li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/population-pharmacokinetics" target="_blank" rel="noopener noreferrer">FDA — Population Pharmacokinetics ↗</a></li>
+<li><a href="https://www.fda.gov/drugs/guidances-drugs/guidance-recap-podcast-clinical-drug-interaction-studies-cytochrome-p450-enzyme-and-transporter" target="_blank" rel="noopener noreferrer">FDA — Clinical Drug Interaction Studies ↗</a></li>
+<li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioequivalence-studies-pharmacokinetic-endpoints-drugs-submitted-under-abbreviated-new-drug" target="_blank" rel="noopener noreferrer">FDA — BE Studies with PK Endpoints（2026）↗</a></li>
+<li><a href="https://www.ema.europa.eu/en/scientific-guidelines/investigation-bioequivalence" target="_blank" rel="noopener noreferrer">EMA — Bioequivalence &amp; ICH M13A 适用范围说明 ↗</a></li>
+<li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/e14-and-s7b-clinical-and-nonclinical-evaluation-qtqtc-interval-prolongation-and-proarrhythmic" target="_blank" rel="noopener noreferrer">FDA / ICH E14、S7B — QT/QTc 评估 ↗</a></li>
+<li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/immunogenicity-testing-therapeutic-protein-products-developing-and-validating-assays-anti-drug" target="_blank" rel="noopener noreferrer">FDA — ADA 检测与免疫原性 ↗</a></li>
+<li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/clinical-pharmacology-considerations-human-radiolabeled-mass-balance-studies" target="_blank" rel="noopener noreferrer">FDA — Mass Balance Studies ↗</a></li>
+</ul>
+<p>本文是 SP 入门和项目复盘材料；提及的公式、经验及数据流可能因剂型、给药途径、研究目的和项目 SAP 而变化，不能用于代替临床处方或监管申报的专项判断。</p>
+<p>配套阅读：<a href="/clinical-statistics/">临床试验统计学基础 ↗</a> · <a href="/pk-parameters/">常用 PK 参数计算方法 ↗</a></p>
+</section>
+
+</main>
+<footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.2.8</span></footer>
+<a class="back-to-top" href="#top" aria-label="回到顶部" title="回到顶部" hidden>↑</a>
+<script>
+(() => { const b=document.querySelector('.back-to-top');const update=()=>{b.hidden=window.scrollY<280};window.addEventListener('scroll',update,{passive:true});update()})();
+</script>
+</div></body></html>
