@@ -1,5 +1,5 @@
 {
-  "version": "0.2.1",
+  "version": "0.2.4",
   "description": "公开文章索引；新增文章时维护此文件和首页目录。",
   "articles": [
     {
@@ -44,7 +44,18 @@
         "Ctau",
         "Cavg",
         "AUMC",
-        "terminal half life"
+        "terminal half life",
+        "PARAMCD",
+        "PPTESTCD",
+        "PKPARMCD",
+        "CTROUGH",
+        "LAMZHL",
+        "AUCIFO",
+        "AUCIFP",
+        "MRTEVIFO",
+        "MRTIBIFO",
+        "FLUCP",
+        "拖动图解"
       ]
     }
   ]
