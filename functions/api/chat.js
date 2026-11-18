@@ -1,5 +1,6 @@
 // Cloudflare Pages Function: /api/chat
 // Server-side DeepSeek proxy. Never place DEEPSEEK_API_KEY in public files.
+const AI_ENABLED = false; // Temporarily disabled; switch to true to re-enable.
 const MODEL = "deepseek-flash";
 const MAX_BODY = 24000;
 const MAX_CONTEXT_CHARS = 6000;
@@ -72,10 +73,11 @@ async function getLocalSources(env, request, question) {
 }
 
 export function onRequestGet({ env }) {
-  return json({ ready: Boolean(env.DEEPSEEK_API_KEY), model: MODEL });
+  return json({ ready: AI_ENABLED && Boolean(env.DEEPSEEK_API_KEY), enabled: AI_ENABLED, model: MODEL });
 }
 
 export async function onRequestPost({ request, env }) {
+  if (!AI_ENABLED) return json({ error: "SP AI 暂时关闭。" }, 503);
   const origin = request.headers.get("Origin");
   if (origin && origin !== new URL(request.url).origin) {
     return json({ error: "请求来源不受支持。" }, 403);
