@@ -1,11 +1,11 @@
 # SP · Clinical Statistical Programming
 
-**V0.2.0** — 极简 SP 统计编程知识库、顶部 XPT/CT 快捷链接、右下角 SP AI。
+**V0.2.1** — 极简 SP 统计编程知识库、顶部 XPT/CT 快捷链接、右下角 SP AI。
 
 ## 页面与文件
 
 - `/`：文章索引（不展示搜索框或大幅介绍）
-- `/pk-parameters/`：常用 PK 参数文章
+- `/pk-parameters/`：常用 PK 参数文章，含 14 个参数的 NCA 计算方法、QC 注意事项和手算示例
 - `public/assets/ai.js`：右下角 AI 面板（全站可用）
 - `functions/api/chat.js`：Cloudflare Pages Function，调用 DeepSeek API
 - `public/knowledge-index.json`：本站公开文章的索引及检索关键词
