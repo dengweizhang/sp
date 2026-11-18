@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SP 统计编程人员的统计学知识体系：描述统计、假设检验、置信区间、ANCOVA、MMRM、生存分析、分析集、缺失数据、Estimand 与数据集 QC。">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="canonical" href="https://sp.769967.xyz/clinical-statistics/">
+<link rel="stylesheet" href="/assets/style.css">
+<title>临床试验统计学基础：SP 必须理解的分析逻辑 · SP</title>
+</head>
+<body>
+<div class="shell" id="top">
+<header class="site-header"><a class="brand" href="/" aria-label="SP 首页">SP.</a>
+<nav class="tool-links" aria-label="常用工具">
+<a href="https://xpt.769967.xyz" target="_blank" rel="noopener noreferrer">XPT <span aria-hidden="true">↗</span></a>
+<a href="https://ct.769967.xyz" target="_blank" rel="noopener noreferrer">CT <span aria-hidden="true">↗</span></a>
+</nav></header>
+<header class="article-header"><nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / 临床试验统计学基础</nav>
+<h1>临床试验统计学基础：SP 必须理解的分析逻辑</h1>
+<p class="article-lead">面向 CRO 统计编程人员，从“数据为什么这样分析”出发，把临床统计学与 ADaM、TFL、QC 和面试联系起来。</p></header>
+<main class="article-body" id="main-content">
+<details class="toc-inline"><summary>本页目录</summary><nav aria-label="本页目录">
+          <a href="#stat-map">1. 知识地图</a>
+          <a href="#stat-descriptive">2. 描述性统计</a>
+          <a href="#stat-inference">3. 假设检验与置信区间</a>
+          <a href="#stat-methods">4. 常用统计方法</a>
+          <a href="#stat-survival">5. 生存分析</a>
+          <a href="#stat-populations">6. 分析集</a>
+          <a href="#stat-missing">7. 缺失数据与 Estimand</a>
+          <a href="#stat-multiplicity">8. 多重性</a>
+          <a href="#stat-programming">9. SP 数据与 QC</a>
+          <a href="#stat-interview">10. 面试自测</a>
+          <a href="#stat-references">11. 来源</a>
+</nav></details>
+
+<div class="sp-learning-lead">
+  <strong>这篇文章要解决的问题</strong>
+  <p>统计师设计分析方案，SP 将方案精确实现并验证。SP 不必凭空决定模型，却应知道为什么用这个模型、输出中每个统计量是什么意思，以及哪些数据衍生会改变统计结论。</p>
+  <p>建议结合 <a href="/trial-designs/">试验设计</a> 和 <a href="/clinical-pharmacology/">临床药理学基础</a> 一起阅读。本篇是知识框架，不替代项目 SAP 或正式统计分析方法学培训。</p>
+</div>
+
+<section aria-labelledby="stat-map">
+<h2 id="stat-map">1. 先建立一张 SP 统计学知识地图</h2>
+<div class="table-wrap">
+<table class="learning-table">
+<thead><tr><th>层级</th><th>常见概念</th><th>SP 需要理解到什么程度</th></tr></thead>
+<tbody>
+<tr><td>研究问题</td><td>终点、假设、Estimand、分析集</td><td>说清研究要估计什么、针对谁、用什么变量</td></tr>
+<tr><td>数据描述</td><td>N、n、Mean、SD、Median、Q1/Q3、%</td><td>核查汇总口径、缺失、分母与有效位数</td></tr>
+<tr><td>统计推断</td><td>α、P 值、95% CI、检验效能、样本量</td><td>正确理解显著性和不确定性，不把 P 值当效果大小</td></tr>
+<tr><td>分析方法</td><td>t 检验、ANCOVA、MMRM、卡方、Logistic、Cox</td><td>根据终点类型理解模型输入、调整因素和结果</td></tr>
+<tr><td>数据问题</td><td>重复测量、缺失、删失、方案偏离、ICE</td><td>区分未观察到、不再观察和真实发生事件</td></tr>
+<tr><td>结果稳健性</td><td>多重性、敏感性分析、亚组分析</td><td>理解正式结论和探索性结果的边界</td></tr>
+</tbody>
+</table>
+</div>
+<p class="sp-learning-hint">优先顺序：描述性统计 → 终点与分析集 → P 值/置信区间 → 常用模型 → 缺失/删失 → Estimand 与多重性。</p>
+</section>
+
+<section aria-labelledby="stat-descriptive">
+<h2 id="stat-descriptive">2. 描述性统计：几乎每个项目都会出现</h2>
+<div class="table-wrap">
+<table class="learning-table">
+<thead><tr><th>统计量</th><th>含义与计算</th><th>常见错误</th></tr></thead>
+<tbody>
+<tr><td><code>N</code> / <code>n</code></td><td>样本总数、某参数有效记录或受试者数；具体由表壳定义</td><td>把记录数当受试者数；N 与有效 n 混淆</td></tr>
+<tr><td>Mean</td><td>算术平均数：Σxᵢ / n</td><td>未核对缺失、重复记录或分析集</td></tr>
+<tr><td>SD</td><td>样本标准差：√[Σ(xᵢ−Mean)²/(n−1)]</td><td>把 SD 当 SEM（标准误）</td></tr>
+<tr><td>Median</td><td>第 50 百分位数</td><td>将其当作 Mean；忘记百分位算法约定</td></tr>
+<tr><td>Q1 / Q3</td><td>第 25 / 75 百分位数</td><td>不同软件分位数定义可能不同</td></tr>
+<tr><td>Min / Max</td><td>观测最小值 / 最大值</td><td>缺少对异常值或单位的核查</td></tr>
+<tr><td>n (%)</td><td>事件人数及比例：100×n/指定分母</td><td>以 AE 条数代替有 AE 的受试者人数</td></tr>
+<tr><td>几何均值</td><td>对正数取自然对数求平均，再指数变换</td><td>直接对 0 或负数取 ln；将其与算术均值混同</td></tr>
+</tbody></table>
+</div>
+<p>例如安全性 AE 表中的“至少发生一次 TEAE”的人数，分子通常是符合条件的<strong>去重受试者数</strong>，并非 AE 记录行数。百分比的分母则依 SAP 规定，常见为对应治疗组的安全性分析集人数。</p>
+<p><strong>QC 问题：</strong>同一受试者同一类别有三条 AE，表中应算 3 条事件，还是 1 名受试者？必须看表格是按 <em>Number of Events</em> 还是 <em>Subjects with Events</em> 统计。</p>
+</section>
+
+<section aria-labelledby="stat-inference">
+<h2 id="stat-inference">3. 假设检验与置信区间，怎样才算真正理解？</h2>
+<div class="sp-learning-grid">
+<div class="sp-learning-cell"><strong>H₀ / H₁</strong><span>零假设 / 备择假设；例如 H₀：两治疗的总体平均差为 0</span></div>
+<div class="sp-learning-cell"><strong>α（第一类错误）</strong><span>若零假设为真，却错误拒绝它的概率；常见双侧 0.05，仍以方案为准</span></div>
+<div class="sp-learning-cell"><strong>Power（检验效能）</strong><span>备择假设为特定真实情况时正确拒绝 H₀ 的概率；取决于效应、样本量和变异</span></div>
+<div class="sp-learning-cell"><strong>95% CI（置信区间）</strong><span>在重复抽样意义下具有约 95% 覆盖率的区间估计方法；不是“此固定区间有 95% 概率包含参数”</span></div>
+</div>
+<p><strong>P 值：</strong>在零假设和检验模型成立的前提下，观察到当前或更极端检验统计量的概率。<strong>P = 0.03 不表示零假设为真的概率是 3%，也不代表治疗有 97% 的概率有效。</strong></p>
+<p><strong>效应量比 P 值更直观：</strong>治疗组差值（Difference）、风险比（RR）、优势比（OR）、风险差（RD）、风险比率（HR）及各自 CI，回答的是不同尺度上的问题，不能互换。</p>
+<div class="sp-learning-example">
+  <strong>示意：HbA1c 变化</strong>
+  <p>A 组平均变化 −0.9%，B 组 −0.4%，那么<strong>未调整的组间均值变化差</strong>是 −0.5 个百分点。若 SAP 使用 ANCOVA，则结果可能是调整后的 LS Mean Difference，不能把 −0.5 直接贴成模型结果，也不能据此编造 P 值。</p>
+</div>
+<h3>样本量为什么和统计学有关？</h3>
+<p>样本量常取决于主要终点、期望检测的效应、变异或事件率、α、目标 Power、分组比、失访及分析方法。SP 通常不负责主导样本量论证，但应知道为什么 TFL 里实际分析人数和方案计划人数不同，以及实际事件数不足可能如何影响分析精度。</p>
+</section>
+
+<section aria-labelledby="stat-methods">
+<h2 id="stat-methods">4. 按终点类型匹配常见统计方法</h2>
+<p>先判断变量属于连续、二分类、计数/等级、重复测量还是时间到事件，再理解 SAP 为何采用指定模型。下表是典型关联，<strong>不是自动选统计方法的算法</strong>。</p>
+<div class="table-wrap">
+<table class="learning-table">
+<thead><tr><th>终点类型</th><th>常见方法</th><th>SP 关注变量</th></tr></thead>
+<tbody>
+<tr><td>连续型<br><small>体重、HbA1c、血压</small></td><td>t 检验、ANCOVA、线性回归；明显偏态时可能使用合适的非参数法或变换</td><td><code>AVAL</code>、<code>BASE</code>、<code>CHG</code>、协变量、<code>ANLxxFL</code></td></tr>
+<tr><td>二分类<br><small>缓解/未缓解、达标率</small></td><td>卡方、Fisher、Logistic 回归、风险差或风险比方法</td><td>响应标记、访视、分母、分层因素</td></tr>
+<tr><td>等级/有序<br><small>症状等级</small></td><td>有序 Logistic、秩和检验等</td><td>等级顺序、类别定义、稀疏数据</td></tr>
+<tr><td>重复测量<br><small>每次访视 HbA1c/体重</small></td><td>MMRM、GEE、混合效应模型</td><td>受试者、访视、治疗、基线、协方差结构</td></tr>
+<tr><td>时间到事件<br><small>OS、PFS、DoR</small></td><td>Kaplan–Meier、Log-rank、Cox 比例风险模型</td><td>起点、事件日期、截尾日期、事件标记、风险集</td></tr>
+<tr><td>暴露参数<br><small>AUC、Cmax</small></td><td>描述统计、对数变换、几何均值；比较时可能用 ANOVA/混合模型</td><td>PK 参数、剂量、周期、序列、可分析标记</td></tr>
+</tbody></table></div>
+<h3>ANCOVA 与 MMRM：做 ADaM 时最值得先弄懂的两种模型</h3>
+<p><strong>ANCOVA</strong> 可以把治疗组、基线值和预先指定的其他协变量纳入模型。例如以末次 HbA1c 变化量为响应变量，比较经过基线调整的治疗差异。LS Mean 是模型调整后的均值估计，<strong>不同于原始 Mean</strong>。</p>
+<p><strong>MMRM</strong> 利用重复访视的纵向观察，常包含治疗、访视、治疗×访视及基线相关项，并对同一受试者多次测量的相关性建模。协方差结构、缺失假设和模型细节必须以 SAP 为准。MMRM 通常依赖 MAR 等模型假设，<strong>不是“自动解决所有缺失值”的魔法</strong>。</p>
+</section>
+
+<section aria-labelledby="stat-survival">
+<h2 id="stat-survival">5. 生存分析：事件、时间、删失三件事</h2>
+<p>时间到事件终点（Time-to-Event）不只记录“有没有发生”，还要记录“从哪里起算、何时发生、何时停止观察”。</p>
+<div class="sp-learning-grid">
+<div class="sp-learning-cell"><strong>Kaplan–Meier</strong><span>随时间估计生存/无事件概率；图上的下降发生在事件时点</span></div>
+<div class="sp-learning-cell"><strong>Censoring（删失）</strong><span>到所知的最后观察时点事件尚未观察到；不等于“确认永远不会发生”</span></div>
+<div class="sp-learning-cell"><strong>Hazard Ratio（HR）</strong><span>比较瞬时事件危险率的相对大小；不等于某时间点概率之比</span></div>
+<div class="sp-learning-cell"><strong>Cox 模型</strong><span>常用于估计 HR；常见比例风险假设需要评估</span></div>
+</div>
+<p><strong>例子：</strong>OS 常以死亡为事件；但 PFS 的事件通常包括方案规定的疾病进展或死亡。不同项目对进展评价、失访、后续抗肿瘤治疗和新评估时间点的处理可能不同，因此不能仅凭 <code>ADTTE</code> 变量名称推断规则。</p>
+<p><strong>SP 特别注意：</strong><code>ADTTE</code> 的 <code>ADT</code>、<code>AVAL</code>、<code>CNSR</code>、<code>EVNTDESC</code> 等必须按 Spec 核对。<code>CNSR=0</code> 常表示发生事件，但具体编码以数据集元数据为准；时间单位和起算日的 ±1 规则同样重要。</p>
+</section>
+
+<section aria-labelledby="stat-populations">
+<h2 id="stat-populations">6. ITT、FAS、PPS、Safety Set 到底有什么区别？</h2>
+<div class="table-wrap">
+<table class="learning-table">
+<thead><tr><th>概念</th><th>理解方式</th><th>常见 SP 工作</th></tr></thead>
+<tbody>
+<tr><td>ITT 原则</td><td>尽可能按随机分配进行分析，以保护随机化收益</td><td>随机化记录、按计划治疗分组、处理偏离</td></tr>
+<tr><td>FAS</td><td>尽量接近 ITT 原则的全分析集；具体允许的排除取决于事先规定的合理准则</td><td><code>FASFL</code> 的入排逻辑及原因可追溯</td></tr>
+<tr><td>PPS</td><td>符合预定义方案要求的受试者集合</td><td>方案偏离、暴露、主要评价窗口、<code>PPSFL</code></td></tr>
+<tr><td>Safety Set</td><td>通常包括实际接受至少一次研究治疗的受试者，但具体定义以 SAP 为准</td><td>安全性标志、实际给药、按实际治疗汇总</td></tr>
+</tbody>
+</table>
+</div>
+<p>一项试验可能将 FAS 用于主要疗效、Safety Set 用于安全性、PPS 用于支持性分析；也可能采用不同定义。尤其在非劣效研究中，FAS 与 PPS 的分析一致性经常具有重要解释意义。<strong>人群标志绝不能由 SP 根据习惯“想当然”填写。</strong></p>
+</section>
+
+<section aria-labelledby="stat-missing">
+<h2 id="stat-missing">7. 缺失数据、敏感性分析与 Estimand</h2>
+<p>这是从“会写程序”走向“理解分析意图”的关键。需要区分两类问题：<strong>某个值没测到（Missing Data）</strong>，以及<strong>治疗后发生了影响结局解释的情况（Intercurrent Event，ICE）</strong>，例如停药、救援治疗、换药。二者并不等价。</p>
+<div class="table-wrap">
+<table class="learning-table">
+<thead><tr><th>术语</th><th>是什么</th><th>注意</th></tr></thead>
+<tbody>
+<tr><td>MCAR</td><td>缺失与已观测和未观测数据均独立</td><td>非常强的假设，不可轻易声称</td></tr>
+<tr><td>MAR</td><td>在已观测信息条件下，缺失不再依赖未观测结果</td><td>MMRM 等方法常依赖这种假设</td></tr>
+<tr><td>MNAR</td><td>即使给定已观测信息，缺失仍可能依赖未观测结果</td><td>常以敏感性分析评估潜在影响</td></tr>
+<tr><td>LOCF</td><td>最后一次观测值结转</td><td>并非中性填补，可能引入偏倚</td></tr>
+<tr><td>MI</td><td>Multiple Imputation，多重插补</td><td>需要合理的插补模型与合并规则</td></tr>
+<tr><td>敏感性分析</td><td>考察主分析推断对关键假设偏离的稳健性</td><td>应针对同一 Estimand；另一个分析目标属于补充分析</td></tr>
+</tbody>
+</table>
+</div>
+<h3>Estimand（估计目标）回答“我们究竟要估计什么治疗效果？”</h3>
+<p>ICH E9(R1) 用五个要素表述一个 Estimand：<strong>治疗条件、目标人群、终点变量、ICE 及处理策略、总体层面的汇总指标</strong>。</p>
+<p>五类常见 ICE 策略包括 Treatment Policy（无论 ICE 是否发生仍关注定义内结果）、Hypothetical（假设 ICE 没发生）、Composite（将 ICE 纳入复合结局）、While-on-Treatment（关注治疗期间结果）、Principal Stratum（特定潜在人群层）。不同策略回答的是不同临床问题，不宜仅依据“停药后是否保留记录”来机械判断。</p>
+<div class="sp-learning-example">
+<strong>例子：减重试验中受试者中途停药</strong>
+<p>如果关注“开始分配治疗后，即使后来停药的总体效果”，可能采用 Treatment Policy 思路；如果关注“假设未停药时会出现的效果”，可能采用 Hypothetical 思路。二者需要不同的数据收集与分析假设；具体采用什么须看 SAP/Estimand 描述。</p>
+</div>
+</section>
+
+<section aria-labelledby="stat-multiplicity">
+<h2 id="stat-multiplicity">8. 多重性、亚组分析与正式结论</h2>
+<p>同时检验多个主要终点、多个治疗剂量或多次正式中期分析时，发生至少一次假阳性判断的风险可能增加。常用控制思路包括层级检验（Hierarchical Testing）、Bonferroni、Hochberg 及预设的 Alpha 分配；不同方案有不同前提。</p>
+<p>并非所有探索性亚组结果都有严格的多重性调整，因此“某亚组 P&lt;0.05”通常不能自动当成确证性结论。SP 需要理解：每张 TFL 的 <strong>正式检验 vs 描述性/探索性分析</strong> 在表题、脚注、比较方法和输出标志中有何区别。</p>
+</section>
+
+<section aria-labelledby="stat-programming">
+<h2 id="stat-programming">9. 把统计学映射到 SP 数据与 QC</h2>
+<div class="table-wrap">
+<table class="learning-table">
+<thead><tr><th>统计问题</th><th>可能的数据位置</th><th>应当检查</th></tr></thead>
+<tbody>
+<tr><td>分析哪个人群？</td><td><code>ADSL</code></td><td><code>SAFFL</code>、<code>FASFL</code>、<code>PPSFL</code> 与具体排除条件</td></tr>
+<tr><td>如何定义基线和变化？</td><td>BDS：<code>ADLB/ADVS</code> 等</td><td><code>ABLFL</code>、<code>BASE</code>、<code>CHG</code>、<code>PCHG</code>、窗口与重复值处理</td></tr>
+<tr><td>选择哪条记录？</td><td>分析数据集</td><td><code>ANL01FL</code> 等，确保每个受试者×参数×访视只有所需分析记录</td></tr>
+<tr><td>缺失如何处理？</td><td>BDS / MI 衍生数据</td><td><code>DTYPE</code>、插补来源、分析标志及原始记录是否被错误覆盖</td></tr>
+<tr><td>事件时间从哪里算？</td><td><code>ADTTE</code></td><td>事件/删失、时间起点、截尾规则、事件数与风险集</td></tr>
+<tr><td>AE 如何汇总？</td><td><code>ADAE</code></td><td>TEAE 定义、治疗归属、同一受试者去重、最多严重度和分母</td></tr>
+<tr><td>模型数据准备是否正确？</td><td>分析数据集 + TFL</td><td>协变量、分层因素、组别、访视、缺失、模型使用的观察记录</td></tr>
+</tbody>
+</table>
+</div>
+<p>最有价值的 QC 不是“统计模型跑出同一个 P 值”，而是<strong>能追踪 P 值所使用的每一行分析数据来自哪里、为什么入选、用什么协变量，以及分析结果代表什么</strong>。</p>
+</section>
+
+<section aria-labelledby="stat-interview">
+<h2 id="stat-interview">10. 面试常见问题：点击自测</h2>
+<div class="indication-quiz">
+<details><summary>Q1. SD 和 SEM 有什么区别？</summary><p>SD 描述样本观测值的离散程度；SEM 描述样本均值估计的抽样不确定性，常为 SD/√n（在常见独立同分布假设下）。不能互相替代。</p></details>
+<details><summary>Q2. 为什么 ANCOVA 要调整基线？</summary><p>预设的基线调整通常可控制已知的预后因素，并可能提高估计精度；模型输出的 LS Mean 与原始 Mean 不同。具体模型项以 SAP 为准。</p></details>
+<details><summary>Q3. PFS 的 CNSR=1 就代表受试者没有发生过进展吗？</summary><p>不能这么说。它通常表示到定义的删失时点未观察到符合规则的事件；事件标记编码和截尾算法必须查看 ADTTE Spec。</p></details>
+<details><summary>Q4. MMRM 可以不管缺失数据吗？</summary><p>不可以。MMRM 往往在 MAR 等假设下处理不完整的重复测量序列，但需要评估缺失机制和稳健性，必要时做敏感性分析。</p></details>
+<details><summary>Q5. FAS 与 PPS 是否必然一样？</summary><p>不一样。FAS 尽可能接近 ITT 原则；PPS 根据预设重要方案要求形成，两者排除条件可能不同，且必须遵循方案和 SAP。</p></details>
+<details><summary>Q6. 如果 P=0.03，能否断言疗效很大？</summary><p>不能。P 值不是效应大小；还需要查看组间估计差异、CI、临床重要性、主要终点及多重性控制。</p></details>
+<details><summary>Q7. Treatment Policy 和缺失值插补是同一件事吗？</summary><p>不是。前者是处理 ICE 的 Estimand 策略，定义目标治疗效果；插补是为估计该目标处理缺失数据的方法，两者位于不同层次。</p></details>
+</div>
+<p><strong>建议下一步：</strong>选择一个你做过的纵向 BDS 项目，将主要终点的 <code>AVAL / BASE / CHG / ANL01FL</code>、人群标志和 SAP 模型串成一条完整逻辑，再练习向面试官解释为什么这样分析。</p>
+</section>
+
+<section aria-labelledby="stat-references">
+<h2 id="stat-references">11. 主要依据与使用边界</h2>
+<p>以下为主要监管/方法学资料；正文 SP 示例为帮助理解的归纳，不应代替特定研究的方案或 SAP。</p>
+<ul class="pk-references">
+<li><a href="https://www.ema.europa.eu/en/scientific-guidelines/ich-e9-statistical-principles-clinical-trials" target="_blank" rel="noopener noreferrer">ICH E9 — Statistical Principles for Clinical Trials ↗</a></li>
+<li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/e9r1-statistical-principles-clinical-trials-addendum-estimands-and-sensitivity-analysis-clinical" target="_blank" rel="noopener noreferrer">ICH E9(R1) — Estimands and Sensitivity Analysis ↗</a></li>
+<li><a href="https://www.ema.europa.eu/en/scientific-guidelines/missing-data-confirmatory-clinical-trials" target="_blank" rel="noopener noreferrer">EMA — Missing Data in Confirmatory Clinical Trials ↗</a></li>
+<li><a href="https://www.fda.gov/drugs/news-events-human-drugs/statistical-considerations-premarketing-risk-assessment-05162024" target="_blank" rel="noopener noreferrer">FDA — Statistical Considerations in Safety Analysis ↗</a></li>
+<li><a href="https://www.cdisc.org/standards/foundational/adam" target="_blank" rel="noopener noreferrer">CDISC — ADaM Foundational Standard ↗</a></li>
+</ul>
+<p>建议学习顺序：先掌握 ICH E9，再阅读 E9(R1) 的估计目标框架；遇到实际模型时再结合 SAP 研究具体公式和软件实现。</p>
+<p>下一篇：<a href="/clinical-pharmacology/">临床药理学基础：从 ADME 到 PK/PD ↗</a></p>
+</section>
+
+</main>
+<footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.2.8</span></footer>
+<a class="back-to-top" href="#top" aria-label="回到顶部" title="回到顶部" hidden>↑</a>
+<script>
+(() => { const b=document.querySelector('.back-to-top');const update=()=>{b.hidden=window.scrollY<280};window.addEventListener('scroll',update,{passive:true});update()})();
+</script>
+</div></body></html>
