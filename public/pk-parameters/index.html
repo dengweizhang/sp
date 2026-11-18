@@ -101,7 +101,7 @@
           </div>
           <div class="pk-method">
             <div class="pk-method-title"><strong>AUCtau</strong><span>一个给药间隔</span></div>
-            <div class="pk-formula">AUCtau = ∫₀ᵗᵃᵘ C(t) dt</div>
+            <div class="pk-formula">AUCtau = ∫₀^τ C(t) dt</div>
             <p>积分区间为本次给药至 <code>τ</code>；通常用于多次给药/稳态评估。若 τ 处没有观测浓度，可能需要插值或外推，能否计算取决于分析规则和数据覆盖范围。</p>
           </div>
           <div class="pk-method">
@@ -138,6 +138,7 @@
           <div class="pk-method">
             <div class="pk-method-title"><strong>MRTinf</strong><span>平均滞留时间</span></div>
             <div class="pk-formula">AUMCinf = ∫₀∞ t × C(t) dt</div>
+            <div class="pk-formula">AUMCinf = AUMClast + tlast × Clast / Lambda_z + Clast / Lambda_z²</div>
             <div class="pk-formula">MRTinf = AUMCinf / AUCinf（非静脉输注）</div>
             <p><code>AUMC</code> 为浓度乘时间的一阶矩曲线下面积。单次恒速静脉输注的 MRT 通常还需扣除 <code>输注时长 / 2</code>；血管外给药所得 MRT 也包含平均输入/吸收时间，不能简单解释为纯体内系统滞留时间。</p>
           </div>
