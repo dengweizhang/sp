@@ -156,8 +156,9 @@ code{font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow
 }
 .pk-viz-tabs button:hover{color:var(--ink);background:#f0f1ee}
 .pk-viz-tabs button[aria-pressed="true"]{color:#345b61;border-color:#bfd1cf;background:#eff5f4;font-weight:600}
-.pk-viz svg{display:block;width:100%;height:auto;overflow:visible;margin:3px 0 0;max-height:215px}
-.pk-viz-narrow svg{max-height:176px}
+.pk-viz-canvas{overflow-x:auto;overscroll-behavior-x:contain}
+.pk-viz svg{display:block;width:100%;min-width:455px;height:auto;overflow:visible;margin:3px 0 0;max-height:215px}
+.pk-viz-narrow svg{max-height:176px;min-width:420px}
 .pk-viz-axis{font:12px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#999}
 .pk-viz-value{font:600 13px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#4d686c}
 .pk-viz-caption{font-size:13px!important;line-height:1.7!important;color:#444;margin:5px 0 0!important}
