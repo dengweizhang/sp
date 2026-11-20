@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="SAS 实战问题速查：01 百分比拼接空格，02 PROC FORMAT，03 INPUT/PUT，04 CAT/CATS/CATX。短结论、关键代码、边界提醒，持续更新。">
+<meta name="description" content="SAS 实战问题速查：PICTURE、PUT/INPUT，以及 CAT/CATS/CATX、SCAN、COMPRESS、UPCASE、LOWCASE、NMISS、CMISS 等高频 SAS 字符串与缺失函数。">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="canonical" href="https://sp.769967.xyz/sas-notes/">
@@ -31,6 +31,15 @@
 .sas-note .learning-table{min-width:460px}
 .sas-note .learning-table td:first-child{width:135px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
 .sas-note .table-wrap{margin:8px 0 11px}
+.sas-fn-group{font-size:13px!important;line-height:1.5;font-weight:650;margin:18px 0 6px!important;color:#424242}
+.sas-fn-table{min-width:655px;table-layout:auto;font-size:12px}
+.sas-fn-table th{font-size:11px;padding:7px 9px}
+.sas-fn-table td{padding:7px 9px;line-height:1.55}
+.sas-fn-table td:first-child{width:130px!important;white-space:nowrap!important;font-weight:400!important;font-size:12px!important}
+.sas-fn-table td:nth-child(2){width:210px}
+.sas-fn-table code{font-size:11.5px;white-space:nowrap;overflow-wrap:normal}
+.sas-fn-table strong code{font-weight:750;color:#1c3e51}
+.sas-fn-wrap{margin-bottom:13px!important}
 .sas-ending{font-size:12px;color:#888;margin:20px 0 25px;line-height:1.8}
 @media (max-width:700px){.sas-note h2{font-size:17px}.sas-toc a{font-size:12px}.sas-code code{font-size:11.5px}}
 @media print{.site-header,.back-to-top{display:none}.sas-code{white-space:pre-wrap;overflow:visible}}
@@ -54,7 +63,7 @@
 <a href="#note-01"><span class="sas-no">01</span> TFL n (%) 多出空格</a>
 <a href="#note-02"><span class="sas-no">02</span> PROC FORMAT：VALUE / PICTURE / INVALUE</a>
 <a href="#note-03"><span class="sas-no">03</span> INPUT 与 PUT：方向相反</a>
-<a href="#note-04"><span class="sas-no">04</span> CAT / CATS / CATX：怎么拼接</a>
+<a href="#note-04"><span class="sas-no">04</span> SAS 常用字符串与缺失函数</a>
 </nav>
 </details>
 <!-- SP_NOTES_START: add subsequent notes as 05, 06...; mirror the numbered table of contents -->
@@ -95,18 +104,98 @@ run;</code></pre>
 <p class="sas-boundary"><strong>本次宏：</strong><code>INPUT(PCT,BEST.)</code> 先把字符型百分比转数值，再由 <code>PUT(...,pctfmt.)</code> 生成显示文本；如果 PCT 本身是数值型，就不必先 INPUT。</p>
 </section>
 <section class="sas-note" id="note-04" aria-labelledby="title-04">
-<h2 id="title-04"><span class="sas-no">04</span>CAT / CATS / CATX：怎么拼接</h2>
-<div class="table-wrap"><table class="learning-table"><thead><tr><th>函数</th><th>规则</th><th>示例（_ 代表空格）</th></tr></thead><tbody>
-<tr><td><code>CAT(a,b)</code></td><td>保留两端空格，无分隔符</td><td><code>_A__B_</code></td></tr>
-<tr><td><code>CATS(a,b)</code></td><td>删首尾空格，无分隔符</td><td><code>AB</code></td></tr>
-<tr><td><code>CATX(' ',a,b)</code></td><td>删首尾空格，加入指定分隔符</td><td><code>A_B</code></td></tr>
+<h2 id="title-04"><span class="sas-no">04</span>SAS 常用字符串与缺失函数</h2>
+<p><strong>速查 42 项。</strong>按用途分类，<strong>加粗函数</strong>为 SP/TFL 高频用法；示例中的 <code>s</code> 是字符串、<code>x</code> 是变量。只列最有用的规则。</p>
+<h3 class="sas-fn-group">01 · 拼接与分隔</h3>
+<div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
+<thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
+<tbody>
+<tr><td><strong><code>CAT</code></strong></td><td><code>cat(a,b)</code></td><td>直接拼接，保留两端空格</td></tr>
+<tr><td><code>CATT</code></td><td><code>catt(a,b)</code></td><td>只去各参数的尾随空格</td></tr>
+<tr><td><strong><code>CATS</code></strong></td><td><code>cats(a,b)</code></td><td>去各参数首尾空格，不加分隔符</td></tr>
+<tr><td><strong><code>CATX</code></strong></td><td><code>catx(' ',a,b)</code></td><td>去首尾空格，再插入指定分隔符</td></tr>
+<tr><td><strong><code>||</code></strong></td><td><code>a||b</code></td><td>字符串直接拼接运算符</td></tr>
 </tbody></table></div>
-<p class="sas-boundary"><strong>示例输入：</strong><code>a=' A '</code>、<code>b=' B '</code>。<strong>速记：</strong>CAT 保留，CATS 清理，CATX 清理后加分隔符。三个函数都不删除参数内部空格；本次 <code>n (%)</code> 用 <code>CATX</code>。</p>
+<h3 class="sas-fn-group">02 · 空格与字符清理</h3>
+<div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
+<thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
+<tbody>
+<tr><td><strong><code>STRIP</code></strong></td><td><code>strip(s)</code></td><td>去首尾空格，内部不变</td></tr>
+<tr><td><strong><code>TRIM</code></strong></td><td><code>trim(s)</code></td><td>只去尾随空格；全空格串返回一个空格</td></tr>
+<tr><td><code>TRIMN</code></td><td><code>trimn(s)</code></td><td>只去尾随空格；全空格串返回零长度</td></tr>
+<tr><td><code>LEFT / RIGHT</code></td><td><code>left(s) / right(s)</code></td><td>左对齐 / 右对齐</td></tr>
+<tr><td><strong><code>COMPRESS</code></strong></td><td><code>compress(s)</code></td><td>默认删除所有普通空格</td></tr>
+<tr><td><strong><code>COMPRESS + KD</code></strong></td><td><code>compress(s,,'kd')</code></td><td>仅保留数字；负号、小数点也会删除</td></tr>
+<tr><td><strong><code>COMPBL</code></strong></td><td><code>compbl(s)</code></td><td>多个连续空格压缩成一个</td></tr>
+</tbody></table></div>
+<h3 class="sas-fn-group">03 · 提取、拆分与长度</h3>
+<div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
+<thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
+<tbody>
+<tr><td><strong><code>SCAN</code></strong></td><td><code>scan(s,2,'|')</code></td><td>取按 | 分隔的第 2 段</td></tr>
+<tr><td><strong><code>COUNTW</code></strong></td><td><code>countw(s,'|')</code></td><td>统计按 | 分隔的词数</td></tr>
+<tr><td><strong><code>SUBSTR</code></strong></td><td><code>substr(s,2,3)</code></td><td>从第 2 位取 3 个字符</td></tr>
+<tr><td><code>SUBSTRN</code></td><td><code>substrn(s,2,n)</code></td><td>安全截取；长度不合法时返回空白</td></tr>
+<tr><td><strong><code>LENGTH</code></strong></td><td><code>length(s)</code></td><td>去尾随空格计长度；全空格返回 1</td></tr>
+<tr><td><code>LENGTHN</code></td><td><code>lengthn(s)</code></td><td>去尾随空格计长度；全空格返回 0</td></tr>
+<tr><td><code>LENGTHC</code></td><td><code>lengthc(s)</code></td><td>返回字符值的存储长度（含尾随空格）</td></tr>
+</tbody></table></div>
+<h3 class="sas-fn-group">04 · 查找、匹配与计数</h3>
+<div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
+<thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
+<tbody>
+<tr><td><strong><code>INDEX</code></strong></td><td><code>index(s,'AE')</code></td><td>查子串位置，未找到返回 0</td></tr>
+<tr><td><strong><code>FIND</code></strong></td><td><code>find(s,'ae','i')</code></td><td>查子串；i 忽略大小写</td></tr>
+<tr><td><strong><code>FINDW</code></strong></td><td><code>findw(s,'AE')</code></td><td>按完整单词查找位置</td></tr>
+<tr><td><strong><code>COUNT</code></strong></td><td><code>count(s,'AE')</code></td><td>统计子串出现次数</td></tr>
+<tr><td><code>COUNTC</code></td><td><code>countc(s,'0123456789')</code></td><td>统计指定字符集合的出现次数</td></tr>
+<tr><td><code>FINDC</code></td><td><code>findc(s,'0123456789')</code></td><td>找指定字符集合首次出现的位置</td></tr>
+<tr><td><code>ANYDIGIT / ANYALPHA</code></td><td><code>anydigit(s) / anyalpha(s)</code></td><td>找首个数字 / 字母的位置</td></tr>
+</tbody></table></div>
+<h3 class="sas-fn-group">05 · 替换与正则</h3>
+<div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
+<thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
+<tbody>
+<tr><td><strong><code>TRANWRD</code></strong></td><td><code>tranwrd(s,'old','new')</code></td><td>将所有匹配子串替换成新文本</td></tr>
+<tr><td><code>TRANSTRN</code></td><td><code>transtrn(s,'old','')</code></td><td>可把匹配子串真正替换为空串</td></tr>
+<tr><td><code>TRANSLATE</code></td><td><code>translate(s,'_',' ')</code></td><td>逐字符替换：空格改下划线</td></tr>
+<tr><td><strong><code>PRXMATCH</code></strong></td><td><code>prxmatch('/^AE/',s)</code></td><td>正则匹配，返回位置；不匹配为 0</td></tr>
+<tr><td><code>PRXCHANGE</code></td><td><code>prxchange('s/ +/ /',-1,s)</code></td><td>正则全局替换连续空格</td></tr>
+</tbody></table></div>
+<h3 class="sas-fn-group">06 · 大小写</h3>
+<div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
+<thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
+<tbody>
+<tr><td><strong><code>UPCASE</code></strong></td><td><code>upcase(s)</code></td><td>全部转大写</td></tr>
+<tr><td><strong><code>LOWCASE</code></strong></td><td><code>lowcase(s)</code></td><td>全部转小写</td></tr>
+<tr><td><strong><code>PROPCASE</code></strong></td><td><code>propcase(s)</code></td><td>单词首字母大写、其余小写</td></tr>
+</tbody></table></div>
+<h3 class="sas-fn-group">07 · 缺失判断与取首个非缺失值</h3>
+<div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
+<thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
+<tbody>
+<tr><td><strong><code>MISSING</code></strong></td><td><code>missing(x)</code></td><td>单个字符或数值是否缺失，返回 1/0</td></tr>
+<tr><td><strong><code>NMISS</code></strong></td><td><code>nmiss(x,y)</code></td><td>统计缺失数；只应传数值参数</td></tr>
+<tr><td><strong><code>CMISS</code></strong></td><td><code>cmiss(x,y)</code></td><td>统计缺失数；支持字符+数值混合</td></tr>
+<tr><td><strong><code>N</code></strong></td><td><code>n(x,y)</code></td><td>统计非缺失数值的个数</td></tr>
+<tr><td><code>COALESCE</code></td><td><code>coalesce(n1,n2)</code></td><td>返回首个非缺失数值</td></tr>
+<tr><td><strong><code>COALESCEC</code></strong></td><td><code>coalescec(c1,c2)</code></td><td>返回首个非缺失字符值</td></tr>
+</tbody></table></div>
+<h3 class="sas-fn-group">08 · 类型与格式转换</h3>
+<div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
+<thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
+<tbody>
+<tr><td><strong><code>INPUT</code></strong></td><td><code>input(raw,best.)</code></td><td>按 Informat 读入字符为数值</td></tr>
+<tr><td><strong><code>PUT</code></strong></td><td><code>put(num,8.2)</code></td><td>按 Format 输出字符，不改原值</td></tr>
+</tbody></table></div>
+<p class="sas-boundary"><strong>关键区别：</strong><code>NMISS</code> 用于数值，<code>CMISS</code> 可混用字符与数值；<code>TRIM</code> 仅去尾随空格，<code>STRIP</code> 去两端；<code>COMPRESS(s,,'kd')</code> 会删除小数点、负号，不能直接用于保留数值符号的清洗。</p>
+<p class="sas-boundary"><strong>本次 TFL 的选择：</strong><code>catx(' ',compress(COUNT),put(input(compress(PCT),best.),pctfmt.))</code>。中文/UTF-8 数据在需要按字符而非字节处理时，注意 SAS NLS 的 <code>KSCAN / KSUBSTR / KLENGTH</code> 等对应函数。</p>
+<p class="sas-boundary">参考：<a href="https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0w6napahk6x0an0z2dzozh2ouzm.htm" target="_blank" rel="noopener noreferrer">SAS 官方函数分类</a> · <a href="https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0nw8trwk5ooesn1o8zrtd5c6j1t.htm" target="_blank" rel="noopener noreferrer">NMISS</a> · <a href="https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p1tth4ltf640din1ey86ubo2lky2.htm" target="_blank" rel="noopener noreferrer">CMISS</a></p>
 </section>
 <!-- SP_NOTES_END -->
 <p class="sas-ending">每次只新增一条有复用价值的记录；没有验证的结论要标明待验证。<a href="https://documentation.sas.com/" target="_blank" rel="noopener noreferrer">SAS 官方文档 ↗</a></p>
 </main>
-<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.2.12</span></footer>
+<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.2.13</span></footer>
 <a class="back-to-top" href="#top" aria-label="回到顶部" title="回到顶部" hidden>↑</a>
 <script>(()=>{const b=document.querySelector('.back-to-top');const u=()=>{b.hidden=window.scrollY<280};window.addEventListener('scroll',u,{passive:true});u()})();</script>
 </div>
