@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="单组/多组折线、均值与误差线、分面图、轴和图例；重点排查首尾错误连线、采样时间排序及图形 QC。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/graphics/"><link rel="stylesheet" href="/assets/style.css?v=0.3.2"><title>SAS 绘图：SGPLOT / SGPANEL 到临床 TFL · SP</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="单组/多组折线、均值与误差线、分面图、轴和图例；重点排查首尾错误连线、采样时间排序及图形 QC。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/graphics/"><link rel="stylesheet" href="/assets/style.css?v=0.3.3"><title>SAS 绘图：SGPLOT / SGPANEL 到临床 TFL · SP</title>
 <style>
 .learning-head{padding:25px 0 22px}.learning-topline{font:600 11px/1.4 system-ui,sans-serif;letter-spacing:.09em;color:#999}
 .learning-head h1{margin:9px 0 8px;font-size:27px}.learning-head p{font-size:14px;color:#777;max-width:700px;line-height:1.9}
@@ -12,7 +12,7 @@
 .learning-qc{font-size:12px!important;color:#727272!important}.learning-more{padding:18px 0 28px;font-size:13px;color:#666}
 .learning-more a{color:#245e81;text-decoration:underline;text-underline-offset:3px}.learning-more p{margin:8px 0}
 @media(max-width:700px){.learning-head h1{font-size:23px}.learning-code code{font-size:11px}}
-</style><script src="/assets/code-copy.js?v=0.3.2" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
+</style><script src="/assets/code-copy.js?v=0.3.3" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
 <header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / SAS 绘图：SGPLOT / SGPANEL 到临床 TFL</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>SAS 绘图：SGPLOT / SGPANEL 到临床 TFL</h1><p>单组/多组折线、均值与误差线、分面图、轴和图例；重点排查首尾错误连线、采样时间排序及图形 QC。</p></header>
 <main><nav class="learning-nav" aria-label="章节快速索引"><a href="#level-1">01 基础</a><a href="#level-2">02 实战</a><a href="#level-3">03 进阶 / QC</a></nav><section class="learning-part" id="level-1"><div class="learning-kicker">LEVEL 1 · 基础</div><h2>SCATTER 与 SERIES</h2><p>散点适合个体观测，<code>SERIES</code> 按 X 连接同一个组的多个点。先明确 X/Y 是实际日期、数值时间还是展示标签。</p><pre class="learning-code"><code>proc sgplot data=sashelp.class;
   scatter x=height y=weight / group=sex;
@@ -40,4 +40,4 @@ run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>示意�
   series x=visit y=mean / markers;
   colaxis integer;
   rowaxis label="Example Mean";
-run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>同组同时间多条记录、未使用正确 GROUP、X 是字符型时间标签等都可能造成误导；先整理绘图数据再修样式。</p></section><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/grstatproc/62603/HTML/default/sgplot-stmt.htm" target="_blank" rel="noopener noreferrer">SAS PROC SGPLOT ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.2</span></footer></div></body></html>
+run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>同组同时间多条记录、未使用正确 GROUP、X 是字符型时间标签等都可能造成误导；先整理绘图数据再修样式。</p></section><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/grstatproc/62603/HTML/default/sgplot-stmt.htm" target="_blank" rel="noopener noreferrer">SAS PROC SGPLOT ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.3</span></footer></div></body></html>
