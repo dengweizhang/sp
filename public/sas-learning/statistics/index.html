@@ -13,19 +13,19 @@
 .learning-more a{color:#245e81;text-decoration:underline;text-underline-offset:3px}.learning-more p{margin:8px 0}
 @media(max-width:700px){.learning-head h1{font-size:23px}.learning-code code{font-size:11px}}
 </style><script src="/assets/code-copy.js?v=0.3.3" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
-<header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / 统计汇总：MEANS / SUMMARY / UNIVARIATE</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>统计汇总：MEANS / SUMMARY / UNIVARIATE</h1><p>从 n、Mean、SD、Median 到分组统计、分位数、CV 与几何均值；核心是清楚每个统计量从哪些记录计算。</p></header>
-<main><nav class="learning-nav" aria-label="章节快速索引"><a href="#level-1">01 基础</a><a href="#level-2">02 实战</a><a href="#level-3">03 进阶 / QC</a></nav><section class="learning-part" id="level-1"><div class="learning-kicker">LEVEL 1 · 基础</div><h2>MEANS：快速获得描述统计</h2><p>常用统计量为 <code>N MEAN STD MEDIAN MIN MAX</code>；<code>VAR</code> 指定数值变量，<code>CLASS</code> 定义分类层级。</p><pre class="learning-code"><code>proc means data=sashelp.class
+<header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / 统计汇总：MEANS / SUMMARY / UNIVARIATE</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>统计汇总：MEANS / SUMMARY / UNIVARIATE</h1><p>同样一批浓度或实验室数值，Mean、Median、SD、CV%、几何均值讲述的是不同的侧面。如果先不弄清统计对象，PROC MEANS 再快也只能产出一串看似整齐的数字。</p></header>
+<main><nav class="learning-nav" aria-label="从问题出发的章节索引"><a href="#level-1">一个 N 的疑问</a><a href="#level-2">怎样按层级汇总</a><a href="#level-3">偏态数据的另一种中心</a></nav><section class="learning-part" id="level-1"><h2>Mean 只需一行代码，为什么最先要检查 N？</h2><p>N 通常是非缺失观测的数量，而不是自动去重后的受试者数。在 ADLB 或 ADPC 中，一个人可能贡献多个访视或时点；如果把这些行混在一起计算，得到的是“观测均值”，不一定是目标时点的汇总。先界定分组和筛选，再算 Mean、SD、Median 才有意义。</p><pre class="learning-code"><code>proc means data=sashelp.class
            n mean std median min max maxdec=2;
   class sex;
   var height weight;
-run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>N 是该变量非缺失观测记录数；多条观测不自动代表多个受试者。</p></section>
-<section class="learning-part" id="level-2"><div class="learning-kicker">LEVEL 2 · TFL 实战</div><h2>SUMMARY：NWAY + OUTPUT</h2><p><code>PROC SUMMARY</code> 适合直接生成可供 TFL 使用的汇总数据集；<code>NWAY</code> 只保留全部 CLASS 变量组合的统计。</p><pre class="learning-code"><code>proc summary data=sashelp.class nway;
+run;</code></pre><p class="learning-qc"><strong>回到数据核对：</strong>N 是该变量非缺失观测记录数；多条观测不自动代表多个受试者。</p></section>
+<section class="learning-part" id="level-2"><h2>每个组、每个访视都要算一遍，有没有更清楚的办法？</h2><p>当表格需要按治疗组、访视甚至 PARAMCD 输出多种统计量时，逐个手工筛选既繁琐又容易口径不一致。PROC SUMMARY 的 CLASS 与 NWAY 把“按哪些层级汇总”写进程序，OUTPUT 再把统计量交给排版层，分析和展示由此分开。</p><pre class="learning-code"><code>proc summary data=sashelp.class nway;
   class sex;
   var weight;
   output out=stats(drop=_type_ _freq_)
     n=n mean=mean std=sd median=median;
-run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>检查是否需要保留缺失 CLASS 水平；注意 NWAY、_TYPE_、_FREQ_ 的含义，不要将 _FREQ_ 直接当作分析 N。</p></section>
-<section class="learning-part" id="level-3"><div class="learning-kicker">LEVEL 3 · 进阶 / QC</div><h2>UNIVARIATE 分位数 + 几何均值</h2><p><code>UNIVARIATE</code> 可指定分位点；几何均值常用对正值先取对数再取均值并反变换。几何 CV 与算术 CV 不一样。</p><pre class="learning-code"><code>proc univariate data=sashelp.class noprint;
+run;</code></pre><p class="learning-qc"><strong>回到数据核对：</strong>检查是否需要保留缺失 CLASS 水平；注意 NWAY、_TYPE_、_FREQ_ 的含义，不要将 _FREQ_ 直接当作分析 N。</p></section>
+<section class="learning-part" id="level-3"><h2>PK 浓度常常右偏，为什么只有 Mean 和 SD 不够？</h2><p>一个很高的浓度就可能把算术均值拉高。Median 描述排序中间的位置，GeoMean 则把倍数变化放到对数尺度上理解。它不是对 Mean 简单开方：只有正值可以直接取 LOG，零值与 BLQ 的处理还会影响有效样本量，详见 PK 浓度统计专题。</p><pre class="learning-code"><code>proc univariate data=sashelp.class noprint;
   var weight;
   output out=pctl
     pctlpts=25 50 75 pctlpre=p_;
@@ -42,4 +42,4 @@ run;
 data gm;
   set gm0;
   geometric_mean=exp(mean_log);
-run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>分位数计算方法在不同过程/软件可能不同；几何均值只适用于正值，非正值与缺失要预先按 SAP 定义处理。</p></section><p style="font-size:13px"><strong>PK 专题进阶：</strong><a href="/sas-learning/pk-concentration/" style="color:#245e81;text-decoration:underline">浓度 Table 的 N/n、CV%、GeoMean、GeoSD、GeoCV% 的真实含义与 BLQ 处理 ↗</a></p><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473537.htm" target="_blank" rel="noopener noreferrer">SAS PROC MEANS ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.3</span></footer></div></body></html>
+run;</code></pre><p class="learning-qc"><strong>回到数据核对：</strong>分位数计算方法在不同过程/软件可能不同；几何均值只适用于正值，非正值与缺失要预先按 SAP 定义处理。</p></section><p style="font-size:13px"><strong>PK 专题进阶：</strong><a href="/sas-learning/pk-concentration/" style="color:#245e81;text-decoration:underline">浓度 Table 的 N/n、CV%、GeoMean、GeoSD、GeoCV% 的真实含义与 BLQ 处理 ↗</a></p><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473537.htm" target="_blank" rel="noopener noreferrer">SAS PROC MEANS ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.4</span></footer></div></body></html>
