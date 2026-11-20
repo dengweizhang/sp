@@ -418,3 +418,27 @@ code{font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow
     color:#4d5861;
   }
 }
+
+/* V0.3.6 · Editorial home: soften article hierarchy without reducing readability.
+   Keep the dark body text inside articles; avoid overly heavy homepage link titles. */
+@media screen and (min-width:701px){
+  .knowledge-main .library-intro p{
+    color:#46525b;
+    font-weight:400;
+  }
+  .knowledge-main .entry-info strong{
+    color:#394852;
+    font-weight:500;
+    font-size:17px;
+    letter-spacing:0;
+  }
+  .knowledge-main .entry-info small{
+    color:#5f6b75;
+  }
+  .knowledge-main .entry-no{
+    color:#7d8790;
+  }
+  .knowledge-main .entry-item a:hover .entry-info strong{
+    color:var(--accent);
+  }
+}
