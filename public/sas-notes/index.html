@@ -37,7 +37,7 @@
 <nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / SAS 实战问题笔记</nav>
 <h1>SAS 实战问题笔记</h1>
 <p class="article-lead">真实 TFL / ADaM / SDTM 编程中遇到的问题，按“现象 → 原因 → 修复 → 验证 → 边界”留下可复用的答案。持续更新，不堆砌理论。</p>
-<div class="sas-note-meta">SAS DEBUG LOG · 首篇 2026-11-20 · 1 条实战记录</div>
+<div class="sas-note-meta">SAS DEBUG LOG · 首篇 2026-11-20 · 1 条实战记录 · 拼接函数对照已补充</div>
 </header>
 <main class="article-body">
 <details class="toc-inline" open><summary>本页目录 · 可持续追加</summary>
@@ -45,7 +45,7 @@
 <a href="#note-001">001 · n (%) 格式的多余空格</a>
 <a href="#format-guide">基础 · PROC FORMAT</a>
 <a href="#put-input">基础 · PUT 与 INPUT</a>
-<a href="#string-tools">基础 · 字符拼接与空格</a>
+<a href="#string-tools">基础 · CAT / CATS / CATX 拼接</a>
 <a href="#test-code">可运行测试代码</a>
 <a href="#pitfalls">边界与 QC</a>
 <a href="#sources">来源与更新方式</a>
@@ -144,16 +144,54 @@ result = catx(' ',compress(COUNT),put(input(compress(PCT),best.),pctfmt.));
 result = catx(' ',strip(put(COUNT,best.)),put(PCT,pctfmt.));</code></pre>
 </section>
 <section class="sas-note-section" id="string-tools">
-<h2>基础 03 · ||、CATX、STRIP、COMPRESS、TRANWRD 怎么选？</h2>
-<div class="table-wrap"><table class="learning-table"><thead><tr><th>写法</th><th>主要行为</th><th>何时用</th></tr></thead><tbody>
-<tr><td><code>a || b</code></td><td>直接拼接；原有前后空格可能保留</td><td>确实需要原始空格时</td></tr>
-<tr><td><code>CATX(' ',a,b)</code></td><td>去掉各参数首尾空格，再插入一个分隔空格</td><td>本次 <code>COUNT + 百分比</code> 首选</td></tr>
-<tr><td><code>STRIP(x)</code></td><td>删除首尾空格，不改变内部空格</td><td>清理单个字段首尾</td></tr>
-<tr><td><code>COMPRESS(x)</code></td><td>默认删除所有空格，也会删内部空格</td><td>清理无须保留内部空格的原始字符串</td></tr>
-<tr><td><code>TRANWRD(x,a,b)</code></td><td>按固定子串替换</td><td>有明确固定文本需替换；不宜依赖空格个数</td></tr>
-<tr><td><code>QUOTE(x)</code></td><td>给文本加引号，方便在 Log 中辨认前导空格</td><td>排查显示问题</td></tr>
+<h2>基础 03 · CAT、CATS、CATX：三个拼接函数放在一起比较</h2>
+<p>三者看上去只差一两个字母，实际决定了两件事：<strong>要不要去掉字段首尾空格</strong>、<strong>要不要在字段之间自动插入分隔符</strong>。在 TFL 的 <code>n (%)</code> 输出中，这正是产生多余空格的根源。</p>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>函数</th><th>是否清除首尾空格</th><th>是否自动插入分隔符</th><th>典型用途</th></tr></thead><tbody>
+<tr><td><code>CAT(a,b)</code></td><td>否，原样保留</td><td>否</td><td>需要保留固定宽度空格时；近似 <code>a||b</code></td></tr>
+<tr><td><code>CATS(a,b)</code></td><td>是，两端都删除</td><td>否</td><td>拼接不需要分隔的标识符，例如 <code>AE</code> + <code>01</code></td></tr>
+<tr><td><code>CATX(' ',a,b)</code></td><td>是，两端都删除</td><td>是，使用第一个参数指定的分隔符</td><td>姓名、列表、<code>COUNT + 百分比</code></td></tr>
 </tbody></table></div>
-<p><code>CATX()</code> 会去掉字符串首尾空格，但<strong>保留内部空格</strong>，因此 <code>( 12.5)</code> 的对齐设计不受影响。与此不同，对格式化百分比再次使用 <code>COMPRESS()</code> 会把括号内部有意保留的空格也清除。</p>
+<h3>同一组输入，三种结果</h3>
+<p>假设 <code>A=" A "</code>、<code>B=" B "</code>（两侧都各有一个空格），以 <code>_</code> 表示一个空格：</p>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>表达式</th><th>显示结果（_ 代表空格）</th><th>如何理解</th></tr></thead><tbody>
+<tr><td><code>cat(A,B)</code></td><td><code>_A__B_</code></td><td>所有空格原样拼上</td></tr>
+<tr><td><code>cats(A,B)</code></td><td><code>AB</code></td><td>先清除两端空格，再无缝连接</td></tr>
+<tr><td><code>catx(' ',A,B)</code></td><td><code>A_B</code></td><td>先清除两端空格，再插入一个空格</td></tr>
+</tbody></table></div>
+<h3>可直接执行的 SAS 对比测试</h3>
+<pre class="sas-code"><code>data _null_;
+    length A B $3 CAT_RAW CATS_RAW CATX_RAW $20
+           CAT_VISIBLE $6;
+    A = ' A ';
+    B = ' B ';
+
+    CAT_RAW  = cat(A,B);
+    CATS_RAW = cats(A,B);
+    CATX_RAW = catx(' ',A,B);
+
+    /* 用下划线替代空格，观察首尾及中间空格 */
+    CAT_VISIBLE = translate(substr(CAT_RAW,1,6),'_',' ');
+
+    putlog 'CAT  = [' CAT_VISIBLE $6. ']';  /* [_A__B_] */
+    putlog 'CATS = [' CATS_RAW $2. ']';     /* [AB] */
+    putlog 'CATX = [' CATX_RAW $3. ']';     /* [A B] */
+run;</code></pre>
+<p><strong>本次 TFL 该选哪个？</strong> 选 <code>CATX(' ', ...)</code>。它会删除 <code>PUT(...,pctfmt.)</code> 可能带出的括号<strong>外部</strong>空格，然后添加一个分隔空格；括号<strong>内部</strong>的 <code>( 12.5)</code>、<code>(  9.5)</code> 不受影响。</p>
+<pre class="sas-code"><code>/* 本项目最终使用的表达式 */
+catx(' ',
+     compress(COUNT),
+     put(input(compress(PCT),BEST.),pctfmt.)
+)</code></pre>
+<p><strong>额外提醒：</strong><code>CATX</code> 会跳过空白参数，不会因为 PCT 对应的格式结果全为空格而留下多余分隔符；<code>CATS</code> 虽能清理空格，但会让 <code>64</code> 与 <code>(100)</code> 连成 <code>64(100)</code>，不符合本次目标。</p>
+<h3>补充：与 ||、STRIP、COMPRESS、TRANWRD 的关系</h3>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>写法</th><th>主要行为</th><th>适合什么情况</th></tr></thead><tbody>
+<tr><td><code>a || b</code></td><td>直接拼接，不自动去掉前导/尾随空格</td><td>要保留原始字符串布局</td></tr>
+<tr><td><code>STRIP(x)</code></td><td>只删除 x 首尾空格</td><td>清理单个字段</td></tr>
+<tr><td><code>COMPRESS(x)</code></td><td>默认删除 x 中所有空格，包括内部空格</td><td>清理字段，但不适合直接清除格式中的对齐空格</td></tr>
+<tr><td><code>TRANWRD(x,a,b)</code></td><td>把明确的固定子串 a 替换为 b</td><td>固定文本替换，而非一般的空格规范化</td></tr>
+<tr><td><code>QUOTE(x)</code></td><td>添加引号，帮助检查前导空格</td><td>SAS Log 调试</td></tr>
+</tbody></table></div>
+<p>最容易记错的区别：<strong>CAT 保留、CATS 清空格、CATX 清空格再加分隔符。</strong> 三者都不会主动清除一个参数内部的空格。</p>
 </section>
 <section class="sas-note-section" id="test-code">
 <h2>完整可运行的 SAS 测试代码</h2>
@@ -227,13 +265,14 @@ run;</code></pre>
 <ul class="pk-references">
 <li><a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473467.htm" target="_blank" rel="noopener noreferrer">SAS 官方 · PROC FORMAT / PICTURE Statement ↗</a></li>
 <li><a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473495.htm" target="_blank" rel="noopener noreferrer">SAS 官方 · Filling a Picture Format（PREFIX / FILL）↗</a></li>
+<li><a href="https://support.sas.com/kb/46/672.html" target="_blank" rel="noopener noreferrer">SAS 官方 · CAT / CATS / CATT / CATX 差异速查 ↗</a></li>
 <li><a href="https://documentation.sas.com/" target="_blank" rel="noopener noreferrer">SAS Documentation · 查询 CATX、INPUT、PUT、STRIP、COMPRESS ↗</a></li>
 </ul>
 <p>维护约定：<strong>一条问题一个编号</strong>；每条包括发生场景、复现表达式、根因、最终修复、完整测试和适用边界。以后新增内容直接追加到同一个 <code>public/sas-notes/index.html</code>，并同步更新本页目录与站点知识索引。GitHub 提交保留修改历史。</p>
 <p class="sas-note-tip">知识笔记整理与官方函数定义参考来源不同：NOTE 001 的问题、实际修复来自本次 SAS 调试；一般语法说明参照 SAS 官方文档。具体项目的 SAP、Spec 优先决定显示标准。</p>
 </section>
 </main>
-<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.2.9</span></footer>
+<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.2.10</span></footer>
 <a class="back-to-top" href="#top" aria-label="回到顶部" title="回到顶部" hidden>↑</a>
 <script>(()=>{const b=document.querySelector('.back-to-top');const u=()=>{b.hidden=window.scrollY<280};window.addEventListener('scroll',u,{passive:true});u()})();</script>
 </div>
