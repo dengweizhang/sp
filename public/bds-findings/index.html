@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="从 CRF/EDC → SDTM LB/EG/VS/PE → ADaM BDS → TFL：用真实业务逻辑理解分析参数、时间窗、基线、重复测量、异常等级、PE与AE边界，附代码和QC清单。">
+<meta name="theme-color" content="#ffffff">
+<link rel="canonical" href="https://sp.769967.xyz/bds-findings/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css?v=0.3.6">
+<title>Findings → BDS：LB / EG / VS / PE 的业务架构 · SP</title>
+<script src="/assets/code-copy.js?v=0.3.4" defer></script>
+<style>
+#bds-guide{--edge:#e4e8eb;--subtle:#f7f9fa;--blue:#3a667b;--text:#333f46}
+#bds-guide a:not(.back-to-top){text-decoration:underline;text-decoration-color:#d5dddf;text-underline-offset:3px}
+#bds-guide .eyebrow{font:600 11px/1.5 system-ui,sans-serif;letter-spacing:.14em;color:#788790}
+#bds-guide .micro{font:12px/1.65 system-ui,"PingFang SC",sans-serif;color:#6a7880}
+#bds-guide .chapter-kicker{font:700 10px/1.5 system-ui,sans-serif;letter-spacing:.14em;color:#7f919c}
+#bds-guide .map-flow{display:grid;grid-template-columns:1fr 20px 1fr 20px 1fr 20px 1fr;align-items:stretch;gap:5px;margin:17px 0 23px}
+#bds-guide .flow-node{border:1px solid var(--edge);border-radius:5px;padding:12px 9px;background:#fff;min-width:0}
+#bds-guide .flow-node strong{display:block;font:650 14px/1.3 system-ui,"PingFang SC",sans-serif;color:#34454f}
+#bds-guide .flow-node small{display:block;font-size:11px;line-height:1.6;color:#72828c;margin-top:6px}
+#bds-guide .flow-arrow{display:grid;place-items:center;color:#9cabb2;font-size:18px}
+#bds-guide .flow-node.current{background:#f3f7f9;border-color:#c8d6dc}
+#bds-guide .a-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:15px 0}
+#bds-guide .a-card{border:1px solid var(--edge);padding:12px;border-radius:4px}
+#bds-guide .a-card b{display:block;font:700 19px/1.5 system-ui,sans-serif;letter-spacing:-.04em;color:#375b6d}
+#bds-guide .a-card span{display:block;font-size:12px;color:#64747d;line-height:1.6}
+#bds-guide .keyline{padding:12px 15px;margin:15px 0;border-left:3px solid #7895a3;background:#f7f9fa;font-size:14px}
+#bds-guide .keyline p{margin:0}
+#bds-guide .case{border:1px solid var(--edge);padding:15px;margin:14px 0 17px;border-radius:5px}
+#bds-guide .case>strong{font:650 14px/1.5 system-ui,"PingFang SC",sans-serif}
+#bds-guide .case p{margin:8px 0 0;font-size:14px}
+#bds-guide .tag{display:inline-block;font:600 10px/1.3 system-ui,sans-serif;letter-spacing:.03em;padding:3px 6px;border:1px solid #d4dee2;border-radius:3px;color:#54707e;vertical-align:2px}
+#bds-guide .schema{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:16px 0}
+#bds-guide .schema>div{border:1px solid var(--edge);padding:11px;border-radius:4px}
+#bds-guide .schema b{display:block;font:650 12px/1.6 ui-monospace,monospace;color:#375b6d}
+#bds-guide .schema small{display:block;font-size:11px;color:#71808a;line-height:1.65}
+#bds-guide .tabs{display:flex;flex-wrap:wrap;gap:7px;border-bottom:1px solid var(--edge);margin:18px 0 16px;padding-bottom:10px}
+#bds-guide .tab{cursor:pointer;background:#fff;border:1px solid #dce4e8;border-radius:4px;font:650 13px/1.4 system-ui,sans-serif;padding:7px 14px;color:#5a6b75}
+#bds-guide .tab[aria-selected="true"]{color:#fff;background:#345f74;border-color:#345f74}
+#bds-guide .tab:focus-visible{outline:2px solid #345f74;outline-offset:3px}
+#bds-guide .domain-panel[hidden]{display:none}
+#bds-guide .domain-panel h3{margin-top:18px}
+#bds-guide .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+#bds-guide .cols>div{border:1px solid var(--edge);padding:13px;border-radius:4px}
+#bds-guide .cols strong{font-size:13px}
+#bds-guide .cols p{font-size:13px;line-height:1.75;margin:5px 0}
+#bds-guide .minor-table{font-size:12px}
+#bds-guide .minor-table td:first-child{white-space:normal;font-size:12px}
+#bds-guide .minor-table td,#bds-guide .minor-table th{padding:8px 10px}
+#bds-guide details.accordion{border-bottom:1px solid var(--edge);margin:0}
+#bds-guide details.accordion summary{cursor:pointer;font:600 14px/1.7 system-ui,"PingFang SC",sans-serif;padding:13px 0}
+#bds-guide details.accordion[open] summary{color:#3b6475}
+#bds-guide details.accordion p{font-size:14px;line-height:1.82}
+#bds-guide .timeline{border-left:1px solid #d0dbe0;margin:16px 0 20px 8px;padding-left:19px}
+#bds-guide .timeline>div{position:relative;padding:0 0 16px}
+#bds-guide .timeline>div:before{content:"";position:absolute;left:-24px;top:6px;width:9px;height:9px;background:#7c9bab;border:2px solid #fff;border-radius:50%}
+#bds-guide .timeline strong{font-size:14px}
+#bds-guide .timeline p{font-size:13px;margin:4px 0;color:#586770}
+#bds-guide .demo{border:1px solid var(--edge);padding:15px;border-radius:4px;margin:13px 0}
+#bds-guide .demo label{font:600 12px/1.5 system-ui,sans-serif;display:block;margin-bottom:5px}
+#bds-guide .demo-grid{display:flex;gap:11px;flex-wrap:wrap;align-items:end}
+#bds-guide .demo-grid>div{max-width:125px}
+#bds-guide .demo input{width:100%;padding:7px;border:1px solid #d3dce1;border-radius:4px;background:#fff;font:13px system-ui,sans-serif}
+#bds-guide .demo-output{font:650 19px/1.4 system-ui,sans-serif;color:#345f74;padding-bottom:3px}
+#bds-guide .quiz-list{list-style:none;padding:0}
+#bds-guide .quiz-list li{padding:10px 0;border-bottom:1px solid var(--edge)}
+#bds-guide .quiz-list details summary{cursor:pointer;font-size:14px;font-weight:600}
+#bds-guide .quiz-list details p{font-size:14px;color:#576871;margin-top:7px}
+#bds-guide .ref-list li{font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+#bds-guide pre{max-width:100%;overflow-x:auto;margin:11px 0 16px;border:1px solid #e2e8ea;background:#f8fafb;padding:13px}
+#bds-guide pre code{font-size:12px;line-height:1.6;white-space:pre}
+#bds-guide .dataset-chain{font:13px/1.8 ui-monospace,Consolas,monospace;border:1px solid var(--edge);background:#f9fbfc;padding:10px 12px;overflow-x:auto;white-space:nowrap}
+@media(max-width:700px){#bds-guide .map-flow{grid-template-columns:1fr;gap:4px}#bds-guide .flow-arrow{transform:rotate(90deg);font-size:16px;line-height:1}#bds-guide .a-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#bds-guide .schema{grid-template-columns:1fr 1fr}#bds-guide .cols{grid-template-columns:1fr}#bds-guide .flow-node small{margin-top:3px}}
+@media print{#bds-guide .domain-panel[hidden]{display:block!important}#bds-guide .tabs{display:none}}
+</style>
+</head>
+<body>
+<div class="shell" id="top">
+<header class="site-header"><a class="brand" href="/" aria-label="SP 首页">SP.</a><nav class="tool-links" aria-label="常用工具"><a href="https://xpt.769967.xyz" target="_blank" rel="noopener noreferrer">XPT ↗</a><a href="https://ct.769967.xyz" target="_blank" rel="noopener noreferrer">CT ↗</a></nav></header>
+<header class="article-header"><nav class="breadcrumb"><a href="/">首页</a> / Findings 与 BDS</nav><div class="eyebrow">CDISC / DATA MODEL / SAFETY</div><h1>Findings → BDS：LB、EG、VS、PE 的业务底层架构</h1><p class="article-lead">为什么这些检查会被设计出来？原始数据怎样变成可分析的参数？统计师的表格又如何决定 ADaM 的结构？从临床逻辑推导出编程规则，而不是死记变量名。</p><p class="micro">依据 SDTMIG v3.4 / ADaMIG v1.3 整理 · 2026-11-20 · 所有案例为虚构示意，不代表项目 SAP / Spec · <a href="#sources">标准与参考</a></p></header>
+<main class="article-body" id="bds-guide">
+<details class="toc-inline"><summary>本页目录</summary><nav>
+<a href="#boundary">先划清两个层级</a><a href="#pipeline">一张图看完整数据流</a><a href="#bds-structure">BDS 的六组骨架变量</a><a href="#four-domains">LB / EG / VS / PE 四域拆解</a><a href="#param">PARAM 究竟是什么</a><a href="#time">基线、访视与重复测量</a><a href="#recipes">四类 TFL 如何反推 Spec</a><a href="#sas">SAS 教学代码</a><a href="#qc">QC 决策清单</a><a href="#questions">业务理解自测</a><a href="#sources">来源与使用边界</a>
+</nav></details>
+
+<section id="boundary">
+<div class="chapter-kicker">01 / CONCEPT</div><h2>先划清两个层级：SDTM Domain 不等于 BDS Domain</h2>
+<p><strong>LB / EG / VS / PE 是 SDTM 中的 Findings 类 Domain。</strong>它们保存某个检查“在何时、采用什么条件、产生了什么结果”的标准化观察记录。<strong>BDS（Basic Data Structure）是 ADaM 的分析结构，</strong>常见数据集名称是 ADLB、ADEG、ADVS；只有分析确实需要时，才考虑建立 ADPE，并不存在所有 SDTM 域必须逐一映射为 ADaM 的要求。</p>
+<div class="keyline"><p><strong>核心变化：</strong>SDTM 一行描述“某项检查结果”；ADaM 一行描述“某位受试者、某个分析参数、某个分析时点的分析值及其上下文”。这个转换决定了后面所有编程工作。</p></div>
+<div class="a-grid">
+<div class="a-card"><b>LB</b><span>实验室：生物学指标、单位与正常范围</span></div>
+<div class="a-card"><b>EG</b><span>心电图：电传导、复极与重复检查</span></div>
+<div class="a-card"><b>VS</b><span>生命体征：即时生理状态与测量条件</span></div>
+<div class="a-card"><b>PE</b><span>体格检查：体征与异常的临床归属</span></div>
+</div>
+</section>
+
+<section id="pipeline">
+<div class="chapter-kicker">02 / DATA FLOW</div><h2>临床业务怎样传递到分析结果？</h2>
+<div class="map-flow" role="img" aria-label="CRF/EDC 原始采集到 SDTM 标准化，结合 ADSL 生成 ADaM BDS，再生成 TFL">
+<div class="flow-node"><strong>CRF / EDC</strong><small>如何测、何时测、原始值与来源</small></div><div class="flow-arrow">→</div>
+<div class="flow-node"><strong>SDTM Findings</strong><small>LB / EG / VS / PE，保留观察事实</small></div><div class="flow-arrow">→</div>
+<div class="flow-node current"><strong>ADaM BDS</strong><small>结合 ADSL，定义分析参数/时间点/分析值</small></div><div class="flow-arrow">→</div>
+<div class="flow-node"><strong>TFL</strong><small>均值、变化量、分类、阈值、Listing</small></div>
+</div>
+<p>从右往左理解更有效：统计师要求“给药后第 7 天 ALT 相对基线的变化”，就意味着 ADLB 需要一个可比较的 ALT <code>PARAM</code>、合理的分析访视 <code>AVISIT</code>、唯一或可筛选的分析记录、<code>AVAL</code>、<code>BASE</code>、<code>CHG</code>，以及可解释的基线选择规则。只复制 LB 数据是做不出这张表的。</p>
+<div class="dataset-chain">原始实验室报告 → SDTM.LB (+ ADSL 给药信息) → ADLB → 变化量 Table / Shift Table / Listing</div>
+<p class="micro">注意：原始/标准化结果并非总是数值；对 PE 定性结果和尿常规定性检查，分析可能使用字符值。ADaM 的分析需要决定结果表现方式，而不是把所有观察强制转换为数字。</p>
+</section>
+
+<section id="bds-structure">
+<div class="chapter-kicker">03 / INTERNAL MODEL</div><h2>BDS 的底层骨架：不是一堆字段，而是六个问题</h2>
+<div class="schema">
+<div><b>WHO / SOURCE</b><small>STUDYID、USUBJID、SRCDOM、SRCSEQ：是谁、追溯哪条记录？</small></div>
+<div><b>WHAT</b><small>PARAMCD、PARAM、PARCATy：到底分析什么？</small></div>
+<div><b>WHEN</b><small>ADT / ADTM、AVISIT、AVISITN：哪次观测被分配给哪个分析时点？</small></div>
+<div><b>VALUE</b><small>AVAL / AVALC、BASE / BASEC、CHG、PCHG：分析值与比较基础是什么？</small></div>
+<div><b>ELIGIBILITY</b><small>SAFFL、ANL01FL、ABLFL：谁纳入？哪条记录参与？哪条是基线？</small></div>
+<div><b>CONTEXT</b><small>测量体位、样本类型、正常范围、DTYPE：结果能否同质比较？</small></div>
+</div>
+<p><code>AVAL</code> 是数字分析值，<code>AVALC</code> 是字符分析值；二者可并存，但若在同一 PARAM 中共同赋值，必须符合 ADaM 对映射一致性的要求。<code>AVALCATy</code> 专用于对分析值分类，不能把它当成 <code>AVALC</code> 的随意替代。<code>BASE</code> 对应数值基线，<code>BASEC</code> 对应字符基线；<code>CHG=AVAL−BASE</code>，<code>PCHG</code> 通常为 <code>100×CHG/BASE</code>，但 BASE=0、缺失及业务不适用时不能硬算。</p>
+<p><code>ABLFL</code> 表示用于分析的基线记录；<code>ANL01FL</code> 是按具体分析用途定义的记录选择标志（名称是常见约定，含义必须写在 Spec 中）。二者不能混用。<code>SRCDOM/SRCVAR/SRCSEQ</code> 可帮助回溯来源；均值等多源派生记录不一定存在唯一 <code>SRCSEQ</code>，这时要靠来源组合和元数据描述算法。</p>
+<div class="table-wrap"><table class="minor-table"><thead><tr><th>维度</th><th>一个典型 ADLB 数据行</th><th>为什么会影响 TFL</th></tr></thead><tbody>
+<tr><td>受试者</td><td>USUBJID = S-001</td><td>同一受试者不能被重复计数</td></tr>
+<tr><td>分析参数</td><td>PARAM = ALT (U/L)</td><td>不同单位、样本或方法可能不可直接合并</td></tr>
+<tr><td>分析访视</td><td>AVISIT = Day 7</td><td>实际采集时间须映射到方案窗口</td></tr>
+<tr><td>分析值</td><td>AVAL = 90；BASE = 30</td><td>CHG = +60；PCHG = +200%</td></tr>
+<tr><td>记录选择</td><td>ANL01FL = Y（仅当满足规则）</td><td>窗口里有两次采样时避免重复进入主分析</td></tr>
+<tr><td>来源</td><td>SRCDOM = LB；SRCSEQ = 对应 LBSEQ</td><td>可回看标准化单位和参考范围</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="four-domains">
+<div class="chapter-kicker">04 / DOMAIN DEEP DIVE</div><h2>四类检查：业务目的、数据结构与分析决策</h2>
+<p>选择一个领域，观察“为什么测 → SDTM 如何记 → ADaM 怎样分析 → QC 最容易错在哪里”。这四个流程的思考起点并不相同。</p>
+<div class="tabs" role="tablist" aria-label="切换检查类别">
+<button class="tab" type="button" role="tab" aria-selected="true" aria-controls="pane-lb" id="tab-lb" data-target="lb">LB · 实验室</button>
+<button class="tab" type="button" role="tab" aria-selected="false" aria-controls="pane-eg" id="tab-eg" data-target="eg" tabindex="-1">EG · 心电图</button>
+<button class="tab" type="button" role="tab" aria-selected="false" aria-controls="pane-vs" id="tab-vs" data-target="vs" tabindex="-1">VS · 生命体征</button>
+<button class="tab" type="button" role="tab" aria-selected="false" aria-controls="pane-pe" id="tab-pe" data-target="pe" tabindex="-1">PE · 体格检查</button>
+</div>
+
+<div id="pane-lb" class="domain-panel" role="tabpanel" aria-labelledby="tab-lb" data-pane="lb">
+<h3>LB：数字只是表面，背后是“样本 + 检测方法 + 参考系统”</h3>
+<p><strong>为什么要做？</strong>通过血常规、生化、凝血、尿常规等观察器官功能、代谢与潜在毒性。药物可能影响 ALT/AST、胆红素、肌酐、血红蛋白或电解质；临床上不仅关心结果大小，还关心是否超出正常范围、是否出现新的异常及其严重程度。</p>
+<div class="cols"><div><strong>SDTM 的业务身份</strong><p><code>LBTESTCD/LBTEST</code> 决定检测项目；<code>LBSPEC</code> 是样本基质（血清、血浆、尿液等）；<code>LBCAT</code> 可区分 CHEMISTRY、HEMATOLOGY、URINALYSIS；<code>LBMETHOD</code>、<code>LBNAM</code>、<code>LBDTC</code> 说明检测方法、机构及采样时间。</p></div><div><strong>结果与参考区间</strong><p><code>LBORRES/LBORRESU</code> 是原始结果和单位；<code>LBSTRESC/LBSTRESN/LBSTRESU</code> 为标准结果；<code>LBSTNRLO/LBSTNRHI</code> 是标准单位下参考区间。不要将原始单位的范围直接与标准单位的结果比较。</p></div></div>
+<div class="table-wrap"><table class="minor-table"><thead><tr><th>业务问题</th><th>分析或 QC 需要作出的决定</th></tr></thead><tbody>
+<tr><td>ALT = 90 U/L 正常吗？</td><td>不仅看 90，还要看该记录适用的 ULN / LLN、实验室和样本条件</td></tr>
+<tr><td>有些结果是 NEGATIVE / POSITIVE</td><td>属于定性结果，不可以简单用 INPUT 转成数值；可能使用 AVALC/分类分析</td></tr>
+<tr><td>同一参数 U/L 和 µkat/L</td><td>先确认单位可换算、转换因子及结果精度；避免不相容属性强合并</td></tr>
+<tr><td>相对基线变化与 CTCAE</td><td>前者比较 AVAL 与 BASE；后者按指定 CTCAE 版本、项目、基线状态及分级规则判断，不能一套倍数套所有项目</td></tr>
+<tr><td>高值/低值都可能有毒性</td><td>例如血细胞减少与某些高值异常属于不同方向；可能需要 ATOXGRL / ATOXGRH 等分析变量</td></tr>
+</tbody></table></div>
+<div class="case"><strong><span class="tag">虚构案例</span> 受试者 S-001：ALT</strong><p>给药前 ALT=30 U/L，Day 7 ALT=90 U/L，假定样本与方法可比较：<code>AVAL=90</code>、<code>BASE=30</code>、<code>CHG=60</code>、<code>PCHG=200</code>。<strong>但不能仅凭这四个数给出 CTCAE 等级</strong>：还要看相应版本的 ALT 规则、正常值上限、基线状态等。即使数值异常，也不能自动转化为 AE。</p></div>
+<p><strong>最常见的业务事故：</strong>不同中心不同 ULN；把尿蛋白定性 +/++ 做成连续数值；把不兼容单位机械换算；忽略标本状态（溶血/脂血）；未处理多次抽血导致同一时间窗重复统计；混淆高低毒性方向。</p>
+</div>
+
+<div id="pane-eg" class="domain-panel" role="tabpanel" aria-labelledby="tab-eg" data-pane="eg" hidden>
+<h3>EG：检查的是心脏电活动，不只是“心率”</h3>
+<p><strong>为什么要做？</strong>十二导联心电图记录心脏电活动，识别心律、传导及复极的变化。对某些新药，尤其要看 QT/QTc 是否延长。QTc 是心率校正后的 QT 间期，QTcF 使用 Fridericia 校正，常见表达式为 <code>QTcF(ms)=QT(ms)/RR(s)^(1/3)</code>；前提是单位和算法正确。</p>
+<svg viewBox="0 0 760 130" width="100%" role="img" aria-label="示意心电图 P 波、QRS 波群和 T 波，非诊断用真实波形">
+<line x1="12" y1="89" x2="748" y2="89" stroke="#d9e1e5" stroke-width="1"/>
+<polyline fill="none" stroke="#416c7e" stroke-width="2.8" stroke-linejoin="round" points="12,89 72,89 90,83 108,73 121,74 140,89 195,89 205,102 214,30 221,113 231,89 310,89 345,80 372,55 402,54 430,76 458,89 748,89"/>
+<g fill="#466d80" font-size="12" font-family="system-ui,sans-serif"><text x="110" y="52">P</text><text x="206" y="18">QRS</text><text x="370" y="39">T</text></g>
+<text x="14" y="123" font-size="10" fill="#8999a2">结构示意 / not a real ECG recording</text>
+</svg>
+<div class="cols"><div><strong>SDTM 的三层粒度</strong><p>一个观察参数（如 PR、QRS、QT、QTc、总判读）可以来自<strong>一次心电图</strong>；一次时点可能安排<strong>多次重复检查（replicate）</strong>；某次检查内部又可以按<strong>心搏（beat）</strong>记录。<code>EGREPNUM</code> 区分重复检查，<code>EGBEATNO</code> 区分心搏，二者不是一个概念。</p></div><div><strong>12 导联 ≠ 重复 12 次</strong><p><code>EGMETHOD</code> 可记录 12-LEAD STANDARD；<code>EGLEAD</code> 记录用于某项测量的导联。12 个导联表示观察心脏电活动的不同视角，不等于 12 次独立测量，更不能因此分母乘以 12。</p></div></div>
+<div class="table-wrap"><table class="minor-table"><thead><tr><th>关注点</th><th>SP 必须先问</th></tr></thead><tbody>
+<tr><td>QTcF / QTcB</td><td>来自设备还是由 QT/RR 计算？选哪种心率校正？各自 PARAM 是否区分？</td></tr>
+<tr><td>三次心电图</td><td>同一计划时间点的 replicate 吗？需要算均值，还是保留单次用于分析？</td></tr>
+<tr><td>基线 ECG</td><td>给药前一次还是多次均值？基线与治疗后采用相同的汇总规则吗？</td></tr>
+<tr><td>异常判读</td><td>定性结果 NORMAL/ABNORMAL 与数值 QTc 应分成不同分析参数</td></tr>
+<tr><td>C-QTc</td><td>ECG 采集时间能否与 PK 实际采样时间精确对应？有无时差/窗口定义？</td></tr>
+</tbody></table></div>
+<div class="case"><strong><span class="tag">虚构案例</span> Day 1，给药后 2 小时同一时点的三次 QTcF</strong><p>468、474、471 ms。假定 SAP 规定同一时点取算术均值，分析值是 <strong>471 ms</strong>。需要保留三次源记录以及“均值如何得到”的追溯信息；不能把 3 次结果都标记成唯一的 <code>ANL01FL=Y</code> 再计算该时点受试者统计。若三次并非同一分析时点，也不能擅自求均值。</p></div>
+<div class="demo"><strong style="display:block;font-size:13px;margin-bottom:9px">交互演算 · QTcF（仅用于理解公式）</strong><div class="demo-grid"><div><label for="qtm">QT (ms)</label><input id="qtm" type="number" value="410" min="1" step="1"></div><div><label for="rrs">RR (s)</label><input id="rrs" type="number" value="0.8" min="0.01" step="0.01"></div><div><span class="micro">QTcF</span><div class="demo-output" id="qtcf-value" aria-live="polite">441.6 ms</div></div></div><p class="micro">示范 RR 必须以秒计；按临床记录来源、计算精度与方案规则决定正式分析值，不能拿示例替代经验证算法。</p></div>
+<p><strong>最常见的业务事故：</strong>先算均值再校正与先校正再算均值混淆；QT/QTcB/QTcF混用；分钟与毫秒混用；同一检查多行被当成多个受试者；精确采样时点丢失，导致 C-QTc 不可用。</p>
+</div>
+
+<div id="pane-vs" class="domain-panel" role="tabpanel" aria-labelledby="tab-vs" data-pane="vs" hidden>
+<h3>VS：同样是一个血压值，体位不同就可能不是同一个问题</h3>
+<p><strong>为什么要做？</strong>血压、脉搏、体温、呼吸频率、身高、体重、BMI 可反映药物对循环、呼吸与全身状态的影响。它往往频次高、贴近给药时间，数值看起来简单，但测量条件的影响特别大。</p>
+<div class="cols"><div><strong>参数与测量环境</strong><p><code>VSTESTCD</code> 可区分 SYSBP、DIABP、PULSE、TEMP、WEIGHT、BMI 等；<code>VSPOS</code> 区分坐位、卧位、立位；<code>VSLOC/VSLAT</code> 可记录手臂与左右侧等相关条件；<code>VSDTC/VSTPT</code> 描述采集时间和计划时点。</p></div><div><strong>为什么要给出这些细节</strong><p>坐位血压与立位血压涉及不同的生理状态；一组立位-卧位对照可用于体位相关的临床评价，但前提是方案事先定义。脉搏 PULSE 与 ECG 心率 HR 即便数值相近，采集技术与生理意义也不完全相同。</p></div></div>
+<div class="table-wrap"><table class="minor-table"><thead><tr><th>业务决定</th><th>SP 如何处理</th></tr></thead><tbody>
+<tr><td>收缩压与舒张压</td><td>分别作为分析参数，不能简单拼成单一连续数值</td></tr>
+<tr><td>卧位/坐位/立位</td><td>作为参数定义或分析分组的一部分；不可跨条件无理由混合</td></tr>
+<tr><td>给药前测三次血压</td><td>核对是否取最后一次、均值或其他规定值；看对应时间点与 replicate 信息</td></tr>
+<tr><td>体重 / BMI</td><td>BMI 可以由体重和身高衍生，但须明确单位、测量日期及来源；并非 SDTM 任意两条值直接拼算</td></tr>
+<tr><td>异常值与生命体征临床显著性</td><td>门槛按方案，数值异常不自动等于已发生 AE</td></tr>
+</tbody></table></div>
+<div class="case"><strong><span class="tag">虚构案例</span> 坐位收缩压</strong><p>基线 132 mmHg，Day 7 坐位收缩压 118 mmHg：<code>CHG = 118−132 = −14 mmHg</code>。如果 Day 7 另有立位收缩压 105 mmHg，不能无条件拿它替代坐位分析值。项目若比较体位性变化，应定义新的计算规则和分析时点。</p></div>
+<p><strong>最常见的业务事故：</strong>体位混用；左右臂混用；重复测量与访视映射不一致；在同一次生命体征内把脉搏与 ECG HR 当同一 PARAM；BMI 计算时将 cm 当 m。</p>
+</div>
+
+<div id="pane-pe" class="domain-panel" role="tabpanel" aria-labelledby="tab-pe" data-pane="pe" hidden>
+<h3>PE：最需要理解业务边界的一个 Domain</h3>
+<p><strong>为什么要做？</strong>体格检查通过视、触、叩、听评估身体系统或发现体征异常。它与实验室检查最大差别是结果经常为<strong>定性或叙述性</strong>：“NORMAL”“皮肤见皮疹”“查体未做”，不是统一可运算的数值。</p>
+<div class="keyline"><p><strong>SDTMIG v3.4 的重要特殊说明：</strong>在与 CDASH Best Practice 对齐的采集模式中，PE Domain <em>可以不使用</em>；PR 记录检查已执行及日期，筛选/基线已存在的异常可进入 MH，基线后新发或加重异常依据事实与 CRF 设计进入 AE 或 CE。这不是说 SP 可以自行把 PE 异常“制造”成 AE；应遵循医学审阅和数据采集流程。</p></div>
+<div class="cols"><div><strong>采用 PE 域时</strong><p><code>PETESTCD/PETEST</code> 表示检查的身体系统；<code>PEORRES</code> 为原始异常描述，正常时可为 NORMAL；<code>PESTRESC</code> 是字符标准结果；<code>PESTAT=NOT DONE</code> 表示没有进行。来源记录粒度通常是“受试者 × 访视 × 身体系统/异常”。</p></div><div><strong>是否要建立 ADPE</strong><p>只有当 TFL/SAP 需要分类分析、正常→异常变化、某些预定义体征分析且 SDTM 不足以直接支持时，才考虑 BDS 形式的 ADPE。可使用 <code>AVALC</code> 和 <code>BASEC</code>；不能凭一个 NORMAL/ABNORMAL 结果硬设 <code>AVAL</code> 并做 CHG。</p></div></div>
+<div class="table-wrap"><table class="minor-table"><thead><tr><th>临床事实</th><th>不能误判成</th><th>数据讨论重点</th></tr></thead><tbody>
+<tr><td>皮肤检查 NORMAL</td><td>“没有采集数据”</td><td>这是一个已完成的正常检查结果</td></tr>
+<tr><td>皮肤检查 NOT DONE</td><td>NORMAL</td><td>这是未完成，需要检查原因是否采集</td></tr>
+<tr><td>筛选期发现既存皮疹</td><td>自动产生给药后 AE</td><td>通常先判断既往已存在状态与 MH 采集流程</td></tr>
+<tr><td>给药后新发皮疹</td><td>一条单纯的 PE 数值异常</td><td>需要核实 AE/CE 记录与临床判断</td></tr>
+</tbody></table></div>
+<div class="case"><strong><span class="tag">虚构案例</span> 皮肤检查：基线 NORMAL → Day 7 ABNORMAL</strong><p>若方案要求体检 Shift Table，可在适当的 ADaM 分类分析结构中设置 <code>BASEC=NORMAL</code>、<code>AVALC=ABNORMAL</code>，统计受试者从正常转异常的人数。<strong>但是否构成 AE、何时起始及严重程度均不能由这两个字符串自动判定。</strong></p></div>
+<p><strong>最常见的业务事故：</strong>把正常和未做混淆；把体格检查结论、异常体征、AE 三者强行视为同一事实；在不需要统计分析时徒增 ADPE；把不同身体系统强行聚合成一个定量 PARAM。</p>
+</div>
+</section>
+
+<section id="param">
+<div class="chapter-kicker">05 / PARAM DESIGN</div><h2>为什么不能把 --TESTCD 直接一对一复制成 PARAMCD？</h2>
+<p>ADaM 的 <code>PARAM</code> 必须唯一刻画一类<strong>可直接比较的分析值</strong>。SDTM 的 <code>--TESTCD</code> 有时需要结合样本、体位、方法、导联或衍生规则才能明确一个分析参数。</p>
+<div class="table-wrap"><table class="minor-table"><thead><tr><th>源数据观察</th><th>缺少哪个限定就可能产生误分析</th><th>ADaM 设计思路</th></tr></thead><tbody>
+<tr><td>LB：GLUC</td><td>血清/血浆/尿液、空腹状态、单位与检测方法</td><td>必要时将样本/条件纳入 PARAM 定义或分析分层</td></tr>
+<tr><td>EG：QT / QTc</td><td>校正方法、单次 vs 均值、导联或时间点</td><td>区分 QTcB / QTcF；均值衍生规则透明</td></tr>
+<tr><td>VS：SYSBP</td><td>SITTING / SUPINE / STANDING、测量部位</td><td>必要时分别建立分析参数或限定分析集</td></tr>
+<tr><td>PE：SKIN</td><td>哪个身体系统、正常/异常及异常文本</td><td>考虑字符型参数，避免强制赋值无效数字</td></tr>
+</tbody></table></div>
+<p><strong>重要的 CDISC 约束：</strong>在同一 BDS 数据集中 <code>PARAM</code> 与 <code>PARAMCD</code> 必须一一对应，<code>PARAMCD</code> 不超过 8 个字符。表中分析参数示意不是建议的官方编码值；真正的命名、标签、单位与派生规则应先在项目 Spec 中确定，并核对适用的 CT。</p>
+</section>
+
+<section id="time">
+<div class="chapter-kicker">06 / TIME &amp; BASELINE</div><h2>基线、分析访视、重复测量：为什么经常是 BDS 的核心工作量？</h2>
+<div class="timeline">
+<div><strong>1. 找到事实发生时间</strong><p>LB 看标本采集时间，EG 看心电图采集时间，VS 看实际测量时间，PE 看体检时间；原始日期只有“日”时，不能擅自补成某个精确时刻后用于给药前后判断。</p></div>
+<div><strong>2. 定义分析可比较的时间窗</strong><p>实际 VISIT 可能与计划 AVISIT 不同。先有窗口规则，再谈某条记录是否进入 Day 1、Day 7；窗口重叠、计划外采集、多次记录必须有优先级。</p></div>
+<div><strong>3. 决定基线</strong><p>通常与首次给药前相关，但并不总是“最后一个给药前数值”；EG 可能取多次基线均值，LB/VS 可能按不同条件分别选取。由 SAP/Spec 决定；衍生的均值基线应保留可追溯性。</p></div>
+<div><strong>4. 决定分析记录</strong><p>通过项目定义的 <code>ANL01FL</code> 或等效逻辑，选择主要统计所需记录。保留多个源记录以支持 QC，不等于让它们全部计入同一 TFL 单元格。</p></div>
+<div><strong>5. 形成 BASE 与变化量</strong><p>同一受试者、同一分析参数、同一定义基线（必要时含 BASETYPE）才可以复制基线。连续变量算 CHG/PCHG；分类变量可能做 BASEC→AVALC Shift。</p></div>
+</div>
+<p class="keyline"><strong>一句话判断：</strong>ADaM 的工作不是“再保存一份 SDTM”；它是把“在不同时间、条件下采集的观察”变成“能够按某个规则比较的分析对象”。</p>
+</section>
+
+<section id="recipes">
+<div class="chapter-kicker">07 / SPEC DESIGN</div><h2>由 TFL 倒推四类分析数据集</h2>
+<div class="table-wrap"><table class="minor-table"><thead><tr><th>TFL 要求</th><th>ADaM 至少需要什么</th><th>容易遗漏的业务规则</th></tr></thead><tbody>
+<tr><td>各访视均值、SD、范围</td><td>AVAL、PARAM、AVISIT、TRT、分析集/分析标志</td><td>受试者-参数-访视是否唯一？重复测量选择规则是什么？</td></tr>
+<tr><td>较基线变化/百分比变化</td><td>ABLFL、BASE、CHG、PCHG（按需）</td><td>基线定义、缺失与零分母、特殊均值基线</td></tr>
+<tr><td>正常值或 CTCAE Shift</td><td>适用的范围/毒性变量与基线分类；数值、单位、上下限</td><td>CTCAE 版本、基线依赖规则、双向异常、未评级与缺失</td></tr>
+<tr><td>QTc 阈值或 ΔQTc 阈值人数</td><td>QTc 参数、BASE、CHG、最大值/分析标志、阈值指标</td><td>单次/均值与时间窗的判定、阈值等号方向、受试者去重</td></tr>
+<tr><td>体格检查正常→异常</td><td>字符型分析值 AVALC/BASEC，身体系统，分析访视</td><td>NORMAL/ABNORMAL/NOT DONE 不可混淆；PE 域是否存在</td></tr>
+</tbody></table></div>
+<p>某些 Listing 只需要从 SDTM 直接生成，不一定需要相应 ADaM；不要因为已有 SDTM 域就默认创建一个内容完全重复的分析数据集。</p>
+</section>
+
+<section id="sas">
+<div class="chapter-kicker">08 / SAS EXAMPLE</div><h2>一个小例子：把“给药前最后一次非缺失值”变成 BASE</h2>
+<p>为了聚焦 BDS 原理，以下使用<strong>完全虚构</strong>的连续结果。设首次给药日期为 2026-01-10，事先排除不满足参数/测量条件的记录，并假定时间精度仅到日期，所有候选基线都发生在 1 月 10 日之前。</p>
+<pre><code>/* 教学示例：未在实际项目 SAS 环境运行验证。
+   项目应按 SAP/Spec 使用真实 TRTSDTM 和完整 ADTM。 */
+data src;
+  length usubjid $8 paramcd $8;
+  input usubjid $ paramcd $ adt :date9. aval;
+  format adt date9.;
+datalines;
+S001 ALT 01JAN2026 32
+S001 ALT 09JAN2026 30
+S001 ALT 17JAN2026 90
+S002 ALT 08JAN2026 41
+S002 ALT 17JAN2026 38
+;
+run;
+
+/* 每个受试者每个参数：最后一个给药前非缺失结果 */
+proc sort
+  data=src(where=(adt &lt; '10JAN2026'd and not missing(aval)))
+  out=bl_cand;
+  by usubjid paramcd descending adt;
+run;
+
+data bl;
+  set bl_cand;
+  by usubjid paramcd descending adt;
+  if first.paramcd;
+  base=aval;
+  keep usubjid paramcd base;
+run;
+
+/* 简化的 BASE/CHG 示范；不代表完整 ADaM BDS */
+proc sql;
+  create table demo as
+  select a.*, b.base,
+         case when not missing(a.aval) and not missing(b.base)
+              then a.aval-b.base else . end as chg
+  from src as a
+  left join bl as b
+    on a.usubjid=b.usubjid
+   and a.paramcd=b.paramcd;
+quit;</code></pre>
+<p><strong>这段代码刻意没有直接标记 ABLFL / ANL01FL，也没有计算 PCHG：</strong>完整 ADaM 必须先处理并列时间、确切给药时刻、可能的不同基线定义、记录可追溯性以及每个分析访视的优先规则。不能把这个日期示范直接当生产程序。</p>
+<div class="case"><strong>如何将它提升为项目级 ADaM？</strong><p>第一步接入 ADSL 的真实给药信息及分析集标志；第二步完成标准参数映射和单位转换；第三步完成时间窗、基线与重复测量逻辑；第四步形成 <code>PARAM/AVAL/BASE/CHG/ABLFL/ANL01FL</code> 及源记录追溯；最后以独立 QC 程序验证 Table/Listing。最难的是第一到第三步的业务约定，不是 SAS 语法。</p></div>
+</section>
+
+<section id="qc">
+<div class="chapter-kicker">09 / QUALITY CONTROL</div><h2>写 Spec 和 QC 时最实用的决策清单</h2>
+<details class="accordion"><summary>01 / 数据来源和粒度：一行究竟代表什么？</summary><p>确认 CRF/EDC 采集表、SDTM Domain、每个参数的来源、观察层级、是否存在重复检查或衍生记录；EG 区分心搏/replicate/时点，PE 区分身体系统/异常描述，LB 区分标本与检查项目。</p></details>
+<details class="accordion"><summary>02 / PARAM：是否真正同质、可比较？</summary><p>检查不同样本基质、方法、单位、体位、导联、QTc校正方法、定量/定性的差异；不能因 TESTCD 一样就默认参数可以混合分析。</p></details>
+<details class="accordion"><summary>03 / 结果及单位：有没有不可逆的信息损失？</summary><p>原始值和标准化值、定量/定性、检测下限、异常文本、正常范围等必须合理保留；LAB 的参考区间也要保证单位一致，PDW 的百分比与 fL 等不同物理量不能仅因名称相似就转换。</p></details>
+<details class="accordion"><summary>04 / 时间：筛选期、给药前和治疗后是否被准确区分？</summary><p>优先关注实际采样时间、给药时刻、时区、时间精度、重叠窗口及计划外访视。不要让一个补全的时间自动决定治疗前后归属。</p></details>
+<details class="accordion"><summary>05 / 基线及分析标志：能否重建被选中记录？</summary><p>对每个受试者×参数×基线定义检查 ABLFL；对每个需要唯一观察的分析单元核查 ANL01FL。BASE/BASEC 必须对应正确的基线记录，异常或多次记录须有明确处理。</p></details>
+<details class="accordion"><summary>06 / 临床规则：异常是否被误当成事件？</summary><p>LB 毒性等级不等于 AE 严重程度；EG 异常判读不自动等于 AE；VS 超阈值不自动等于 AE；PE 异常须根据来源和临床流程确定是否关联 MH/AE/CE。</p></details>
+<details class="accordion"><summary>07 / 输出：表格人数和记录数有没有混用？</summary><p>计算 N、n、任意一次阈值超出、Shift 和最大等级时，确认分母与去重单位；一人三次 ECG 不是三个人。区分缺失、未做、未分级、不满足分析条件。</p></details>
+<details class="accordion"><summary>08 / 可追溯：独立程序能否从 SDTM 复算？</summary><p>核查源记录标识、原始/标准化单位、取值算法、DTYPE、ADRG/Define 中的派生说明；不要让主程序与 QC 程序复制同一错误的业务假设。</p></details>
+</section>
+
+<section id="questions">
+<div class="chapter-kicker">10 / SELF CHECK</div><h2>五个最值得问自己的业务问题</h2>
+<ol class="quiz-list">
+<li><details><summary>同一受试者一个访视有三次心电图，是否需要三个分析样本？</summary><p>不一定。三次是观察记录；是否先取均值、保留原始三次、哪个进入主要 TFL 取决于 SAP/Spec。受试者计数不能因此变成 3。</p></details></li>
+<li><details><summary>两个 LB 记录 ALT 都是 90，可以直接认为异常程度一致吗？</summary><p>不可以。先判断单位、样本/检测体系、适用的正常上限及 CTCAE 规则。相同数值未必对应相同 ULN 倍数或毒性分级。</p></details></li>
+<li><details><summary>VS 的 PULSE 是否可以直接取代 EG 的 HR？</summary><p>不能默认替代。采集方法不同，某些心律情况下二者可能不同。分析参数应由检测定义和 SAP 确定。</p></details></li>
+<li><details><summary>体检结果为 NOT DONE，能否当作 NORMAL 参与 Shift？</summary><p>不可以。未做与正常是不同的临床信息，未做通常不能证明没有异常。</p></details></li>
+<li><details><summary>一项研究有 PE Domain，是否必须生成 ADPE？</summary><p>不必须。若 SDTM 足以支持 Listing 或无 PE 相关统计分析，可以不建；采用 CDASH Best Practice 的研究甚至可能没有 PE Domain。</p></details></li>
+</ol>
+</section>
+
+<section id="sources">
+<div class="chapter-kicker">11 / REFERENCES</div><h2>标准依据与使用边界</h2>
+<p>本文以本项目提供的<strong>CDISC SDTMIG v3.4（2021-11-29）</strong>及<strong>ADaMIG v1.3（2021-11-29）</strong>为依据组织技术内容。其中：LB §6.3.5.6（p.241 起）、EG §6.3.3（p.185 起）、VS §6.3.13（p.358 起）、PE §6.3.8（p.315 起）；BDS 参考 ADaMIG §3.3、§4.2、§4.5。参考资料和链接：</p>
+<ol class="ref-list">
+<li><a href="https://www.cdisc.org/standards/foundational/sdtmig" target="_blank" rel="noopener noreferrer">CDISC · SDTM Implementation Guide</a> — 域定义、变量、记录粒度与 PE 特殊说明。</li>
+<li><a href="https://www.cdisc.org/standards/foundational/adam" target="_blank" rel="noopener noreferrer">CDISC · Analysis Data Model / ADaMIG</a> — BDS 变量、派生与记录选择。</li>
+<li><a href="https://www.cdisc.org/standards/terminology/controlled-terminology" target="_blank" rel="noopener noreferrer">CDISC · Controlled Terminology</a> — 代码与术语；正式项目以适用的版本锁定。</li>
+<li><a href="https://ctep.cancer.gov/protocolDevelopment/electronic_applications/ctc.htm" target="_blank" rel="noopener noreferrer">NCI · CTCAE</a> — 具体实验室项目毒性分级需结合适用版本。</li>
+<li><a href="/clinical-pharmacology/">本站 · 临床药理基础</a> — C-QTc、PK/PD、药物安全性概念。</li>
+</ol>
+<p class="micro">本文为业务教学文章而非最终生产 Spec。具体受试者分析集、CTCAE 版本、单位、基线定义、异常界值、窗口、QTc 算法、重复测量汇总及 PE/AE 归属，以相应研究方案、SAP、CRF、DM 约定和审核记录为准。所有数值与受试者编号均为虚构。网站未承载上传的完整标准 PDF、受控术语表或项目敏感数据。</p>
+</section>
+
+</main><footer class="site-footer"><span>by dw · <a href="/">返回文章目录</a></span><span>SP V0.3.7</span></footer>
+</div><a class="back-to-top" href="#top" aria-label="返回顶部">↑</a>
+<script>
+(function(){
+ var tabs=[].slice.call(document.querySelectorAll('#bds-guide .tab'));
+ var panels=[].slice.call(document.querySelectorAll('#bds-guide .domain-panel'));
+ function activate(key){
+  tabs.forEach(function(btn){var sel=btn.getAttribute('data-target')===key;btn.setAttribute('aria-selected',String(sel));btn.tabIndex=sel?0:-1;});
+  panels.forEach(function(p){p.hidden=p.getAttribute('data-pane')!==key;});
+ }
+ tabs.forEach(function(btn,i){btn.addEventListener('click',function(){activate(btn.getAttribute('data-target'));});btn.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var next=(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length;tabs[next].focus();activate(tabs[next].getAttribute('data-target'));}});});
+ var q=document.getElementById('qtm'),r=document.getElementById('rrs'),v=document.getElementById('qtcf-value');
+ function update(){var qt=Number(q.value),rr=Number(r.value);v.textContent=qt>0&&rr>0&&isFinite(qt)&&isFinite(rr)?(qt/Math.cbrt(rr)).toFixed(1)+' ms':'—';}
+ q.addEventListener('input',update);r.addEventListener('input',update);update();
+ var hash=location.hash.toLowerCase();if(hash==='#eg'||hash==='#lb'||hash==='#vs'||hash==='#pe')activate(hash.slice(1));
+})();
+</script>
+</body>
+</html>
