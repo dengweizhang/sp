@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="学习 α、Power、效应量、标准差、分配比例；区分计算功效和反推样本量，不把示例数值当项目设计建议。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/power/"><link rel="stylesheet" href="/assets/style.css"><title>PROC POWER：从效应量到样本量 · SP</title>
+<style>
+.learning-head{padding:25px 0 22px}.learning-topline{font:600 11px/1.4 system-ui,sans-serif;letter-spacing:.09em;color:#999}
+.learning-head h1{margin:9px 0 8px;font-size:27px}.learning-head p{font-size:14px;color:#777;max-width:700px;line-height:1.9}
+.learning-nav{display:flex;gap:9px 20px;flex-wrap:wrap;border-block:1px solid var(--line);padding:9px 0;font-size:12px}
+.learning-part{padding:23px 0 20px;border-bottom:1px solid var(--line);scroll-margin-top:75px}
+.learning-kicker{font:600 10px/1.4 system-ui,sans-serif;letter-spacing:.12em;color:#888}.learning-part h2{font-size:19px;margin:8px 0 12px}
+.learning-part p{font-size:14px;line-height:1.9;color:#555;max-width:830px}
+.learning-code{padding:13px 15px;background:#f8f8f8;border:1px solid #eee;overflow-x:auto;border-radius:4px;white-space:pre}
+.learning-code code{white-space:pre;overflow-wrap:normal;font:12px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.learning-qc{font-size:12px!important;color:#727272!important}.learning-more{padding:18px 0 28px;font-size:13px;color:#666}
+.learning-more a{color:#245e81;text-decoration:underline;text-underline-offset:3px}.learning-more p{margin:8px 0}
+@media(max-width:700px){.learning-head h1{font-size:23px}.learning-code code{font-size:11px}}
+</style></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
+<header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PROC POWER：从效应量到样本量</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>PROC POWER：从效应量到样本量</h1><p>学习 α、Power、效应量、标准差、分配比例；区分计算功效和反推样本量，不把示例数值当项目设计建议。</p></header>
+<main><nav class="learning-nav" aria-label="章节快速索引"><a href="#level-1">01 基础</a><a href="#level-2">02 实战</a><a href="#level-3">03 进阶 / QC</a></nav><section class="learning-part" id="level-1"><div class="learning-kicker">LEVEL 1 · 基础</div><h2>先分清五个输入</h2><p>样本量计算不是固定套公式。至少要确定终点与检验方法、显著性水平 <code>ALPHA</code>、期望效应、变异/发生率、目标 <code>POWER</code> 和分配比例。</p><pre class="learning-code"><code>/* 示例场景：独立两组均值差 5，公共 SD=12，
+   双侧 alpha=0.05，目标 Power=0.80。 */
+proc power;
+  twosamplemeans test=diff
+    meandiff=5
+    stddev=12
+    alpha=0.05
+    power=0.80
+    ntotal=.;
+run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>NTOTAL=. 表示由 SAS 求解总样本量。示例参数仅用于学习，不构成任何临床试验正式计算。</p></section>
+<section class="learning-part" id="level-2"><div class="learning-kicker">LEVEL 2 · 常用</div><h2>已知样本量，反算 Power</h2><p>把 <code>NTOTAL</code> 固定，把 <code>POWER=.</code> 设为待求值；使用相同前提比较不同样本量的理论功效。</p><pre class="learning-code"><code>proc power;
+  twosamplemeans test=diff
+    meandiff=5
+    stddev=12
+    alpha=0.05
+    ntotal=80 120 160
+    power=.;
+run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>Power 是在指定替代假设和检验假设下的概率，不是已得到显著结果的“可信度”。</p></section>
+<section class="learning-part" id="level-3"><div class="learning-kicker">LEVEL 3 · 进阶 / QC</div><h2>敏感性分析与模型边界</h2><p>剂量组比例、退出率、非劣效界值、二分类终点、时间到事件终点都有不同前提。可在 PROC POWER 使用 <code>TWOSAMPLEFREQ</code>、<code>TWOSAMPLESURVIVAL</code> 等分析语句；模型更复杂时查 <code>GLMPOWER</code> 或模拟法。</p><pre class="learning-code"><code>proc power;
+  twosamplemeans test=diff
+    meandiff=3 4 5
+    stddev=10 12
+    alpha=0.05
+    power=0.80
+    ntotal=.;
+run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>把“入组人数”“完成研究人数”“进入分析人数”和 dropout 调整分开说明；不同假设结果必须带上效应、SD 等情景参数。</p></section><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/statug_power_syntax.htm" target="_blank" rel="noopener noreferrer">SAS PROC POWER Syntax ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.0</span></footer></div></body></html>
