@@ -1,9 +1,9 @@
 {
-  "version": "0.3.0",
-  "description": "公开知识索引：SAS 01–08 速查及五个系统专题，后续增加文章须同步维护。",
+  "version": "0.3.1",
+  "description": "公开文章索引：SAS 01–10 速查、7 个 SAS 系统专题及其他临床统计编程文章。",
   "articles": [
     {
-      "title": "SAS 实战笔记：编号 01–08（函数、Unicode、PROC REPORT、PRX、ODS RTF）",
+      "title": "SAS 实战笔记：编号 01–10（函数、Unicode、Report RTF、正则、PK 浓度统计）",
       "url": "/sas-notes/",
       "keywords": [
         "SAS",
@@ -95,7 +95,22 @@
         "TAGSETS.RTF",
         "PRX",
         "日期正则",
-        "多列合并"
+        "多列合并",
+        "PK浓度统计",
+        "GeoMean",
+        "GeoSD",
+        "GeoCV",
+        "CVB",
+        "n of BLQ",
+        "RTF style",
+        "STYLE(HEADER)",
+        "RTF raw",
+        "report 组标题",
+        "CELLWIDTH",
+        "Mean",
+        "SD",
+        "CV%",
+        "BLQ"
       ]
     },
     {
@@ -431,7 +446,12 @@
         "CV",
         "几何均值",
         "SD",
-        "Mean"
+        "Mean",
+        "CV%",
+        "GeoMean",
+        "GeoCV%",
+        "Geometric SD",
+        "PK浓度"
       ]
     },
     {
@@ -466,6 +486,72 @@
         "首尾连接",
         "Graph",
         "TFL"
+      ]
+    },
+    {
+      "title": "PK 浓度统计量：N/n、BLQ、CV%、GeoMean、GeoSD、GeoCV% 的含义与 TFL 实现",
+      "url": "/sas-learning/pk-concentration/",
+      "keywords": [
+        "PK",
+        "ADPC",
+        "浓度",
+        "浓度表",
+        "concentration summary",
+        "N",
+        "n",
+        "n of BLQ",
+        "BQL",
+        "BLQ",
+        "LLOQ",
+        "Mean",
+        "SD",
+        "CV",
+        "CV%",
+        "Median",
+        "Min",
+        "Max",
+        "GeoMean",
+        "GeoSD",
+        "GeoCV",
+        "Geometric CV",
+        "CVB%",
+        "log",
+        "exp",
+        "PROC SUMMARY",
+        "PROC MEANS",
+        "Tmax",
+        "TFL",
+        "ANL01FL"
+      ]
+    },
+    {
+      "title": "PROC REPORT：跨列标题、RTF 样式与原生 RTF 控制字",
+      "url": "/sas-learning/report-rtf/",
+      "keywords": [
+        "PROC REPORT",
+        "COLUMN",
+        "spanning column headers",
+        "跨列组标题",
+        "Alcohol History",
+        "Smoking History",
+        "ODS TAGSETS.RTF",
+        "ODS RTF",
+        "style(header)",
+        "style(column)",
+        "cellwidth",
+        "outputwidth",
+        "BORDERBOTTOMWIDTH",
+        "~R",
+        "~R/RTF",
+        "qc",
+        "brdrb",
+        "brdrs",
+        "brdrw16",
+        "ASIS",
+        "JUST",
+        "RTF 格式",
+        "COMPUTE BEFORE",
+        "分页"
       ]
     }
   ]
