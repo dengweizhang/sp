@@ -1,5 +1,5 @@
 {
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "公开文章索引；新增文章时维护此文件和首页目录。",
   "articles": [
     {
@@ -272,7 +272,7 @@
       ]
     },
     {
-      "title": "SAS 实战问题笔记：PROC FORMAT、PICTURE 与 n (%) 空格排查",
+      "title": "SAS 实战笔记：01–04 极简速查",
       "url": "/sas-notes/",
       "keywords": [
         "SAS",
@@ -311,7 +311,14 @@
         "CATS",
         "SAS 字符拼接",
         "SAS CAT family",
-        "连接字符串"
+        "连接字符串",
+        "极简",
+        "速查",
+        "01",
+        "02",
+        "03",
+        "04",
+        "SAS 实战笔记"
       ]
     }
   ]
