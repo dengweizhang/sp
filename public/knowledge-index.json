@@ -1,6 +1,6 @@
 {
-  "version": "0.3.7",
-  "description": "公开知识索引：SAS 速查与系统专题、临床统计基础及 Findings→BDS（LB/EG/VS/PE）实务文章。",
+  "version": "0.3.8",
+  "description": "公开知识索引：SAS 速查与系统专题、临床统计、临床药理、Findings→BDS 与 C-QTc 浓度–效应分析。",
   "articles": [
     {
       "title": "SAS 实战笔记 01–09：函数、Unicode、PROC REPORT/RTF、正则与 PK 浓度",
@@ -583,6 +583,49 @@
         "TFL",
         "QC",
         "CDISC"
+      ]
+    },
+    {
+      "title": "C-QTc：从 ADEG + ADPC 到浓度–效应分析",
+      "url": "/c-qtc/",
+      "keywords": [
+        "C-QTc",
+        "CQTc",
+        "C-QT",
+        "QTcF",
+        "Concentration QTc",
+        "E14",
+        "S7B",
+        "ICH",
+        "ADEG",
+        "ADPC",
+        "EG",
+        "PC",
+        "C-QTc Set",
+        "Delta",
+        "ΔQTcF",
+        "ΔΔQTcF",
+        "Delta Delta",
+        "HR",
+        "ΔHR",
+        "ΔΔHR",
+        "CHG",
+        "BASE",
+        "安慰剂校正",
+        "Placebo corrected",
+        "浓度效应",
+        "Exposure Response",
+        "ECG PK matching",
+        "时间匹配",
+        "Triplicate ECG",
+        "Mixed effects model",
+        "90% CI",
+        "10 ms",
+        "PK ECG",
+        "统计编程",
+        "SP",
+        "TFL",
+        "QC"
       ]
     }
   ]
