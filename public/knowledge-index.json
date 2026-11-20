@@ -1,5 +1,5 @@
 {
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "公开文章索引；新增文章时维护此文件和首页目录。",
   "articles": [
     {
@@ -269,6 +269,44 @@
         "ADEG",
         "SP",
         "面试"
+      ]
+    },
+    {
+      "title": "SAS 实战问题笔记：PROC FORMAT、PICTURE 与 n (%) 空格排查",
+      "url": "/sas-notes/",
+      "keywords": [
+        "SAS",
+        "SP",
+        "统计编程",
+        "问题笔记",
+        "SAS Debug Log",
+        "TFL",
+        "PROC FORMAT",
+        "PICTURE",
+        "pctfmt",
+        "PUT",
+        "INPUT",
+        "BEST.",
+        "FORMAT",
+        "INFORMAT",
+        "INVALUE",
+        "NOEDIT",
+        "PREFIX",
+        "ROUND",
+        "CATX",
+        "COMPRESS",
+        "STRIP",
+        "TRANWRD",
+        "PUTLOG",
+        "QUOTE",
+        "n (%)",
+        "百分比",
+        "格式宽度",
+        "空格",
+        "拼接",
+        "前导空格",
+        "程序调试",
+        "QC"
       ]
     }
   ]
