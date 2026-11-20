@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="SAS 实战速查 01–08：PROC FORMAT、CATX、字符串函数、ODS Unicode、PROC REPORT 跨列标题、PRXMATCH 正则与 ODS RTF 分页。">
+<meta name="description" content="SAS 实战速查 01–09：PROC FORMAT、CATX、字符串函数、ODS Unicode、PROC REPORT 跨列标题、PRXMATCH 正则与 ODS RTF 分页。">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="canonical" href="https://sp.769967.xyz/sas-notes/">
@@ -23,6 +23,7 @@
 .sas-note{padding:6px 0 16px;border-bottom:1px solid var(--line);scroll-margin-top:68px}
 .sas-note:last-child{border-bottom:0}
 .sas-note h2{display:flex;gap:12px;align-items:baseline;margin:21px 0 8px;font-size:18px}
+.sas-note h3{font-size:14px;line-height:1.5;font-weight:650;margin:17px 0 8px}
 .sas-note p{font-size:13px;line-height:1.85;color:#515151;margin:0 0 10px}
 .sas-note strong{font-weight:600;color:#333}
 .sas-code{background:#f8f8f8;border:1px solid #eee;border-radius:4px;padding:10px 12px;margin:9px 0 11px;white-space:pre;overflow-x:auto;tab-size:4}
@@ -57,22 +58,21 @@
 <nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / SAS 实战笔记</nav>
 <h1>SAS 实战笔记</h1>
 <p class="article-lead">只留能解决问题的内容。按编号查找：结论、代码、必要边界。</p>
-<div class="sas-meta">SAS FIELD NOTES · 10 NOTES · UPDATED 2026-11-20</div>
+<div class="sas-meta">SAS FIELD NOTES · 09 NOTES · UPDATED 2026-11-20</div>
 </header>
 <main class="article-body">
 <p class="sas-ending" style="margin:2px 0 13px">系统学习：<a href="/sas-learning/" style="color:#245e81;text-decoration:underline">SQL / FREQ / PK 浓度 / REPORT RTF / POWER / 绘图 ↗</a></p>
-<details class="sas-toc"><summary>目录 · 10 条笔记</summary>
+<details class="sas-toc"><summary>目录 · 09 条笔记</summary>
 <nav aria-label="SAS 笔记目录">
 <a href="#note-01"><span class="sas-no">01</span> TFL n (%) 多出空格</a>
 <a href="#note-02"><span class="sas-no">02</span> PROC FORMAT：VALUE / PICTURE / INVALUE</a>
 <a href="#note-03"><span class="sas-no">03</span> INPUT 与 PUT：方向相反</a>
 <a href="#note-04"><span class="sas-no">04</span> SAS 常用字符串与缺失函数</a>
 <a href="#note-05"><span class="sas-no">05</span> ODS Unicode、上标和下标</a>
-<a href="#note-06"><span class="sas-no">06</span> PROC REPORT：多个 COL 组标题</a>
+<a href="#note-06"><span class="sas-no">06</span> PROC REPORT：跨列标题与 RTF 排版</a>
 <a href="#note-07"><span class="sas-no">07</span> PRXMATCH / PRXCHANGE 正则</a>
 <a href="#note-08"><span class="sas-no">08</span> ODS RTF：标题与分页</a>
 <a href="#note-09"><span class="sas-no">09</span> PK 浓度统计量：CV%、GeoMean 等</a>
-<a href="#note-10"><span class="sas-no">10</span> PROC REPORT：RTF 样式与控制字</a>
 </nav>
 </details>
 <!-- SP_NOTES_START: add subsequent notes as 05, 06...; mirror the numbered table of contents -->
@@ -221,16 +221,53 @@ title2 "mm^{super 2} and H^{sub 2}O";
 <p class="sas-boundary"><strong>注意：</strong><code>^{unicode ...}</code> 与 <code>^{super ...}</code> 属于 ODS inline formatting，不是 PROC FORMAT；ODS LISTING 目的地不支持相同的 ODS inline 表现。RTF 和 TAGSETS.RTF 需要分别验证。</p>
 </section>
 <section class="sas-note" id="note-06" aria-labelledby="title-06">
-<h2 id="title-06"><span class="sas-no">06</span>PROC REPORT：多个 COL 合并为组标题</h2><p><strong>核心：</strong>在 <code>COLUMN</code> 里用 <code>("组标题" col3 col4 ...)</code>，形成横跨多个列的上层标题；<code>DEFINE ... / GROUP</code> 则是对行记录分组，二者不是一回事。<a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473625.htm" target="_blank" rel="noopener noreferrer">官方 COLUMN 语法 ↗</a></p>
-<pre class="sas-code"><code>proc report data=final nowd missing;
+<span id="note-10" aria-hidden="true"></span><!-- legacy bookmark points to merged note 06 -->
+<h2 id="title-06"><span class="sas-no">06</span>PROC REPORT：跨列标题与 RTF 排版</h2>
+<p><strong>问题从哪里来？</strong>一份 Listing 中，Alcohol History 需要横跨 <code>col3–col6</code>，Smoking History 需要横跨 <code>col7–col10</code>；同时组标题还要居中、带底边框。其实这是<strong>两件事</strong>：哪些列属于一组，以及这一组如何显示。</p>
+<h3>先决定表头结构：COLUMN 的括号</h3>
+<pre class="sas-code"><code>proc report data=final nowd missing
+  style(report)=[outputwidth=100%]
+  style(header)=[just=center asis=on]
+  style(column)=[just=left asis=on];
+
   column page usubjid col1 col2
-         ("Alcohol History" col3 col4 col5 col6)
-         ("Smoking History" col7 col8 col9 col10);
+    ("Alcohol History" col3 col4 col5 col6)
+    ("Smoking History" col7 col8 col9 col10);
+
   define page / order noprint;
-  define usubjid / order "Subject ID";
-  /* 其余 col1-col10 按表壳分别 DEFINE */
+  define usubjid / order "Site / Subject ID"
+    style(column)=[cellwidth=6%];
+  define col3 / display "Alcohol Use Within 6 Months?"
+    style(column)=[cellwidth=8%];
+  /* 其他 col1-col10 逐列 DEFINE，按 Shell 设置宽度 */
 run;</code></pre>
-<p class="sas-boundary"><strong>你截图的重点：</strong>红框使用两个括号分别给 Alcohol History（col3–6）和 Smoking History（col7–10）做跨列标题；其中 <code>~R'\qc\brdrb...'</code> 属于 RTF 专用排版控制，不是跨列分组必需的语法。</p>
+<p><strong>理解：</strong><code>("标题" col3 col4 ...)</code> 只建立“跨列上层表头”，不会让数据行分组；<code>DEFINE xx / GROUP</code> 或 <code>ORDER</code> 才影响行的组织方式。列宽加起来须适配页面可用宽度，不能只看每一列本身。</p>
+<h3>再决定显示样式：STYLE 比 RTF 控制字更通用</h3>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>设置</th><th>解决什么问题</th></tr></thead><tbody>
+<tr><td><code>style(report)</code></td><td>报表整体宽度（如 <code>outputwidth=100%</code>）</td></tr>
+<tr><td><code>style(header)</code></td><td>所有层级标题的对齐、字体、边框</td></tr>
+<tr><td><code>style(column)</code></td><td>数据单元格对齐、保留空格等</td></tr>
+<tr><td><code>DEFINE ... style(column)</code></td><td>针对单独一列的 <code>cellwidth</code>、对齐等</td></tr>
+<tr><td><code>split='|'</code></td><td>让列标题中的 <code>|</code> 作为换行标记</td></tr>
+</tbody></table></div>
+<pre class="sas-code"><code>/* 优先用样式属性表达需求 */
+style(header)=[just=center
+               borderbottomstyle=solid
+               borderbottomwidth=1pt
+               borderbottomcolor=black]
+style(column)=[just=left asis=on];</code></pre>
+<p><strong>注意：</strong>报表级的 <code>style(header)</code> 可能同时影响跨列标题和各列标题。若需要不同层级采用不同边框，要结合 Tagset、模板或分层标题实际输出检查；不要默认同一条 STYLE 只作用于组标题。</p>
+<h3>为什么旧宏里会出现 ~R'...'？</h3>
+<p>你截图中的 <code>~R'\qc\brdrb\brdrs\brdrw16'</code> 属于向 RTF 注入原生段落/边框控制字，不是 PROC REPORT 必需的语法。</p>
+<pre class="sas-code"><code>ods escapechar='~';
+/* 旧项目写法：保留原意，需在同版本 TAGSETS.RTF 验证 */
+column page usubjid col1 col2
+ ("~R'\qc\brdrb\brdrs\brdrw16' Alcohol History"
+   col3 col4 col5 col6)
+ ("~R'\qc\brdrb\brdrs\brdrw16' Smoking History"
+   col7 col8 col9 col10);</code></pre>
+<p><code>\qc</code> 表示段落居中；<code>\brdrb</code> 为下边框；<code>\brdrs</code> 为单实线；<code>\brdrw16</code> 为 16 twips，约 <strong>0.8 pt</strong>。这是 RTF 特有语法，不能原样期待在 PDF 或 EXCEL 中生效。SAS 文档也存在 <code>~R/RTF'...'</code> 的目的地限定形式，具体支持情况须按环境测试。</p>
+<p class="sas-boundary"><strong>最后检查：</strong>跨列分组是否覆盖正确列数、标题是否溢出、线条是否重复、第一页和最后一页是否异常。<code>ODS TAGSETS.RTF</code> 打开后用 <code>ODS TAGSETS.RTF CLOSE</code> 关闭，不与普通 <code>ODS RTF</code> 混用。参考 <a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473625.htm" target="_blank" rel="noopener noreferrer">SAS PROC REPORT COLUMN</a>。</p>
 </section>
 <section class="sas-note" id="note-07" aria-labelledby="title-07">
 <h2 id="title-07"><span class="sas-no">07</span>正则表达式：PRXMATCH / PRXCHANGE</h2><p><strong>PRXMATCH</strong> 查符合模式的位置（未匹配返回 0）；<strong>PRXCHANGE</strong> 按模式替换。优先掌握 <code>^</code>、<code>$</code>、<code>\d</code>、<code>{n}</code>、<code>()</code>、<code>[]</code>、<code>+</code> 与替换中的 <code>$1</code>。</p>
@@ -267,20 +304,10 @@ geosd   = exp(sd_log);
 geocv   = 100*sqrt(exp(sd_log**2)-1);</code></pre>
 <p class="sas-boundary"><strong>注意：</strong>原项目浓度 Shell 涉及 N、n、n of BLQ、Mean、SD、CV%、Median、Min、Max、GeoMean、GeoSD、GeoCV%；n 和分母 N 不同，BLQ 与几何统计必须先明确方案规则。<a href="/sas-learning/pk-concentration/">查看完整含义、算例和 TFL/SAS 代码 ↗</a></p>
 </section>
-<section class="sas-note" id="note-10" aria-labelledby="title-10">
-<h2 id="title-10"><span class="sas-no">10</span>PROC REPORT：RTF 样式与原生控制字</h2>
-<p><strong>分工：</strong><code>COLUMN</code> 负责跨列标题；<code>STYLE(HEADER/COLUMN)</code> 与 <code>DEFINE STYLE</code> 控制列宽、边框、对齐；原生 <code>~R</code> 仅用于特殊 RTF 排版。</p>
-<pre class="sas-code"><code>style(header)=[just=center borderbottomwidth=1pt]
-style(column)=[just=left asis=on];
-
-/* 截图中的原生 RTF 控制字（旧宏写法） */
-"~R'\qc\brdrb\brdrs\brdrw16' Alcohol History"</code></pre>
-<p class="sas-boundary"><strong>要点：</strong><code>\qc</code> 居中，<code>\brdrb</code> 底边框，<code>\brdrs</code> 实线，<code>\brdrw16</code> 约 0.8pt。旧宏写法需按版本验证，优先使用 STYLE，切勿与 COLUMN 分组语法混淆。<a href="/sas-learning/report-rtf/">查看完整示例、ODS TAGSETS.RTF 和 QC ↗</a></p>
-</section>
 <!-- SP_NOTES_END -->
 <p class="sas-ending">每次只新增一条有复用价值的记录；没有验证的结论要标明待验证。<a href="https://documentation.sas.com/" target="_blank" rel="noopener noreferrer">SAS 官方文档 ↗</a></p>
 </main>
-<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.3.3</span></footer>
+<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.3.4</span></footer>
 <a class="back-to-top" href="#top" aria-label="回到顶部" title="回到顶部" hidden>↑</a>
 <script>(()=>{const b=document.querySelector('.back-to-top');const u=()=>{b.hidden=window.scrollY<280};window.addEventListener('scroll',u,{passive:true});u()})();</script>
 </div>
