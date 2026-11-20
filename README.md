@@ -1,6 +1,6 @@
 # SP · Clinical Statistical Programming
 
-**V0.2.12** — 极简 SP 统计编程知识库、SAS 01–04 编号速查与项目级记录 Skill；AI 继续隐藏。
+**V0.2.13** — 极简 SP 统计编程知识库、SAS 01–04 编号速查与项目级记录 Skill；AI 继续隐藏。
 
 ## 页面与文件
 
@@ -129,3 +129,10 @@
 - `/sas-notes/` 目录改为原生 `<details>/<summary>` 折叠结构，默认收起；内部 01–04 条目与锚点保留。
 - `public/index.html` 中 SAS 实战笔记固定置顶，显示为第一篇；其余文章顺延。
 - 同步更新项目级 Skill 规定：以后保持此目录可折叠，SAS 笔记首页置顶。
+
+## V0.2.13：SAS 函数速查扩充
+
+- 保持 `/sas-notes/` 折叠目录与首页置顶，更新原编号 **04**（不新增零散文章）。
+- 将 CAT / CATT / CATS / CATX、TRANWRD、COMPRESS、SCAN、STRIP、UPCASE、LOWCASE、PROPCASE、TRIM、NMISS、CMISS 等整理成 **8 类、42 项**功能对照，每项只给短示例和一句说明，常用函数加粗。
+- `NMISS` 只用于数值，`CMISS` 可同时统计字符、数值缺失；强调 `COMPRESS(...,,'kd')` 会删除小数点/负号。
+- 更新 `knowledge-index.json` 关键词，并在项目级 Skill 中固定“紧凑分组表格 + 高频加粗”的规则。
