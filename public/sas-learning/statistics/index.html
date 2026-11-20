@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="从 n、Mean、SD、Median 到分组统计、分位数、CV 与几何均值；核心是清楚每个统计量从哪些记录计算。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/statistics/"><link rel="stylesheet" href="/assets/style.css?v=0.3.3"><title>统计汇总：MEANS / SUMMARY / UNIVARIATE · SP</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="从 n、Mean、SD、Median 到分组统计、分位数、CV 与几何均值；核心是清楚每个统计量从哪些记录计算。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/statistics/"><link rel="stylesheet" href="/assets/style.css?v=0.3.4"><title>统计汇总：MEANS / SUMMARY / UNIVARIATE · SP</title>
 <style>
 .learning-head{padding:25px 0 22px}.learning-topline{font:600 11px/1.4 system-ui,sans-serif;letter-spacing:.09em;color:#999}
 .learning-head h1{margin:9px 0 8px;font-size:27px}.learning-head p{font-size:14px;color:#777;max-width:700px;line-height:1.9}
@@ -12,7 +12,7 @@
 .learning-qc{font-size:12px!important;color:#727272!important}.learning-more{padding:18px 0 28px;font-size:13px;color:#666}
 .learning-more a{color:#245e81;text-decoration:underline;text-underline-offset:3px}.learning-more p{margin:8px 0}
 @media(max-width:700px){.learning-head h1{font-size:23px}.learning-code code{font-size:11px}}
-</style><script src="/assets/code-copy.js?v=0.3.3" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
+</style><script src="/assets/code-copy.js?v=0.3.4" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
 <header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / 统计汇总：MEANS / SUMMARY / UNIVARIATE</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>统计汇总：MEANS / SUMMARY / UNIVARIATE</h1><p>同样一批浓度或实验室数值，Mean、Median、SD、CV%、几何均值讲述的是不同的侧面。如果先不弄清统计对象，PROC MEANS 再快也只能产出一串看似整齐的数字。</p></header>
 <main><nav class="learning-nav" aria-label="从问题出发的章节索引"><a href="#level-1">一个 N 的疑问</a><a href="#level-2">怎样按层级汇总</a><a href="#level-3">偏态数据的另一种中心</a></nav><section class="learning-part" id="level-1"><h2>Mean 只需一行代码，为什么最先要检查 N？</h2><p>N 通常是非缺失观测的数量，而不是自动去重后的受试者数。在 ADLB 或 ADPC 中，一个人可能贡献多个访视或时点；如果把这些行混在一起计算，得到的是“观测均值”，不一定是目标时点的汇总。先界定分组和筛选，再算 Mean、SD、Median 才有意义。</p><pre class="learning-code"><code>proc means data=sashelp.class
            n mean std median min max maxdec=2;
