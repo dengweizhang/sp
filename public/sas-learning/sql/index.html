@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="从 SELECT、WHERE 到 GROUP BY、JOIN、DISTINCT、HAVING；重点解决受试者去重与分母口径问题。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/sql/"><link rel="stylesheet" href="/assets/style.css?v=0.3.3"><title>PROC SQL：从查询到 TFL 数据汇总 · SP</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="从 SELECT、WHERE 到 GROUP BY、JOIN、DISTINCT、HAVING；重点解决受试者去重与分母口径问题。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/sql/"><link rel="stylesheet" href="/assets/style.css?v=0.3.4"><title>PROC SQL：从查询到 TFL 数据汇总 · SP</title>
 <style>
 .learning-head{padding:25px 0 22px}.learning-topline{font:600 11px/1.4 system-ui,sans-serif;letter-spacing:.09em;color:#999}
 .learning-head h1{margin:9px 0 8px;font-size:27px}.learning-head p{font-size:14px;color:#777;max-width:700px;line-height:1.9}
@@ -12,7 +12,7 @@
 .learning-qc{font-size:12px!important;color:#727272!important}.learning-more{padding:18px 0 28px;font-size:13px;color:#666}
 .learning-more a{color:#245e81;text-decoration:underline;text-underline-offset:3px}.learning-more p{margin:8px 0}
 @media(max-width:700px){.learning-head h1{font-size:23px}.learning-code code{font-size:11px}}
-</style><script src="/assets/code-copy.js?v=0.3.3" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
+</style><script src="/assets/code-copy.js?v=0.3.4" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
 <header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PROC SQL：从查询到 TFL 数据汇总</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>PROC SQL：从查询到 TFL 数据汇总</h1><p>一张 TFL 表看起来只是 n 和百分比，真正棘手的往往不是 SQL 语法，而是“这一行到底代表什么”。从查到记录，到数清受试者，再到发现 JOIN 让行数翻倍，问题是沿着数据一步步暴露的。</p></header>
 <main><nav class="learning-nav" aria-label="从问题出发的章节索引"><a href="#level-1">先把记录找对</a><a href="#level-2">人数为什么会变</a><a href="#level-3">JOIN 后发生了什么</a></nav><section class="learning-part" id="level-1"><h2>为什么一条 SELECT 语句，可能已经改变了问题的含义？</h2><p>如果只想看年龄在某个范围的受试者，SELECT、WHERE 和 ORDER BY 足够。但在临床项目里，一行可能是一次采血、一次不良事件，也可能是一个受试者。SQL 能找出符合条件的行，却不会替你决定分析单位；这一步想错，后面再精巧的汇总也会偏离目标。</p><pre class="learning-code"><code>proc sql;
   select name, sex, age
