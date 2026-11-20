@@ -13,13 +13,13 @@
 .learning-more a{color:#245e81;text-decoration:underline;text-underline-offset:3px}.learning-more p{margin:8px 0}
 @media(max-width:700px){.learning-head h1{font-size:23px}.learning-code code{font-size:11px}}
 </style><script src="/assets/code-copy.js?v=0.3.3" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
-<header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / SAS 绘图：SGPLOT / SGPANEL 到临床 TFL</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>SAS 绘图：SGPLOT / SGPANEL 到临床 TFL</h1><p>单组/多组折线、均值与误差线、分面图、轴和图例；重点排查首尾错误连线、采样时间排序及图形 QC。</p></header>
-<main><nav class="learning-nav" aria-label="章节快速索引"><a href="#level-1">01 基础</a><a href="#level-2">02 实战</a><a href="#level-3">03 进阶 / QC</a></nav><section class="learning-part" id="level-1"><div class="learning-kicker">LEVEL 1 · 基础</div><h2>SCATTER 与 SERIES</h2><p>散点适合个体观测，<code>SERIES</code> 按 X 连接同一个组的多个点。先明确 X/Y 是实际日期、数值时间还是展示标签。</p><pre class="learning-code"><code>proc sgplot data=sashelp.class;
+<header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / SAS 绘图：SGPLOT / SGPANEL 到临床 TFL</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>SAS 绘图：SGPLOT / SGPANEL 到临床 TFL</h1><p>图形很直观，也容易让错误更直观。我们之前碰到过浓度曲线首尾相连、时间点顺序不符合预期的现象：这往往不是画图指令少写了一个美化参数，而是数据结构仍没准备好。</p></header>
+<main><nav class="learning-nav" aria-label="从问题出发的章节索引"><a href="#level-1">点与线的差别</a><a href="#level-2">图里的不确定性</a><a href="#level-3">先修数据再修图</a></nav><section class="learning-part" id="level-1"><h2>为什么同样的点，SCATTER 正常，SERIES 却可能画错？</h2><p>散点只标出每条观测，折线却必须决定哪些点属于同一条轨迹、按什么 X 顺序连接。画个体浓度曲线时，受试者、分析物和阶段通常都可能是分组条件；如果这些条件丢了，线会跨过本不该连接的记录。</p><pre class="learning-code"><code>proc sgplot data=sashelp.class;
   scatter x=height y=weight / group=sex;
   xaxis label="Height";
   yaxis label="Weight";
-run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>变量类型、单位和坐标轴顺序要与图注一致；X 数值与显示 FORMAT 分开检查。</p></section>
-<section class="learning-part" id="level-2"><div class="learning-kicker">LEVEL 2 · TFL 实战</div><h2>组均值折线 + 误差棒</h2><p>把每组每访视的均值和 CI/SD 上下界整理成每组每时点一行。图表只负责展示，不应临时计算不受控的分析口径。</p><pre class="learning-code"><code>data plot_demo;
+run;</code></pre><p class="learning-qc"><strong>回到数据核对：</strong>变量类型、单位和坐标轴顺序要与图注一致；X 数值与显示 FORMAT 分开检查。</p></section>
+<section class="learning-part" id="level-2"><h2>一条均值曲线，为什么还需要误差线？</h2><p>均值只告诉我们中心在哪，不能告诉我们这个估计有多分散或多不确定。SD、SE 与 CI 的含义不同。建议先在数据层按正确分母生成上下界，再让 SGPLOT 展示；不要在绘图阶段临时定义统计规则。</p><pre class="learning-code"><code>data plot_demo;
   do trt=1 to 2;
     do visit=1 to 4;
       mean=10+2*trt+visit;
@@ -34,10 +34,10 @@ proc sgplot data=plot_demo;
     group=trt yerrorlower=lower yerrorupper=upper;
   xaxis integer;
   yaxis label="Example Mean";
-run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>示意误差界不是实算的 SD/CI；正式图应从 QC 过的汇总数据集中读取误差范围。</p></section>
-<section class="learning-part" id="level-3"><div class="learning-kicker">LEVEL 3 · 进阶 / QC</div><h2>SGPANEL 与错误连线定位</h2><p>多治疗组、多分析物时可分面。出现首尾相连或跨受试者连线，应先检查 <code>GROUP</code>、X 排序、重复时间点、缺失处理与分面键。</p><pre class="learning-code"><code>proc sgpanel data=plot_demo;
+run;</code></pre><p class="learning-qc"><strong>回到数据核对：</strong>示意误差界不是实算的 SD/CI；正式图应从 QC 过的汇总数据集中读取误差范围。</p></section>
+<section class="learning-part" id="level-3"><h2>出现‘首尾相连’时，该先检查图形颜色还是数据？</h2><p>先看同组 X 是否按数值时间排序，再查重复时点、缺失、组标识以及是否把多个受试者放进同一条 SERIES。只有确认数据连接关系正确，才值得调整图例、坐标轴与 SGPANEL 的分面布局。</p><pre class="learning-code"><code>proc sgpanel data=plot_demo;
   panelby trt / columns=2;
   series x=visit y=mean / markers;
   colaxis integer;
   rowaxis label="Example Mean";
-run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>同组同时间多条记录、未使用正确 GROUP、X 是字符型时间标签等都可能造成误导；先整理绘图数据再修样式。</p></section><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/grstatproc/62603/HTML/default/sgplot-stmt.htm" target="_blank" rel="noopener noreferrer">SAS PROC SGPLOT ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.3</span></footer></div></body></html>
+run;</code></pre><p class="learning-qc"><strong>回到数据核对：</strong>同组同时间多条记录、未使用正确 GROUP、X 是字符型时间标签等都可能造成误导；先整理绘图数据再修样式。</p></section><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/grstatproc/62603/HTML/default/sgplot-stmt.htm" target="_blank" rel="noopener noreferrer">SAS PROC SGPLOT ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.4</span></footer></div></body></html>
