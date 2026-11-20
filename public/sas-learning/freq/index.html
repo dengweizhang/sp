@@ -13,20 +13,20 @@
 .learning-more a{color:#245e81;text-decoration:underline;text-underline-offset:3px}.learning-more p{margin:8px 0}
 @media(max-width:700px){.learning-head h1{font-size:23px}.learning-code code{font-size:11px}}
 </style><script src="/assets/code-copy.js?v=0.3.3" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
-<header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PROC FREQ：从频数到分类统计</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>PROC FREQ：从频数到分类统计</h1><p>单维频数、列联表、行/列百分比、OUT=、OUTPCT、ODS、CHISQ 和 EXACT，连接到 TFL 的 n (%)。</p></header>
-<main><nav class="learning-nav" aria-label="章节快速索引"><a href="#level-1">01 基础</a><a href="#level-2">02 实战</a><a href="#level-3">03 进阶 / QC</a></nav><section class="learning-part" id="level-1"><div class="learning-kicker">LEVEL 1 · 基础</div><h2>TABLES / MISSING / 百分比口径</h2><p><code>TABLES</code> 一维看频数，二维看交叉分类。二维表默认展示 cell / row / column 等不同百分比，必须明确分母。</p><pre class="learning-code"><code>proc freq data=sashelp.class;
+<header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PROC FREQ：从频数到分类统计</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>PROC FREQ：从频数到分类统计</h1><p>分类统计最容易让人产生错觉：PROC FREQ 很快就给出 COUNT 和百分比，可它无法知道你打算报告的是“记录”还是“人”，也不知道 SAP 要用哪一个分母。理解这些差别，比背会 TABLES 选项重要。</p></header>
+<main><nav class="learning-nav" aria-label="从问题出发的章节索引"><a href="#level-1">百分比的分母</a><a href="#level-2">从输出到表格</a><a href="#level-3">什么时候需要检验</a></nav><section class="learning-part" id="level-1"><h2>同一个格子，为什么会有三种百分比？</h2><p>二维交叉表中，一个格子可以占全表多少、占本行多少，也可以占本列多少。PROC FREQ 并没有算错，它只是在回答不同的问题。真正要写进 TFL 的百分比，需要先读懂 SAP 的分析口径，再决定是否使用 ROW、COL 或自行计算。</p><pre class="learning-code"><code>proc freq data=sashelp.class;
   tables sex;
   tables sex*age / missing;
-run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>同一受试者多条记录时 FREQ 统计行数，而非自动去重的受试者数。</p></section>
-<section class="learning-part" id="level-2"><div class="learning-kicker">LEVEL 2 · TFL 实战</div><h2>OUT= / OUTPCT / SPARSE</h2><p>先通过 FREQ 得到分类计数，再按 SAP 的分析人群 N 计算 TFL 百分比；SPARSE 可以让二维表输出零计数单元格的组合（基于实际分类水平）。</p><pre class="learning-code"><code>proc freq data=sashelp.class noprint;
+run;</code></pre><p class="learning-qc"><strong>回到数据核对：</strong>同一受试者多条记录时 FREQ 统计行数，而非自动去重的受试者数。</p></section>
+<section class="learning-part" id="level-2"><h2>已经有了 COUNT，为什么还不能直接交付 n (%)？</h2><p>OUT= 会给分类组合和计数，OUTPCT 会增加相应百分比；但数据中没出现的类别可能仍需要表壳补齐，而且同一受试者多条记录不应被无意当成多人。换句话说，PROC FREQ 负责算频数，TFL 程序还要负责分析人群、零行和显示规则。</p><pre class="learning-code"><code>proc freq data=sashelp.class noprint;
   tables sex*age / out=freq_cells outpct sparse;
 run;
 
 proc print data=freq_cells noobs;
   var sex age count percent pct_row pct_col;
-run;</code></pre><p class="learning-qc"><strong>检查重点：</strong>OUTPCT 输出中的百分比字段（如 PCT_ROW、PCT_COL）口径不同；未出现的完整类别通常仍需用显式 shell 补齐。</p></section>
-<section class="learning-part" id="level-3"><div class="learning-kicker">LEVEL 3 · 进阶 / QC</div><h2>ODS 检验输出：CHISQ / EXACT</h2><p><code>ODS OUTPUT</code> 可以捕获统计过程产生的对象。卡方检验和 Fisher 精确检验是否合适取决于设计与期望频数。</p><pre class="learning-code"><code>ods output ChiSq=chisq_result;
+run;</code></pre><p class="learning-qc"><strong>回到数据核对：</strong>OUTPCT 输出中的百分比字段（如 PCT_ROW、PCT_COL）口径不同；未出现的完整类别通常仍需用显式 shell 补齐。</p></section>
+<section class="learning-part" id="level-3"><h2>什么时候频数表不再只是描述，而是在做推断？</h2><p>当问题变成“组间分布是否不同”，才会进入卡方或精确检验。CHISQ 可以产生检验输出，EXACT 处理更适合某些稀疏列联表的情形，但选检验方法的理由来自设计与 SAP，而不是看哪个过程能跑出较小的 P 值。</p><pre class="learning-code"><code>ods output ChiSq=chisq_result;
 proc freq data=sashelp.class;
   tables sex*age / chisq;
 run;
-ods output close;</code></pre><p class="learning-qc"><strong>检查重点：</strong>这个表的 age 有多个水平，不能把输出的所有 P 值都当作唯一正式 P 值；分析方法必须以 SAP 为准，若需 Fisher 可进一步查 EXACT 语句。</p></section><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/statug/63962/HTML/default/statug_freq_sect010.htm" target="_blank" rel="noopener noreferrer">SAS PROC FREQ TABLES ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.3</span></footer></div></body></html>
+ods output close;</code></pre><p class="learning-qc"><strong>回到数据核对：</strong>这个表的 age 有多个水平，不能把输出的所有 P 值都当作唯一正式 P 值；分析方法必须以 SAP 为准，若需 Fisher 可进一步查 EXACT 语句。</p></section><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/statug/63962/HTML/default/statug_freq_sect010.htm" target="_blank" rel="noopener noreferrer">SAS PROC FREQ TABLES ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.4</span></footer></div></body></html>
