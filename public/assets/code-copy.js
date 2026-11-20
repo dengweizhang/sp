@@ -30,9 +30,9 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'code-copy-button';
-      button.textContent = '复制';
-      button.title = '复制 SAS 代码';
-      button.setAttribute('aria-label', '复制这段代码');
+      button.textContent = 'Copy';
+      button.title = 'Copy SAS code';
+      button.setAttribute('aria-label', 'Copy this code snippet');
       button.setAttribute('aria-live', 'polite');
       wrapper.appendChild(button);
 
@@ -47,25 +47,25 @@
           } else {
             fallbackCopy(value);
           }
-          button.textContent = '已复制';
+          button.textContent = 'Copied';
           button.classList.add('is-copied');
           button.classList.remove('is-error');
         } catch (error) {
           // Some browsers deny clipboard access. Try the legacy path.
           try {
             fallbackCopy(value);
-            button.textContent = '已复制';
+            button.textContent = 'Copied';
             button.classList.add('is-copied');
             button.classList.remove('is-error');
           } catch (ignored) {
-            button.textContent = '复制失败';
+            button.textContent = 'Failed';
             button.classList.remove('is-copied');
             button.classList.add('is-error');
           }
         }
         window.clearTimeout(feedbackTimer);
         feedbackTimer = window.setTimeout(() => {
-          button.textContent = '复制';
+          button.textContent = 'Copy';
           button.classList.remove('is-copied', 'is-error');
         }, 1600);
       });
