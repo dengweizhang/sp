@@ -1,9 +1,9 @@
 {
-  "version": "0.3.3",
-  "description": "公开文章索引：SAS 01–10 速查、7 个 SAS 系统专题及其他临床统计编程文章。",
+  "version": "0.3.4",
+  "description": "公开知识索引：SAS 01–09 速查、6 个问题驱动的 SAS 专题及其他临床统计编程文章。",
   "articles": [
     {
-      "title": "SAS 实战笔记：编号 01–10（函数、Unicode、Report RTF、正则、PK 浓度统计）",
+      "title": "SAS 实战笔记 01–09：函数、Unicode、PROC REPORT/RTF、正则与 PK 浓度",
       "url": "/sas-notes/",
       "keywords": [
         "SAS",
@@ -110,7 +110,10 @@
         "Mean",
         "SD",
         "CV%",
-        "BLQ"
+        "BLQ",
+        "RTF格式",
+        "ODS TAGSETS.RTF",
+        "Report样式"
       ]
     },
     {
@@ -383,7 +386,7 @@
       ]
     },
     {
-      "title": "SAS 系统专题：基础到进阶",
+      "title": "SAS 系统专题：从真实疑问出发的六个专题",
       "url": "/sas-learning/",
       "keywords": [
         "SAS教程",
@@ -522,36 +525,6 @@
         "Tmax",
         "TFL",
         "ANL01FL"
-      ]
-    },
-    {
-      "title": "PROC REPORT：跨列标题、RTF 样式与原生 RTF 控制字",
-      "url": "/sas-learning/report-rtf/",
-      "keywords": [
-        "PROC REPORT",
-        "COLUMN",
-        "spanning column headers",
-        "跨列组标题",
-        "Alcohol History",
-        "Smoking History",
-        "ODS TAGSETS.RTF",
-        "ODS RTF",
-        "style(header)",
-        "style(column)",
-        "cellwidth",
-        "outputwidth",
-        "BORDERBOTTOMWIDTH",
-        "~R",
-        "~R/RTF",
-        "qc",
-        "brdrb",
-        "brdrs",
-        "brdrw16",
-        "ASIS",
-        "JUST",
-        "RTF 格式",
-        "COMPUTE BEFORE",
-        "分页"
       ]
     }
   ]
