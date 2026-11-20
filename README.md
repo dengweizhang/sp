@@ -1,6 +1,13 @@
 # SP · Clinical Statistical Programming
 
-**V0.3.7** — SAS 01–09 笔记 + 6 个问题驱动专题；跨列分组与 RTF 合并，代码区更紧凑；AI 继续隐藏。
+**V0.3.8** — 新增 C-QTc 浓度–效应分析学习专题；SAS 01–09 速查与原有专题保持不变，AI 继续隐藏。
+
+## V0.3.8：C-QTc 与 ADEG / ADPC 学习专题
+
+- 新增 `/c-qtc/`，解释 Δ 与 ΔΔ、安慰剂校正、C-QTc 与 ADEG/ADPC 的关系、ECG–PK 实际时间匹配、90% CI 与 SP QC。
+- 用公开/虚构数据提供简洁的交互式差值计算器，清楚区分组均值差与正式混合效应模型的估计；不上传任何真实研究 Shell 或申办方信息。
+- 更新首页、公开知识索引和 sitemap；保留 V0.3.1 原始视觉基准，沿用全站 CSS 和 Copy 按钮。
+- GitHub main 提交与 Cloudflare 实际上线是两项独立状态，需分别验证。
 
 ## V0.3.7：Findings → BDS 深度业务专题
 
@@ -20,6 +27,7 @@
 - `/trial-designs/`：临床试验设计，按研究结构/随机/盲法/对照/SAD-MAD/适应性分类，含可切换的小型流程图和 SP 面试卡片
 - `/clinical-statistics/`：统计学基础，包括描述统计、假设检验、常见模型、生存分析、分析集、缺失数据、Estimand、SP 数据与 QC
 - `/clinical-pharmacology/`：临床药理学，包括 ADME、PK/PD、SAD/MAD、稳态、DDI、BE、QTc、免疫原性与编程映射
+- `/c-qtc/`：浓度–QTc 关系专题，从 ADEG 和 ADPC 理解 Δ/ΔΔ、时间匹配与 C-QTc 模型边界
 - `public/assets/ai.js`：右下角 AI 面板源码（暂时停用）
 - `functions/api/chat.js`：Cloudflare Pages Function，调用 DeepSeek API
 - `public/knowledge-index.json`：本站公开文章的索引及检索关键词
