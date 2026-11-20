@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="单组/多组折线、均值与误差线、分面图、轴和图例；重点排查首尾错误连线、采样时间排序及图形 QC。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/graphics/"><link rel="stylesheet" href="/assets/style.css?v=0.3.3"><title>SAS 绘图：SGPLOT / SGPANEL 到临床 TFL · SP</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="单组/多组折线、均值与误差线、分面图、轴和图例；重点排查首尾错误连线、采样时间排序及图形 QC。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/graphics/"><link rel="stylesheet" href="/assets/style.css?v=0.3.4"><title>SAS 绘图：SGPLOT / SGPANEL 到临床 TFL · SP</title>
 <style>
 .learning-head{padding:25px 0 22px}.learning-topline{font:600 11px/1.4 system-ui,sans-serif;letter-spacing:.09em;color:#999}
 .learning-head h1{margin:9px 0 8px;font-size:27px}.learning-head p{font-size:14px;color:#777;max-width:700px;line-height:1.9}
@@ -12,7 +12,7 @@
 .learning-qc{font-size:12px!important;color:#727272!important}.learning-more{padding:18px 0 28px;font-size:13px;color:#666}
 .learning-more a{color:#245e81;text-decoration:underline;text-underline-offset:3px}.learning-more p{margin:8px 0}
 @media(max-width:700px){.learning-head h1{font-size:23px}.learning-code code{font-size:11px}}
-</style><script src="/assets/code-copy.js?v=0.3.3" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
+</style><script src="/assets/code-copy.js?v=0.3.4" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
 <header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / SAS 绘图：SGPLOT / SGPANEL 到临床 TFL</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>SAS 绘图：SGPLOT / SGPANEL 到临床 TFL</h1><p>图形很直观，也容易让错误更直观。我们之前碰到过浓度曲线首尾相连、时间点顺序不符合预期的现象：这往往不是画图指令少写了一个美化参数，而是数据结构仍没准备好。</p></header>
 <main><nav class="learning-nav" aria-label="从问题出发的章节索引"><a href="#level-1">点与线的差别</a><a href="#level-2">图里的不确定性</a><a href="#level-3">先修数据再修图</a></nav><section class="learning-part" id="level-1"><h2>为什么同样的点，SCATTER 正常，SERIES 却可能画错？</h2><p>散点只标出每条观测，折线却必须决定哪些点属于同一条轨迹、按什么 X 顺序连接。画个体浓度曲线时，受试者、分析物和阶段通常都可能是分组条件；如果这些条件丢了，线会跨过本不该连接的记录。</p><pre class="learning-code"><code>proc sgplot data=sashelp.class;
   scatter x=height y=weight / group=sex;
