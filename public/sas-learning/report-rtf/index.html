@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#fff"><meta name="description" content="PROC REPORT 多列分组与 ODS TAGSETS.RTF 格式：COLUMN 跨列标题、STYLE HEADER/COLUMN、CELLWIDTH、RTF raw 控制字、分页与调试。">
-<link rel="canonical" href="https://sp.769967.xyz/sas-learning/report-rtf/"><link rel="stylesheet" href="/assets/style.css"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><title>PROC REPORT 跨列分组与 RTF 样式 · SP</title>
+<link rel="canonical" href="https://sp.769967.xyz/sas-learning/report-rtf/"><link rel="stylesheet" href="/assets/style.css?v=0.3.2"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><title>PROC REPORT 跨列分组与 RTF 样式 · SP</title>
 <style>
 .rl-top{padding:22px 0 20px}.rl-top h1{font-size:26px;margin:10px 0}.rl-top p{font-size:14px;color:#666;line-height:1.85;max-width:810px}
 .rl-nav{display:flex;flex-wrap:wrap;gap:8px 18px;border-block:1px solid var(--line);padding:9px 0;font-size:12px}
@@ -11,7 +11,7 @@
 .rl-footnote{border-left:2px solid #dad8d1;padding:4px 13px;font-size:12px!important;color:#696969}
 .rl-link a,.rl-part a{color:#245e81;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:680px){.rl-top h1{font-size:23px}.learning-code code{font-size:11px}}
-</style></head><body><div class="shell" id="top">
+</style><script src="/assets/code-copy.js?v=0.3.2" defer></script></head><body><div class="shell" id="top">
 <header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">系统专题</a></nav></header>
 <header class="rl-top"><nav class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PROC REPORT 与 RTF</nav>
 <h1>PROC REPORT：跨列分组与 RTF 样式</h1><p>把问题拆开：<strong>COLUMN 决定表头结构</strong>；<strong>DEFINE/STYLE 决定单元格布局</strong>；<strong>ODS TAGSETS.RTF 决定文件输出</strong>；<strong>RTF 原生控制字只负责特定格式微调</strong>。</p></header>
@@ -136,4 +136,4 @@ column page usubjid
 <p><strong>独立 QC：</strong>先对比简单样式（无 raw RTF 控制字）的输出，再逐项加 STYLE 与 raw；核对第一页/中间页/最后一页，检查跨列组标题是否真正覆盖正确列数、页眉/脚注是否重复、是否有空白页及列截断。</p>
 </section>
 <p class="rl-link" style="font-size:12px;line-height:2;color:#777">参考：<a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473625.htm" target="_blank" rel="noopener noreferrer">PROC REPORT COLUMN</a> · <a href="https://support.sas.com/rnd/base/ods/templateFAQ/Template_rtf.html" target="_blank" rel="noopener noreferrer">SAS 官方 ODS RTF 控制字</a> · <a href="https://support.sas.com/documentation/cdl/en/odsug/65308/HTML/default/p19rpsb989jyadn1kgunyh4t8g0e.htm" target="_blank" rel="noopener noreferrer">ODS TAGSETS.RTF</a>。<br>代码为公开/虚构数据教学示例，未在用户 SAS 及 Word 环境执行。</p>
-</main><footer class="site-footer"><span><a href="/sas-learning/">← 系统专题</a> · by dw</span><span>V0.3.1</span></footer></div></body></html>
+</main><footer class="site-footer"><span><a href="/sas-learning/">← 系统专题</a> · by dw</span><span>V0.3.2</span></footer></div></body></html>
