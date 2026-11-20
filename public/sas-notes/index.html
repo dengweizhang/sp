@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="SAS 实战问题速查：PICTURE、PUT/INPUT，以及 CAT/CATS/CATX、SCAN、COMPRESS、UPCASE、LOWCASE、NMISS、CMISS 等高频 SAS 字符串与缺失函数。">
+<meta name="description" content="SAS 实战速查 01–08：PROC FORMAT、CATX、字符串函数、ODS Unicode、PROC REPORT 跨列标题、PRXMATCH 正则与 ODS RTF 分页。">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="canonical" href="https://sp.769967.xyz/sas-notes/">
@@ -57,15 +57,20 @@
 <nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / SAS 实战笔记</nav>
 <h1>SAS 实战笔记</h1>
 <p class="article-lead">只留能解决问题的内容。按编号查找：结论、代码、必要边界。</p>
-<div class="sas-meta">SAS FIELD NOTES · 04 NOTES · UPDATED 2026-11-20</div>
+<div class="sas-meta">SAS FIELD NOTES · 08 NOTES · UPDATED 2026-11-20</div>
 </header>
 <main class="article-body">
-<details class="sas-toc"><summary>目录 · 04 条笔记</summary>
+<p class="sas-ending" style="margin:2px 0 13px">系统学习：<a href="/sas-learning/" style="color:#245e81;text-decoration:underline">SQL / FREQ / 统计汇总 / POWER / 绘图 ↗</a></p>
+<details class="sas-toc"><summary>目录 · 08 条笔记</summary>
 <nav aria-label="SAS 笔记目录">
 <a href="#note-01"><span class="sas-no">01</span> TFL n (%) 多出空格</a>
 <a href="#note-02"><span class="sas-no">02</span> PROC FORMAT：VALUE / PICTURE / INVALUE</a>
 <a href="#note-03"><span class="sas-no">03</span> INPUT 与 PUT：方向相反</a>
 <a href="#note-04"><span class="sas-no">04</span> SAS 常用字符串与缺失函数</a>
+<a href="#note-05"><span class="sas-no">05</span> ODS Unicode、上标和下标</a>
+<a href="#note-06"><span class="sas-no">06</span> PROC REPORT：多个 COL 组标题</a>
+<a href="#note-07"><span class="sas-no">07</span> PRXMATCH / PRXCHANGE 正则</a>
+<a href="#note-08"><span class="sas-no">08</span> ODS RTF：标题与分页</a>
 </nav>
 </details>
 <!-- SP_NOTES_START: add subsequent notes as 05, 06...; mirror the numbered table of contents -->
@@ -195,10 +200,66 @@ run;</code></pre>
 <p class="sas-boundary"><strong>本次 TFL 的选择：</strong><code>catx(' ',compress(COUNT),put(input(compress(PCT),best.),pctfmt.))</code>。中文/UTF-8 数据在需要按字符而非字节处理时，注意 SAS NLS 的 <code>KSCAN / KSUBSTR / KLENGTH</code> 等对应函数。</p>
 <p class="sas-boundary">参考：<a href="https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0w6napahk6x0an0z2dzozh2ouzm.htm" target="_blank" rel="noopener noreferrer">SAS 官方函数分类</a> · <a href="https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0nw8trwk5ooesn1o8zrtd5c6j1t.htm" target="_blank" rel="noopener noreferrer">NMISS</a> · <a href="https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p1tth4ltf640din1ey86ubo2lky2.htm" target="_blank" rel="noopener noreferrer">CMISS</a></p>
 </section>
-<!-- SP_NOTES_END -->
+<section class="sas-note" id="note-05" aria-labelledby="title-05">
+<h2 id="title-05"><span class="sas-no">05</span>ODS Unicode、上标和下标</h2><p><strong>记住：</strong><code>007E=~</code>，<code>0025=%</code>。下面是常用十六进制码和 ODS 控制语法，实际显示取决于字体、ODS 输出目标与版本。</p>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>码位</th><th>字符</th><th>用途</th></tr></thead><tbody>
+<tr><td><code>007E</code></td><td>~</td><td>波浪号</td></tr>
+<tr><td><code>0025</code></td><td>%</td><td>百分号</td></tr>
+<tr><td><code>00B1</code></td><td>±</td><td>正负号</td></tr>
+<tr><td><code>2264 / 2265</code></td><td>≤ / ≥</td><td>不等号</td></tr>
+<tr><td><code>03BC</code></td><td>μ</td><td>微米/微单位前缀</td></tr>
+<tr><td><code>00B2 / 2082</code></td><td>² / ₂</td><td>预置上标/下标 2</td></tr>
+<tr><td><code>00B0 / 00D7</code></td><td>° / ×</td><td>角度/乘号</td></tr>
+</tbody></table></div>
+<pre class="sas-code"><code>ods escapechar='^';
+title "About ^{unicode 007E} ^{unicode 0025}";
+title2 "mm^{super 2} and H^{sub 2}O";
+/* 若项目设置 ods escapechar='~'，
+   则将以上 ^{...} 改为 ~{...} */</code></pre>
+<p class="sas-boundary"><strong>注意：</strong><code>^{unicode ...}</code> 与 <code>^{super ...}</code> 属于 ODS inline formatting，不是 PROC FORMAT；ODS LISTING 目的地不支持相同的 ODS inline 表现。RTF 和 TAGSETS.RTF 需要分别验证。</p>
+</section>
+<section class="sas-note" id="note-06" aria-labelledby="title-06">
+<h2 id="title-06"><span class="sas-no">06</span>PROC REPORT：多个 COL 合并为组标题</h2><p><strong>核心：</strong>在 <code>COLUMN</code> 里用 <code>("组标题" col3 col4 ...)</code>，形成横跨多个列的上层标题；<code>DEFINE ... / GROUP</code> 则是对行记录分组，二者不是一回事。<a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473625.htm" target="_blank" rel="noopener noreferrer">官方 COLUMN 语法 ↗</a></p>
+<pre class="sas-code"><code>proc report data=final nowd missing;
+  column page usubjid col1 col2
+         ("Alcohol History" col3 col4 col5 col6)
+         ("Smoking History" col7 col8 col9 col10);
+  define page / order noprint;
+  define usubjid / order "Subject ID";
+  /* 其余 col1-col10 按表壳分别 DEFINE */
+run;</code></pre>
+<p class="sas-boundary"><strong>你截图的重点：</strong>红框使用两个括号分别给 Alcohol History（col3–6）和 Smoking History（col7–10）做跨列标题；其中 <code>~R'\qc\brdrb...'</code> 属于 RTF 专用排版控制，不是跨列分组必需的语法。</p>
+</section>
+<section class="sas-note" id="note-07" aria-labelledby="title-07">
+<h2 id="title-07"><span class="sas-no">07</span>正则表达式：PRXMATCH / PRXCHANGE</h2><p><strong>PRXMATCH</strong> 查符合模式的位置（未匹配返回 0）；<strong>PRXCHANGE</strong> 按模式替换。优先掌握 <code>^</code>、<code>$</code>、<code>\d</code>、<code>{n}</code>、<code>()</code>、<code>[]</code>、<code>+</code> 与替换中的 <code>$1</code>。</p>
+<pre class="sas-code"><code>/* 完整日期 YYYY-MM-DD */
+ok = prxmatch('/^\d{4}-\d{2}-\d{2}$/',strip(dt));
+
+/* 任意连续空格 -&gt; 一个空格 */
+clean = prxchange('s/ +/ /',-1,strip(raw));
+
+/* 从“某参数 (mg)”提取括号里的单位 */
+unit = strip(prxchange('s/.*\(([^)]*)\).*/$1/',1,param));</code></pre>
+<p class="sas-boundary"><strong>边界：</strong>最后一个示例只适合包含括号的文本，未匹配时 PRXCHANGE 可能返回原文，应先判断；部分 SAS 环境不接受 PRX 模式尾部 <code>/u</code> 修饰符。日期插补仍以 SAP/Spec 为准。</p>
+</section>
+<section class="sas-note" id="note-08" aria-labelledby="title-08">
+<h2 id="title-08"><span class="sas-no">08</span>ODS RTF：标题、分页与文件关闭</h2><p><strong>先分清：</strong><code>TITLE</code> 是 ODS 标题；<code>COMPUTE BEFORE _PAGE_</code> 的 <code>LINE</code> 属于 PROC REPORT 报表内容，可能每页重复；<code>BREAK AFTER ... / PAGE</code> 是主动分页。</p>
+<pre class="sas-code"><code>ods listing close;
+ods escapechar='^';
+ods rtf file="report.rtf";
+proc report data=sashelp.class nowd;
+  column name sex age;
+  define name / display;
+  define sex / display;
+  define age / display;
+run;
+ods rtf close; /* 开 ODS RTF，关 ODS RTF */
+ods listing;</code></pre>
+<p class="sas-boundary"><strong>排查：</strong>空白页除了 <code>HEADSKIP</code>，还要查脚注、末尾段落、余量、手动分页与 FINAL 中的空白占位行；使用 <code>ODS TAGSETS.RTF</code> 时要对应 <code>ODS TAGSETS.RTF CLOSE</code>，不能混关。</p>
+</section><!-- SP_NOTES_END -->
 <p class="sas-ending">每次只新增一条有复用价值的记录；没有验证的结论要标明待验证。<a href="https://documentation.sas.com/" target="_blank" rel="noopener noreferrer">SAS 官方文档 ↗</a></p>
 </main>
-<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.2.13</span></footer>
+<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.3.0</span></footer>
 <a class="back-to-top" href="#top" aria-label="回到顶部" title="回到顶部" hidden>↑</a>
 <script>(()=>{const b=document.querySelector('.back-to-top');const u=()=>{b.hidden=window.scrollY<280};window.addEventListener('scroll',u,{passive:true});u()})();</script>
 </div>
