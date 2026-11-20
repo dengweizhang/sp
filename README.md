@@ -1,6 +1,6 @@
 # SP · Clinical Statistical Programming
 
-**V0.3.1** — SAS 01–10 速查 + 7 个系统专题；新增 PK 浓度统计量原理与 PROC REPORT RTF 格式细解；AI 继续隐藏。
+**V0.3.2** — SAS 01–10 速查 + 7 个系统专题；新增 PK 浓度统计量原理与 PROC REPORT RTF 格式细解；AI 继续隐藏。
 
 ## 页面与文件
 
@@ -154,3 +154,11 @@
 - 原有 `/sas-learning/statistics/`、`/pk-parameters/` 增加 PK 浓度统计量专题链接。系统专题入口扩充为 7 项。
 - Skill 约束更新：统计概念、公式、来源与适用条件须解释充分，不能为追求简洁而牺牲可理解性。
 - 代码均为教学示例，未在实际 SAS/Word 环境执行；BLQ 规则、N/n、GeoSD 标签、NC/NA 显示需要以项目 Shell、SAP、Spec 为准。
+
+## V0.3.2：PC 文字对比度与代码复制
+
+- `public/assets/style.css`：仅在桌面宽度 ≥701px 时适度提高正文、描述、表格、代码文本的灰度对比，恢复默认 WebKit 字体平滑，缓解 PC 渲染偏淡；手机端排版与正文色彩原则上保持原样。
+- `public/assets/code-copy.js`：为静态页面中所有 `<pre><code>` 自动加独立“复制”按钮，复制 `code.textContent` 以保留缩进、换行及被 HTML 转义的特殊符号；优先 Clipboard API，权限不足时回退到选择复制，含复制成功/失败反馈。
+- 全部 15 个主页面统一引入共享脚本和 `style.css?v=0.3.2` 防缓存，后续新增文章自动使用同一套代码块交互。
+- 无第三方 JavaScript 依赖，无数据上报、无账号、无新后端。
+- 生产站点显示仍需在 Cloudflare 完成部署后使用电脑和手机实际检查。
