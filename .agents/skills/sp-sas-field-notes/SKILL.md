@@ -5,6 +5,15 @@ description: 将真实 SAS/SP/CDISC/TFL 编程问题压缩成极简、连续编�
 
 # SP · SAS Field Notes
 
+## 两层架构（V0.3.0 起）
+
+- **速查**：`public/sas-notes/index.html`，统一编号 01、02……；正文只放问题、结论、短代码、必要边界；原生折叠目录、首页置顶规则持续有效。
+- **系统专题**：`public/sas-learning/index.html` 及 `public/sas-learning/{sql,freq,statistics,power,graphics}/index.html`；用于用户要求“基础到进阶”或教程级理解的内容，必须分层（基础 → 具体 SP/TFL 例子 → 进阶/独立 QC），与速查页互相链接，不将长课程塞进单条短笔记。
+- **回顾进度**：`docs/sas-learning-roadmap.md` 记录真实历史讨论、证据边界、后续积累的主题。历史聊天回顾不等于代码已验证。
+- **新增专题**：更新对应 HTML、`public/knowledge-index.json`、`public/sitemap.xml`，必要时增加首页入口；避免无效功能。
+- **示例标识**：只用匿名或公开的 `sashelp.*` 示例；未经用户实际运行验证的示例，应明确标为官方语法教学代码。不能因为出现在网页就宣称已经在 SAS 运行。
+- **保留原始问题**：涉及 `PROC REPORT` ODS RTF、Raw RTF `~R'...'` 时，必须区分 SAS 通用语法与目的地特定排版代码；记录实际版本差异。
+
 ## 宗旨
 
 **人狠话不多。只保留未来能帮自己解决问题的内容。**
