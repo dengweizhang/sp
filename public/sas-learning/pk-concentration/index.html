@@ -1,5 +1,5 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fff"><meta name="description" content="PK 浓度统计量完整详解：N、n、BLQ、Mean、SD、CV%、GeoMean、GeoSD、GeoCV%、Median、Min、Max 的含义、公式、SAS 与 QC。">
-<link rel="canonical" href="https://sp.769967.xyz/sas-learning/pk-concentration/"><link rel="stylesheet" href="/assets/style.css?v=0.3.2"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><title>PK 浓度统计量：含义、公式与 TFL 实现 · SP</title>
+<link rel="canonical" href="https://sp.769967.xyz/sas-learning/pk-concentration/"><link rel="stylesheet" href="/assets/style.css?v=0.3.3"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><title>PK 浓度统计量：含义、公式与 TFL 实现 · SP</title>
 <style>
 .lx-head{padding:23px 0 18px}.lx-head h1{font-size:25px;margin:11px 0 8px}.lx-head p{font-size:14px;color:#696969;line-height:1.9;max-width:840px}
 .lx-nav{display:flex;flex-wrap:wrap;gap:7px 16px;padding:10px 0;margin:0 0 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:12px}
@@ -14,7 +14,7 @@
 .lx-caution{font-size:13px;color:#666;border-left:2px solid #d1cfca;padding:5px 13px;margin:15px 0}
 .lx-sources{font-size:12px;line-height:2;color:#777;padding:16px 0 30px}.lx-sources a,.lx-section a{color:#245e81;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:680px){.lx-head h1{font-size:23px}.learning-code code{font-size:11px}}
-</style><script src="/assets/code-copy.js?v=0.3.2" defer></script></head><body><div class="shell" id="top">
+</style><script src="/assets/code-copy.js?v=0.3.3" defer></script></head><body><div class="shell" id="top">
 <header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">系统专题</a></nav></header>
 <header class="lx-head"><nav class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PK 浓度统计量</nav><h1>PK 浓度统计量：含义、公式与 TFL 实现</h1><p>不只是会算：要能解释为什么报告 Mean/CV，也报告 GeoMean/GeoCV，知道 N 与 n 的区别，以及 BLQ 如何改变统计量。</p></header>
 <main class="article-body">
@@ -122,4 +122,4 @@ run;
 <p>建议独立 QC：<strong>人群 N、有效 n、BLQ 数、n_positive、零值/缺失、分析物、给药组、时间点、单位、舍入位数、单个受试者重复记录</strong>。CV% 在 Mean=0、SD 在 n&lt;2、几何 CV% 在对数样本不足时，不应强行计算一个数字。</p>
 </section>
 <aside class="lx-sources"><strong>参考：</strong><a href="https://blogs.sas.com/content/iml/2019/10/02/geometric-mean-deviation-cv-sas.html" target="_blank" rel="noopener noreferrer">SAS 官方博客 · 几何均值/几何 SD/几何 CV 的公式</a>；<a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473537.htm" target="_blank" rel="noopener noreferrer">PROC MEANS</a>；<a href="https://www.accessdata.fda.gov/drugsatfda_docs/nda/2015/207865Orig1s000ClinPharmR.pdf" target="_blank" rel="noopener noreferrer">FDA 临床药理审评报告中的几何 CV 示例</a>。<br><strong>来源边界：</strong>统计公式参考公开资料；表头字段与 Tmax/BLQ 约定依据之前的项目讨论。代码是教学示例，未在本次会话中的 SAS 环境实际运行。</aside>
-</main><footer class="site-footer"><span><a href="/sas-learning/">← 系统专题</a> · by dw</span><span>V0.3.2</span></footer></div></body></html>
+</main><footer class="site-footer"><span><a href="/sas-learning/">← 系统专题</a> · by dw</span><span>V0.3.3</span></footer></div></body></html>
