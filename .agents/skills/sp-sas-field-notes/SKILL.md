@@ -14,6 +14,15 @@ description: 将真实 SAS/SP/CDISC/TFL 编程问题压缩成极简、连续编�
 - **示例标识**：只用匿名或公开的 `sashelp.*` 示例；未经用户实际运行验证的示例，应明确标为官方语法教学代码。不能因为出现在网页就宣称已经在 SAS 运行。
 - **保留原始问题**：涉及 `PROC REPORT` ODS RTF、Raw RTF `~R'...'` 时，必须区分 SAS 通用语法与目的地特定排版代码；记录实际版本差异。
 
+## 深度原则（V0.3.1 起）
+
+- **简洁不是删掉理解所需的信息。** 速查页只保留快捷答案和入口；凡涉及概念、统计公式、计算前提、分析集、不同口径或实质性 QC 风险时，须在对应系统专题解释清楚，不能仅贴函数名与公式。
+- **PK 浓度 Table 必需统计量**：N、n、n of BLQ、Mean、SD、CV%、Median、Min、Max、GeoMean、GeoSD、GeoCV%（历史 Shell 可能命名 Geostd/CVB%，须以 Shell/Spec 为准）。解释统计含义、原尺度/对数尺度、零与 BLQ、计算条件、n 与 N 的不同。**GeoCV% ≠ SD/GeoMean**，而是 `100*sqrt(exp(sd(log(x))**2)-1)`。
+- **PK 参数的特殊情况**：如 Tmax 仅显示 n/Median/Min/Max，特殊的 NC/NA、BLQ 阈值、分析标志与 PPCAT/PPTPTREF 的选择皆为项目规则，严禁普适化。
+- **PROC REPORT**：把 COLUMN 中的跨列标题结构和 ODS TAGSETS.RTF 的样式控制分开讲。系统专题必须包括 STYLE(HEADER/COLUMN)、DEFINE CELLWIDTH、ODS 目的地开关、RTF 原生控制字 `~R` 的角色、段落/边框原理以及文件版面 QC。
+- **案例+推理**：公式解释要附至少一个最小数值算例或可运行结构示例；凡 SAS/Word 环境未实际执行，只能标记“教学/待运行验证”。
+- 新入口：`/sas-learning/pk-concentration/` 与 `/sas-learning/report-rtf/`。编号速查依次新增 09、10，保持首页 SAS notes 置顶、折叠目录不变。
+
 ## 宗旨
 
 **人狠话不多。只保留未来能帮自己解决问题的内容。**
