@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="从 SELECT、WHERE 到 GROUP BY、JOIN、DISTINCT、HAVING；重点解决受试者去重与分母口径问题。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/sql/"><link rel="stylesheet" href="/assets/style.css"><title>PROC SQL：从查询到 TFL 数据汇总 · SP</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="从 SELECT、WHERE 到 GROUP BY、JOIN、DISTINCT、HAVING；重点解决受试者去重与分母口径问题。"><meta name="theme-color" content="#fff"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="canonical" href="https://sp.769967.xyz/sas-learning/sql/"><link rel="stylesheet" href="/assets/style.css?v=0.3.2"><title>PROC SQL：从查询到 TFL 数据汇总 · SP</title>
 <style>
 .learning-head{padding:25px 0 22px}.learning-topline{font:600 11px/1.4 system-ui,sans-serif;letter-spacing:.09em;color:#999}
 .learning-head h1{margin:9px 0 8px;font-size:27px}.learning-head p{font-size:14px;color:#777;max-width:700px;line-height:1.9}
@@ -12,7 +12,7 @@
 .learning-qc{font-size:12px!important;color:#727272!important}.learning-more{padding:18px 0 28px;font-size:13px;color:#666}
 .learning-more a{color:#245e81;text-decoration:underline;text-underline-offset:3px}.learning-more p{margin:8px 0}
 @media(max-width:700px){.learning-head h1{font-size:23px}.learning-code code{font-size:11px}}
-</style></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
+</style><script src="/assets/code-copy.js?v=0.3.2" defer></script></head><body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">专题</a></nav></header>
 <header class="learning-head"><div class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PROC SQL：从查询到 TFL 数据汇总</div><div class="learning-topline">SAS / SP LEARNING TRACK</div><h1>PROC SQL：从查询到 TFL 数据汇总</h1><p>从 SELECT、WHERE 到 GROUP BY、JOIN、DISTINCT、HAVING；重点解决受试者去重与分母口径问题。</p></header>
 <main><nav class="learning-nav" aria-label="章节快速索引"><a href="#level-1">01 基础</a><a href="#level-2">02 实战</a><a href="#level-3">03 进阶 / QC</a></nav><section class="learning-part" id="level-1"><div class="learning-kicker">LEVEL 1 · 基础</div><h2>SELECT / WHERE / ORDER BY</h2><p>先选列、筛行、排序；<code>DISTINCT</code> 去重复组合，不等同于按特定键保留首条记录。</p><pre class="learning-code"><code>proc sql;
   select name, sex, age
@@ -48,4 +48,4 @@ quit;</code></pre><p class="learning-qc"><strong>检查重点：</strong>这个�
   select a.*, b.maxage
   from sashelp.class a
   left join key_unique b on a.sex=b.sex;
-quit;</code></pre><p class="learning-qc"><strong>检查重点：</strong>JOIN 前后比较记录数，检查 JOIN 键唯一性与缺失匹配；需做存在性判断时优先考虑 EXISTS，避免无意义的 1:N 扩张。</p></section><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473678.htm" target="_blank" rel="noopener noreferrer">SAS PROC SQL SELECT ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.1</span></footer></div></body></html>
+quit;</code></pre><p class="learning-qc"><strong>检查重点：</strong>JOIN 前后比较记录数，检查 JOIN 键唯一性与缺失匹配；需做存在性判断时优先考虑 EXISTS，避免无意义的 1:N 扩张。</p></section><aside class="learning-more"><p><strong>学习边界：</strong>代码使用 SASHELP 或自造示例，仅为官方语法参考与学习示范，未在本次对话的 SAS 环境执行；进入正式 TFL 前须按 SAP、Spec 和独立 QC 核对。</p><p>官方文档：<a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473678.htm" target="_blank" rel="noopener noreferrer">SAS PROC SQL SELECT ↗</a></p><p><a href="/sas-notes/">返回 SAS 速查笔记</a> · <a href="/sas-learning/">查看全部专题</a></p></aside></main><footer class="site-footer"><span>by dw</span><span>V0.3.2</span></footer></div></body></html>
