@@ -30,6 +30,8 @@ description: 将真实 SAS/SP/CDISC/TFL 编程问题压缩成极简、连续编�
 - 保持 PC 文字可读性与手机端的平衡：PC 端在全局 CSS 中集中维护对比度；不要在个别页面用更浅的行内颜色覆盖。
 - 复用的组件应优先集中到 `public/assets/`，保证后续新增 SAS 代码页自动获得按钮。
 
+- 代码按钮文字使用英文 `Copy` / `Copied` / `Failed`。可悬停设备默认隐藏，hover 或键盘聚焦时显示；触屏常显确保可触达。全站共用 `/assets/code-copy.js` 和 `/assets/style.css`，不可在各页重复创建。
+
 ## 宗旨
 
 **人狠话不多。只保留未来能帮自己解决问题的内容。**
