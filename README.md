@@ -2,6 +2,14 @@
 
 **V0.3.7** — SAS 01–09 笔记 + 6 个问题驱动专题；跨列分组与 RTF 合并，代码区更紧凑；AI 继续隐藏。
 
+## V0.3.7：Findings → BDS 深度业务专题
+
+- 新增 `/bds-findings/`，从 CRF/EDC → SDTM → ADaM BDS → TFL 解释 LB、EG、VS、PE 的医学背景与数据结构。
+- 四个检查专题可切换；增加流程图、概念结构图、虚构数字算例、QTcF 校正交互小工具、SAS 教学代码和 QC 清单。
+- 特别强调 PE 的 CDASH Best Practice 路径（PR/MH/AE/CE）、重复 ECG、实验室单位/参考范围/CTCAE、VS 体位等业务差异。
+- 更新首页索引、公开知识索引、站点地图；静态资源与 AI 状态保持不变。
+- Cloudflare Pages 使用 main 自动发布；代码已推送不代表线上请求已验证。
+
 ## 页面与文件
 
 - `/`：文章索引（不展示搜索框或大幅介绍）
