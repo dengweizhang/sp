@@ -1,11 +1,12 @@
 # SP · Clinical Statistical Programming
 
-**V0.2.13** — 极简 SP 统计编程知识库、SAS 01–04 编号速查与项目级记录 Skill；AI 继续隐藏。
+**V0.3.0** — 极简 SP 统计编程知识库、SAS 01–04 编号速查与项目级记录 Skill；AI 继续隐藏。
 
 ## 页面与文件
 
 - `/`：文章索引（不展示搜索框或大幅介绍）
-- `/sas-notes/`：持续更新的 SAS 极简速查笔记；目录与正文统一 01–04 连续编号，每条只留结论、关键代码与必要边界
+- `/sas-notes/`：SAS 实战速查 01–08；目录可折叠，问题、关键代码、必要边界，首页固定置顶
+- `/sas-learning/`：SAS 系统专题入口，五个教学页面覆盖 SQL、FREQ、MEANS/SUMMARY/UNIVARIATE、POWER、SGPLOT/SGPANEL
 - `/pk-parameters/`：常用 PK 参数文章，含 14 个参数的 NCA 计算方法、QC 注意事项和手算示例
 - `/indication-interview/`：治疗领域、适应症、受试者与研究目的的区别，SP 面试项目复盘、回答模板和自测
 - `/trial-designs/`：临床试验设计，按研究结构/随机/盲法/对照/SAD-MAD/适应性分类，含可切换的小型流程图和 SP 面试卡片
@@ -136,3 +137,11 @@
 - 将 CAT / CATT / CATS / CATX、TRANWRD、COMPRESS、SCAN、STRIP、UPCASE、LOWCASE、PROPCASE、TRIM、NMISS、CMISS 等整理成 **8 类、42 项**功能对照，每项只给短示例和一句说明，常用函数加粗。
 - `NMISS` 只用于数值，`CMISS` 可同时统计字符、数值缺失；强调 `COMPRESS(...,,'kd')` 会删除小数点/负号。
 - 更新 `knowledge-index.json` 关键词，并在项目级 Skill 中固定“紧凑分组表格 + 高频加粗”的规则。
+
+## V0.3.0：速查笔记 + 系统专题双层知识库
+
+- 继续维护 `/sas-notes/`，新加 05 Unicode/上下标，06 PROC REPORT 跨列分组标题，07 PRXMATCH/PRXCHANGE，08 ODS RTF 标题分页；编号 01–08 与折叠目录同步。
+- 新增 `/sas-learning/` 与五个独立页面 `/sas-learning/sql/`、`/freq/`、`/statistics/`、`/power/`、`/graphics/`。每页包含基础、TFL 实战、进阶与 QC，使用公开示例或虚构数据。
+- 首页 SAS 实战笔记仍在第一位，系统专题位于第二位；静态索引及 sitemap 同步更新。
+- `docs/sas-learning-roadmap.md` 记录历史实际话题、尚未验证的空白和后续路线。
+- `.agents/skills/sp-sas-field-notes/SKILL.md` 更新为双层内容规范。所有新代码属于文档示例，不能声称在用户 SAS 环境已运行。
