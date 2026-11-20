@@ -1,12 +1,12 @@
 # SP · Clinical Statistical Programming
 
-**V0.3.3** — SAS 01–10 速查 + 7 个系统专题；新增 PK 浓度统计量原理与 PROC REPORT RTF 格式细解；AI 继续隐藏。
+**V0.3.4** — SAS 01–09 笔记 + 6 个问题驱动专题；跨列分组与 RTF 合并，代码区更紧凑；AI 继续隐藏。
 
 ## 页面与文件
 
 - `/`：文章索引（不展示搜索框或大幅介绍）
-- `/sas-notes/`：SAS 实战速查 01–10；目录可折叠，问题、关键代码、必要边界，首页固定置顶
-- `/sas-learning/`：SAS 系统专题入口，七个教学页面覆盖 SQL、FREQ、MEANS/SUMMARY/UNIVARIATE、PK 浓度统计、PROC REPORT/RTF、POWER、SGPLOT/SGPANEL
+- `/sas-notes/`：SAS 实战速查 01–09；目录可折叠，问题、关键代码、必要边界，首页固定置顶
+- `/sas-learning/`：SAS 系统专题入口，六个问题驱动专题：SQL、FREQ、MEANS/SUMMARY/UNIVARIATE、PK 浓度统计、POWER、SGPLOT/SGPANEL
 - `/pk-parameters/`：常用 PK 参数文章，含 14 个参数的 NCA 计算方法、QC 注意事项和手算示例
 - `/indication-interview/`：治疗领域、适应症、受试者与研究目的的区别，SP 面试项目复盘、回答模板和自测
 - `/trial-designs/`：临床试验设计，按研究结构/随机/盲法/对照/SAD-MAD/适应性分类，含可切换的小型流程图和 SP 面试卡片
@@ -169,3 +169,12 @@
 - 支持鼠标悬停代码框显示；非悬停时按钮默认透明并不接收鼠标，减少视觉干扰。
 - 键盘 Tab 聚焦按钮时同样显示；触屏设备没有 hover 操作，始终显示以保证可用性；打印时隐藏按钮。
 - 更新全站 `style.css?v=0.3.3` 与 `code-copy.js?v=0.3.3` 防缓存；没有修改 SAS 代码正文。
+
+## V0.3.4：知识结构与代码布局
+
+- Copy 按钮不再占用代码块顶部 41px 的空行：恢复接近原有 12px 内边距，按钮绝对定位于右上角，PC 端 hover/focus 显示，触屏保持可点。
+- SAS 实战笔记 06 合并 PROC REPORT 的 COLUMN 组标题、STYLE 排版、RTF 控制与 QC；删除重复编号 10，仍保留旧 `#note-10` 指向 06，实际笔记为 01–09。
+- `/sas-learning/report-rtf/` 从专题索引移除，改为轻量跳转到 `/sas-notes/#note-06`，避免旧链接失效。
+- SQL、FREQ、统计过程、POWER、绘图专题不再采用“基础/实战/进阶”栏目，而由真实疑问串起解释与代码；PK 浓度专题也改成提问式标题。
+- 更新项目级 Skill：从现象出发，自然推理到解决方案；内容长度由解释是否充分决定，避免形式化章节。
+- 更新站点索引、站点地图和全站样式版本 V0.3.4；实际浏览器效果与 Cloudflare 发布仍需生产检查。
