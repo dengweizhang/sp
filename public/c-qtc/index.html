@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="C-QTc 浓度–QTc 关系分析：从 ADEG 的 CHG、ADPC 的浓度理解 Δ、ΔΔ、安慰剂校正、ECG–PK 时间匹配、90% CI 与 SP QC。">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="canonical" href="https://sp.769967.xyz/c-qtc/">
+<link rel="stylesheet" href="/assets/style.css?v=0.3.7">
+<title>C-QTc：从 ADEG + ADPC 到浓度–效应分析 · SP</title>
+<script src="/assets/code-copy.js?v=0.3.4" defer></script>
+<style>
+#cqtc .cqtc-equations{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:15px 0}
+#cqtc .cqtc-equations>div{border:1px solid #e1e7e9;border-radius:4px;padding:13px;background:#fbfcfc}
+#cqtc .cqtc-equations strong{display:block;font:650 24px/1.4 Georgia,serif;color:#345f72}
+#cqtc .cqtc-equations small{display:block;font-size:12px;color:#69767b}
+#cqtc .cqtc-calc{border:1px solid #dce6e8;border-radius:5px;padding:17px;margin:18px 0;background:#fafbfb}
+#cqtc .cqtc-calc h3{margin:0 0 7px;font-size:16px}
+#cqtc .cqtc-calc p{font-size:13px;color:#67767d}
+#cqtc .calc-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0}
+#cqtc .calc-grid label{display:block;font:600 11px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;color:#62717a}
+#cqtc .calc-grid input{width:100%;min-width:0;padding:7px 6px;border:1px solid #cdd8dc;border-radius:3px;background:#fff;font-size:15px;color:#263b46}
+#cqtc .calc-output{border-top:1px solid #dbe4e6;padding-top:11px;display:flex;flex-wrap:wrap;gap:10px 28px}
+#cqtc .calc-output>div{min-width:110px}
+#cqtc .calc-output span{font-size:12px;color:#6f7d83;display:block}
+#cqtc .calc-output strong{font:650 23px/1.5 Georgia,serif;color:#29566e;display:block}
+#cqtc .cqtc-flow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:16px 0}
+#cqtc .cqtc-flow>div{border-top:2px solid #b8c9cf;background:#f8fafb;padding:12px 14px}
+#cqtc .cqtc-flow b{display:block}
+#cqtc .cqtc-flow small{font-size:12px;color:#65737a}
+#cqtc .cqtc-flow .full{grid-column:1/-1;background:#f6f9f9;border-top-color:#779ba9}
+#cqtc .cqtc-micro{font-size:12px;color:#707b82}
+#cqtc .cqtc-questions details{border-bottom:1px solid #e6eaec;padding:9px 0}
+#cqtc .cqtc-questions summary{cursor:pointer;font-weight:600;font-size:14px}
+#cqtc .cqtc-questions p{padding:7px 0 0;font-size:13px}
+@media(max-width:620px){#cqtc .calc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#cqtc .cqtc-equations{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell" id="top">
+<header class="site-header"><a class="brand" href="/" aria-label="SP 首页">SP.</a>
+<nav class="tool-links" aria-label="常用工具"><a href="https://xpt.769967.xyz" target="_blank" rel="noopener noreferrer">XPT <span aria-hidden="true">↗</span></a><a href="https://ct.769967.xyz" target="_blank" rel="noopener noreferrer">CT <span aria-hidden="true">↗</span></a></nav></header>
+<header class="article-header">
+<nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / C-QTc 专题</nav>
+<h1>C-QTc：从 ADEG + ADPC 到浓度–效应分析</h1>
+<p class="article-lead">不从全新的术语开始，而从 SP 已经熟悉的 BASE、CHG、QTcF 和血药浓度出发，理解 Δ、ΔΔ 及后续建模。</p>
+</header>
+<main class="article-body" id="cqtc">
+<details class="toc-inline"><summary>本页目录 · 从问题出发</summary><nav aria-label="专题目录">
+<a href="#why">1. 它和 ADEG 有什么不同？</a><a href="#delta">2. Δ 和 ΔΔ 到底是什么意思？</a>
+<a href="#bridge">3. ADEG 与 ADPC 如何连接？</a><a href="#shells">4. Shell 分成哪几类？</a>
+<a href="#dataset">5. 数据集怎么设计？</a><a href="#qc">6. SP 需要 QC 什么？</a>
+<a href="#next">7. 下一步探索</a><a href="#refs">8. 参考资料</a>
+</nav></details>
+<div class="sp-learning-lead"><strong>从实际疑问开始</strong>
+<p>常规 ADEG 能回答“给药后 QTcF 变了吗、多少人超过阈值”；C-QTc 则试图回答“血药浓度越高，QTcF 是否系统性延长，以及在临床相关暴露下可能延长多少”。它是分析模块，不是一个新的 SDTM Domain；可以复用 ADEG，但还需要 ADPC 及研究方案定义的配对/模型规则。</p></div>
+
+<section id="why"><h2>1. 它和 ADEG 常规分析有什么不同？</h2>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>问题</th><th>常规 ADEG</th><th>C-QTc</th></tr></thead>
+<tbody><tr><td>分析对象</td><td>ECG 测量和变化</td><td>药物浓度与 ECG 变化的联系</td></tr>
+<tr><td>横坐标</td><td>访视或给药后时间</td><td>也看时间，但核心模型关注浓度</td></tr>
+<tr><td>常用输出</td><td>描述统计、Shift、异常阈值 n(%)</td><td>时间曲线、浓度–效应散点、模型预测及 90% CI</td></tr>
+<tr><td>数据来源</td><td>EG → ADEG</td><td>EG/ADEG + PC/ADPC + ADSL 等</td></tr>
+<tr><td>关键注意</td><td>基线、重复测量、分析标志</td><td>再加 ECG–PK 时间匹配、安慰剂校正及模型假设</td></tr>
+</tbody></table></div>
+<p>你可以把 ADEG 理解为 <strong>effect 的测量基础</strong>，把 ADPC 理解为 <strong>exposure 的逐时间点浓度来源</strong>。两者一经正确匹配，就有了探索浓度–QTc 关系的基本记录。</p></section>
+
+<section id="delta"><h2>2. 一个 Δ、两个 Δ：把 CHG 思路延长一步</h2>
+<div class="cqtc-equations"><div><strong>ΔQTcF</strong><small>Delta：较基线变化值</small><p>给药后 QTcF − 基线 QTcF<br>相当于常见 ADEG 的 <code>CHG</code>。</p></div>
+<div><strong>ΔΔQTcF</strong><small>Double Delta：双重差值</small><p>试验药组平均 ΔQTcF − 安慰剂组平均 ΔQTcF（同一分析时间点的简化比较）。</p></div></div>
+<p><strong>两个三角形不是“连续扣两次基线”。</strong>第一步消除自身基线水平差异，第二步通过同期安慰剂组的变化，帮助剥离非特异性的时间效应。ΔHR、ΔΔHR 也遵循相同逻辑。</p>
+<div class="cqtc-calc" aria-labelledby="calc-h"><h3 id="calc-h">自己改数字，直观看到 ΔΔ 如何产生</h3>
+<p>下列全部是虚构的同时间点组均值，单位 ms。这个小计算器只展示简单差值；<strong>不代表正式 C-QTc 混合效应模型结果</strong>。</p>
+<div class="calc-grid">
+<label>试验药组基线 <input id="a-base" type="number" value="410" step="0.1"></label>
+<label>试验药组给药后 <input id="a-post" type="number" value="425" step="0.1"></label>
+<label>安慰剂组基线 <input id="p-base" type="number" value="405" step="0.1"></label>
+<label>安慰剂组给药后 <input id="p-post" type="number" value="410" step="0.1"></label>
+</div>
+<div class="calc-output" aria-live="polite">
+<div><span>试验药 ΔQTcF</span><strong id="a-delta">+15.0 ms</strong></div>
+<div><span>安慰剂 ΔQTcF</span><strong id="p-delta">+5.0 ms</strong></div>
+<div><span>ΔΔQTcF</span><strong id="dd-delta">+10.0 ms</strong></div>
+</div></div>
+<p>如果没有合适的安慰剂对照，则不能照搬这个双重差值公式；必须结合研究设计与 SAP 决定如何估计或解释药物效应。即使存在安慰剂组，<strong>模型估计的安慰剂校正效应</strong>也不一定等于未调整的组均值差。</p></section>
+
+<section id="bridge"><h2>3. 已有 ADEG 和 ADPC，下一步如何接起来？</h2>
+<div class="cqtc-flow"><div><b>EG → ADEG</b><small>同一 ECG 测量的 QT、RR、QTcF、HR、基线、CHG、ECG 实际采集时间</small></div>
+<div><b>PC → ADPC</b><small>同一分析物的浓度、单位、实际采血时间、给药相对时间、BLQ 状态</small></div>
+<div class="full"><b>按研究规则匹配 → C-QTc 分析记录</b><small>受试者 + 给药周期/队列 + 时间匹配 + 有效 ECG/PK + 分析人群 → 描述统计、绘图、建模</small></div></div>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>受试者</th><th>给药后时间</th><th>ADPC 浓度</th><th>ADEG QTcF</th><th>ΔQTcF</th></tr></thead><tbody>
+<tr><td>虚构 A</td><td>1 h</td><td>20 ng/mL</td><td>415 ms</td><td>+5 ms</td></tr>
+<tr><td>虚构 A</td><td>2 h</td><td>50 ng/mL</td><td>422 ms</td><td>+12 ms</td></tr>
+<tr><td>虚构 A</td><td>4 h</td><td>100 ng/mL</td><td>430 ms</td><td>+20 ms</td></tr></tbody></table></div>
+<p class="cqtc-micro">示意基线为 410 ms，以上浓度、时间和结果完全虚构，未使用任何项目数据。</p>
+<p>这里的难点不是 SQL JOIN 语法，而是 <strong>实际采血时间与 ECG 时间不完全相同</strong>。不能简单认定 <code>ATPTN</code> 相同就一定可以配对；允许的时间差、匹配窗口、重复 ECG 处理和缺失/BLQ 规则，都要由具体分析计划定义。</p>
+<p><strong>另一个高频误区：</strong>C-QTc 的 HR 应使用与 ECG 方法一致的心率测量，不能无条件把 VS 的 PULSE 替换进来；需要的是逐时间点的浓度（通常来自 ADPC），而不是只用 ADPP 的 Cmax、AUC 概括每条 ECG 观测。</p></section>
+
+<section id="shells"><h2>4. 常见 Shell 可以分成三组</h2>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>Shell 类型</th><th>在回答什么</th><th>SP 关注点</th></tr></thead><tbody>
+<tr><td>描述统计表</td><td>HR、QTcF、ΔHR、ΔQTcF；不同组/时点的 n、Mean、SD、Median、Min/Max</td><td>分析集、参数、基线、重复测量和时点</td></tr>
+<tr><td>时间变化曲线</td><td>均值或安慰剂校正值随给药后时间如何变化</td><td>时间顺序、CI/SE/SD 定义、分组和缺失</td></tr>
+<tr><td>浓度–效应图 / 模型</td><td>浓度与 QTcF 变化是否相关；最高临床相关暴露下的预测效应</td><td>ECG–PK 配对、协变量、重复测量相关性、模型拟合与 90% CI</td></tr>
+</tbody></table></div>
+<p><strong>注意区分：</strong>按时间点算出的原始均值之差、经过模型调整的安慰剂校正效应、浓度–效应模型预测结果，不是一个统计量。带 90% CI 的散点趋势图也不能自动替代正式模型分析。</p>
+<p>在适用的 ICH E14/S7B 浓度–反应框架下，常见监管判断关注：<strong>最高临床相关暴露水平处，模型估计 QTc 效应的双侧 90% CI 上限是否低于 10 ms</strong>。这需要满足研究设计、数据质量、模型与覆盖暴露范围等前提，不能仅用图形斜率判定。</p></section>
+
+<section id="dataset"><h2>5. C-QTc 是否一定要新建 ADCQTC？</h2>
+<p><strong>不一定。</strong>“C-QTc”描述分析目的，不代表 CDISC 标准要求必须有一个固定名称的 <code>ADCQTC</code> 数据集。若现有 ADEG 已保留足够精度、可追溯且分析就绪的信息，可在适用的数据结构中扩展；若需要合并 PK 时间匹配、分析队列或模型专用变量，也可以根据项目需要建立独立分析数据集。名称、结构和变量遵从项目 Spec 与 ADaM 原则。</p>
+<p>建议先做数据流检查，而不是立即造新 Domain：</p>
+<pre><code>/* 教学伪代码：不是可直接执行的项目程序 */
+ADEG: USUBJID, ECG_DATE_TIME, PARAMCD, AVAL, BASE, CHG
+ADPC: USUBJID, PK_SAMPLE_TIME, ANALYTE, CONC
+ADSL: USUBJID, CQT_SET_FLAG, COHORT, TRT
+MATCH: subject + period + protocol-defined time window
+OUT: paired concentration + ECG effect + analysis metadata</code></pre>
+<p class="cqtc-micro">数据结构为教学示例，ECG_DATE_TIME、PK_SAMPLE_TIME、CONC、CQT_SET_FLAG 是占位逻辑名，不保证是 CDISC 标准变量名。实际字段以 ADaM Spec 为准。</p></section>
+
+<section id="qc"><h2>6. SP 需要优先 QC 的六个问题</h2>
+<ol>
+<li><strong>人群：</strong>Safety Set 与 C-QTc Set 不能默认等同；是否需要可评价的 ECG–PK 对？</li>
+<li><strong>参数：</strong>QTcF 的公式和 RR 单位是否一致？HR 来自 ECG 还是 VS？</li>
+<li><strong>基线：</strong>首次给药前最近一次，还是 time-matched baseline？是否与模型一致？</li>
+<li><strong>匹配：</strong>PK 与 ECG 实际时间差、跨天、跨周期、同一时点三次 ECG 如何处理？</li>
+<li><strong>缺失与 BLQ：</strong>浓度不可定量、缺少安慰剂时点、缺少基线时是否保留？</li>
+<li><strong>统计层次：</strong>个体 CHG、组均值差、模型效应和 90% CI 是否分别核对？</li>
+</ol>
+<p>所有规则都应当由 Protocol / SAP / C-QTc Analysis Plan / Spec 明确，不应根据示意 Shell 推断成普适规则。</p></section>
+
+<section id="next"><h2>7. 下一步值得真正动手做什么？</h2>
+<div class="cqtc-questions">
+<details open><summary>问题 A：一名受试者有三次 ECG、一条 PK 浓度，该如何配对？</summary><p>先判定 ECG 三次是独立记录还是需要按方案在时间点内取均值；再核实配对的是 ECG 实际采集时间、均值记录对应的时间，还是名义时间。不能先合并，再倒推医学规则。</p></details>
+<details><summary>问题 B：ΔΔQTcF 要不要放入每一名受试者的 ADEG？</summary><p>未必。安慰剂校正通常基于组/时间点比较或统计模型，并非每名试验药受试者天然拥有一条个人 ΔΔQTcF。先弄清 Shell 展示和模型需要何种记录粒度。</p></details>
+<details><summary>问题 C：有了散点图和一条回归线，就能评价 QT 风险了吗？</summary><p>不能。还需要验证浓度覆盖范围、时间效应、潜在滞后（hysteresis）、模型形式和拟合诊断，最后在预先定义的暴露水平给出带不确定性的效应估计。</p></details>
+</div>
+<p>推荐学习顺序：<strong>Δ/ΔΔ → 时间匹配 → C-QTc 分析数据集 → 描述性 TFL → 浓度–效应模型 → QC</strong>。本页作为后续讨论的第一版笔记。</p></section>
+
+<section id="refs"><h2>8. 标准与延伸阅读</h2>
+<ul>
+<li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/e14-and-s7b-clinical-and-nonclinical-evaluation-qtqtc-interval-prolongation-and-proarrhythmic" target="_blank" rel="noopener noreferrer">FDA · E14/S7B Q&amp;A (R1)，2026 年 10 月</a>：浓度–反应分析与 QT/QTc 风险评估。</li>
+<li><a href="https://www.ema.europa.eu/en/scientific-guidelines/ich-e14-s7b-r1-qas-clinical-evaluation-qt-qtc-interval-prolongation-proarrhythmic-potential-non-antiarrhythmic-drugs-questions-answers" target="_blank" rel="noopener noreferrer">EMA · ICH E14/S7B (R1)</a>：整合后的 Q&amp;A。</li>
+<li><a href="https://www.cdisc.org/standards/foundational/adam" target="_blank" rel="noopener noreferrer">CDISC · ADaM / ADaMIG</a>：BDS、可追溯性和分析就绪原则。</li>
+<li><a href="/bds-findings/">本站 · Findings → BDS：EG / ADEG</a> 与 <a href="/sas-learning/pk-concentration/">PK 浓度分析</a>。</li>
+</ul>
+<p class="cqtc-micro">本文是公开的学习资料；所有数字、研究对象、时间点均为虚构。未上传任何具体研究的图表、申办方资料、项目编号或原始数据；正式生产分析请以对应项目 SAP、Spec 和有效法规指南为准。</p></section>
+</main>
+<footer class="site-footer"><span>by dw · <a href="/">返回文章目录</a></span><span>SP V0.3.8</span></footer>
+</div>
+<script>
+(function(){
+  var ids=['a-base','a-post','p-base','p-post'],inputs=ids.map(function(id){return document.getElementById(id)});
+  function fmt(x){return Number.isFinite(x)?(x>0?'+':'')+x.toFixed(1)+' ms':'—'}
+  function calc(){var a=inputs.map(function(x){return x.value.trim()===''?NaN:Number(x.value)});
+    document.getElementById('a-delta').textContent=fmt(a[1]-a[0]);
+    document.getElementById('p-delta').textContent=fmt(a[3]-a[2]);
+    document.getElementById('dd-delta').textContent=fmt((a[1]-a[0])-(a[3]-a[2]));
+  }
+  inputs.forEach(function(i){i.addEventListener('input',calc)});calc();
+})();
+</script>
+</body></html>
