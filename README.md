@@ -1,6 +1,6 @@
 # SP · Clinical Statistical Programming
 
-**V0.2.11** — 极简 SP 统计编程知识库、SAS 01–04 编号速查与项目级记录 Skill；AI 继续隐藏。
+**V0.2.12** — 极简 SP 统计编程知识库、SAS 01–04 编号速查与项目级记录 Skill；AI 继续隐藏。
 
 ## 页面与文件
 
@@ -57,21 +57,21 @@
 
 文档参考：https://api-docs.deepseek.com/guides/web_tools/ 与 https://developers.cloudflare.com/pages/functions/get-started/ 。
 
-## V0.2.11：暂时隐藏 AI
+## V0.2.12：暂时隐藏 AI
 
 - 首页与 PK 文章都已移除 `/assets/ai.js` 引用，右下角不显示入口。
 - 服务端 `functions/api/chat.js` 中 `AI_ENABLED = false`，避免直接访问 API 产生 DeepSeek 消耗。
 - 恢复时：将 `AI_ENABLED` 改为 `true`，在需要显示的页面 `<head>` 中加入 `<script src="/assets/ai.js" defer></script>`，并部署；如使用 API，还需设置密钥与限流。
 - AI 源码与文章索引保留，不删除现有能力。
 
-## V0.2.11 · PK 交互图解
+## V0.2.12 · PK 交互图解
 
 - `public/assets/pk-interactive.js`：只加载在 PK 文章内的本地 SVG 交互图，无外部依赖或数据上报。
 - 浓度–时间图：点选 Cmax/Tmax、AUClst、AUCinf、Lambda_z、t½，显示不同强调状态与解释。
 - AUC 积分图：切换线性梯形法 / 对数梯形法；对相同两个采样点分别计算示意面积 3.750 与 3.607 ng·h/mL。
 - 图为模拟数据（非项目数据）；手机上图表可横向滑动。原有 AI 入口继续隐藏且接口暂停。
 
-## V0.2.11：PARAMCD 对照与点击式图解
+## V0.2.12：PARAMCD 对照与点击式图解
 
 - 参数表新增 PARAMCD（参考）列，按 SDTM PKPARMCD 控制术语 C85839 匹配；ADPP PARAMCD 最终以项目 Spec 为准。
 - AUCinf、MRTinf、CL 和 CL/F 按观测/预测、给药途径等展示多个候选代码，附可展开解释。
@@ -79,20 +79,20 @@
 - AUC 梯形法图：点击「线性梯形」/「对数梯形」按钮查看面积差异；不再支持拖动。
 - 图解数据均为示意，不可代替项目 PK 分析输出。AI 继续隐藏并停用。
 
-## V0.2.11：适应症与面试准备
+## V0.2.12：适应症与面试准备
 
 - 新增 `/indication-interview/`，按“概念区分→为什么不是每个项目都有患者适应症→5种项目背景→Protocol复盘→面试话术→自测”组织。
 - 例子是通用、匿名的学习示意，不泄露具体申办方与保密研究内容。
 - 首页文章数更新到 2，静态知识索引和 sitemap 同步更新。原 AI 入口继续隐藏。
 
-## V0.2.11：临床试验设计
+## V0.2.12：临床试验设计
 
 - 依据 ICH E8(R1)、E9、E10、FDA 和 ClinicalTrials.gov 的公开权威说明，区分研究结构、随机化、盲法、对照、比较目标及研究阶段。
 - 新增 5 状态点击式路径图：平行、交叉、单臂、序贯、析因；无拖动、无外部依赖。
 - 从 SAD/MAD 队列执行、随机双盲逻辑、TA/TE/TV/SE 到 ADaM/TFL 的工作影响，配合面试示范回答与六道自测题。
 - 更新首页为 3 篇文章、公开知识索引与 sitemap；AI 仍然隐藏并停用。
 
-## V0.2.11：统计学与临床药理学基础
+## V0.2.12：统计学与临床药理学基础
 
 - 分成两篇交叉链接的独立文章；统计学重在数据分析推断与 TFL，药理学重在给药、药代、药效与安全性科学逻辑。
 - 统计学篇：11 个章节，描述统计、P 值与 CI、ANCOVA、MMRM、KM/Cox、分析集、缺失数据、Estimand、多重性与面试题。
@@ -101,7 +101,7 @@
 - 首页共 5 篇，knowledge-index、sitemap 与版本号同步更新。参考监管指南主要来自 ICH/EMA/FDA。
 
 
-## V0.2.11：SAS 实战问题笔记
+## V0.2.12：SAS 实战问题笔记
 
 - 首页新增第 6 篇：`/sas-notes/`。使用现有文章排版，无复杂框架或新后端。
 - NOTE 001（2026-11-20）：PICTURE 百分比格式拼接多余空格，实测采用 `CATX(' ',COUNT,PCT_FORMATTED)`；保留格式生成的括号内部空格。
@@ -110,16 +110,22 @@
 - 站点为公开静态内容，**不能将未脱敏的临床试验数据、申办方文件或患者信息放入笔记**。
 - 当前没有网页端账号编辑器；新增笔记通过 GitHub 修改和 Cloudflare Pages 自动构建部署。
 
-### V0.2.11 · 字符拼接专题补充
+### V0.2.12 · 字符拼接专题补充
 
 - 同一节比较 `CAT`、`CATS`、`CATX`，以空格可视化示例和可运行 SAS DATA step 测试说明。
 - 增补 SAS 官方 CAT family 资料链接，说明 `CATX` 适合 TFL n (%)，而 `CATS` 会去掉分隔空格。
 
 
-## V0.2.11：极简编号笔记 + Agent Skill
+## V0.2.12：极简编号笔记 + Agent Skill
 
 - /sas-notes/ 全面精简为 01 TFL n (%) 空格、02 PROC FORMAT、03 INPUT/PUT、04 CAT/CATS/CATX；正文和目录编号一一对应。
 - 保留有复用价值的结论、关键代码、风险边界；移除冗余背景与长测试。
 - 新增项目级 Skill：`.agents/skills/sp-sas-field-notes/SKILL.md`；根目录 `AGENTS.md` 指定维护者先读取该 Skill。
 - 每次追加笔记请沿用原有编号，不重排既有条目，且检查公开数据是否脱敏。
 - GitHub 提交和 Cloudflare 实际发布需要分别验证。项目级 Skill 不等于 ChatGPT 全局技能安装。
+
+## V0.2.12：SAS 实战笔记目录收起与首页置顶
+
+- `/sas-notes/` 目录改为原生 `<details>/<summary>` 折叠结构，默认收起；内部 01–04 条目与锚点保留。
+- `public/index.html` 中 SAS 实战笔记固定置顶，显示为第一篇；其余文章顺延。
+- 同步更新项目级 Skill 规定：以后保持此目录可折叠，SAS 笔记首页置顶。
