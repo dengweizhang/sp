@@ -1,9 +1,9 @@
 {
-  "version": "0.2.13",
-  "description": "公开文章索引；新增文章时维护此文件和首页目录。",
+  "version": "0.3.0",
+  "description": "公开知识索引：SAS 01–08 速查及五个系统专题，后续增加文章须同步维护。",
   "articles": [
     {
-      "title": "SAS 实战笔记：PROC FORMAT、字符串与缺失函数速查",
+      "title": "SAS 实战笔记：编号 01–08（函数、Unicode、PROC REPORT、PRX、ODS RTF）",
       "url": "/sas-notes/",
       "keywords": [
         "SAS",
@@ -80,7 +80,22 @@
         "CMISS",
         "COALESCE",
         "COALESCEC",
-        "N function"
+        "N function",
+        "ODS ESCAPECHAR",
+        "unicode 007E",
+        "unicode 0025",
+        "上标",
+        "下标",
+        "SUPER",
+        "SUB",
+        "PROC REPORT",
+        "COLUMN",
+        "跨列标题",
+        "RTF",
+        "TAGSETS.RTF",
+        "PRX",
+        "日期正则",
+        "多列合并"
       ]
     },
     {
@@ -350,6 +365,107 @@
         "ADEG",
         "SP",
         "面试"
+      ]
+    },
+    {
+      "title": "SAS 系统专题：基础到进阶",
+      "url": "/sas-learning/",
+      "keywords": [
+        "SAS教程",
+        "SQL",
+        "FREQ",
+        "PROC MEANS",
+        "PROC POWER",
+        "SGPLOT",
+        "从基础到进阶",
+        "临床统计编程",
+        "QC"
+      ]
+    },
+    {
+      "title": "PROC SQL：从查询到 TFL 数据汇总",
+      "url": "/sas-learning/sql/",
+      "keywords": [
+        "PROC SQL",
+        "GROUP BY",
+        "HAVING",
+        "SELECT DISTINCT",
+        "COUNT DISTINCT",
+        "LEFT JOIN",
+        "JOIN 行数",
+        "去重",
+        "SAS SQL",
+        "分母",
+        "TFL"
+      ]
+    },
+    {
+      "title": "PROC FREQ：频数与分类统计",
+      "url": "/sas-learning/freq/",
+      "keywords": [
+        "PROC FREQ",
+        "TABLES",
+        "OUTPCT",
+        "OUT",
+        "MISSING",
+        "CHISQ",
+        "EXACT",
+        "n(%)",
+        "分类汇总",
+        "百分比"
+      ]
+    },
+    {
+      "title": "SAS 统计汇总：MEANS SUMMARY UNIVARIATE",
+      "url": "/sas-learning/statistics/",
+      "keywords": [
+        "PROC MEANS",
+        "PROC SUMMARY",
+        "PROC UNIVARIATE",
+        "NWAY",
+        "CLASS",
+        "VAR",
+        "OUTPUT",
+        "P25",
+        "P75",
+        "CV",
+        "几何均值",
+        "SD",
+        "Mean"
+      ]
+    },
+    {
+      "title": "PROC POWER：功效与样本量",
+      "url": "/sas-learning/power/",
+      "keywords": [
+        "PROC POWER",
+        "TWOSAMPLEMEANS",
+        "power",
+        "统计功效",
+        "样本量",
+        "效应量",
+        "标准差",
+        "alpha",
+        "敏感性分析"
+      ]
+    },
+    {
+      "title": "SAS 绘图：SGPLOT SGPANEL",
+      "url": "/sas-learning/graphics/",
+      "keywords": [
+        "PROC SGPLOT",
+        "PROC SGPANEL",
+        "SERIES",
+        "SCATTER",
+        "误差线",
+        "REFLINE",
+        "XAXIS",
+        "YAXIS",
+        "分面图",
+        "PK浓度曲线",
+        "首尾连接",
+        "Graph",
+        "TFL"
       ]
     }
   ]
