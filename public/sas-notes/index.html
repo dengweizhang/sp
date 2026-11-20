@@ -11,8 +11,13 @@
 <title>SAS 实战笔记 · SP</title>
 <style>
 .sas-meta{margin:12px 0 18px;font:11px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#888;letter-spacing:.06em}
-.sas-toc{margin:12px 0 22px;border-top:1px solid var(--line)}
-.sas-toc a{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding:8px 2px;color:#444;font-size:13px}
+.sas-toc{margin:12px 0 22px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sas-toc summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:10px 2px;font-size:13px;color:#555;list-style:none;user-select:none}
+.sas-toc summary::-webkit-details-marker{display:none}
+.sas-toc summary::after{content:'+';font:18px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#999}
+.sas-toc[open] summary::after{content:'−'}
+.sas-toc nav{padding:0 0 8px}
+.sas-toc a{display:flex;align-items:baseline;gap:14px;border-top:1px solid var(--line);padding:8px 2px;color:#444;font-size:13px}
 .sas-toc a:hover{color:var(--accent)}
 .sas-toc .sas-no,.sas-note h2 .sas-no{font:600 12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#999;min-width:25px;flex:none}
 .sas-note{padding:6px 0 16px;border-bottom:1px solid var(--line);scroll-margin-top:68px}
@@ -44,12 +49,14 @@
 <div class="sas-meta">SAS FIELD NOTES · 04 NOTES · UPDATED 2026-11-20</div>
 </header>
 <main class="article-body">
-<nav class="sas-toc" aria-label="SAS 笔记目录">
+<details class="sas-toc"><summary>目录 · 04 条笔记</summary>
+<nav aria-label="SAS 笔记目录">
 <a href="#note-01"><span class="sas-no">01</span> TFL n (%) 多出空格</a>
 <a href="#note-02"><span class="sas-no">02</span> PROC FORMAT：VALUE / PICTURE / INVALUE</a>
 <a href="#note-03"><span class="sas-no">03</span> INPUT 与 PUT：方向相反</a>
 <a href="#note-04"><span class="sas-no">04</span> CAT / CATS / CATX：怎么拼接</a>
 </nav>
+</details>
 <!-- SP_NOTES_START: add subsequent notes as 05, 06...; mirror the numbered table of contents -->
 <section class="sas-note" id="note-01" aria-labelledby="title-01">
 <h2 id="title-01"><span class="sas-no">01</span>TFL n (%) 多出空格</h2>
@@ -99,7 +106,7 @@ run;</code></pre>
 <!-- SP_NOTES_END -->
 <p class="sas-ending">每次只新增一条有复用价值的记录；没有验证的结论要标明待验证。<a href="https://documentation.sas.com/" target="_blank" rel="noopener noreferrer">SAS 官方文档 ↗</a></p>
 </main>
-<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.2.11</span></footer>
+<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.2.12</span></footer>
 <a class="back-to-top" href="#top" aria-label="回到顶部" title="回到顶部" hidden>↑</a>
 <script>(()=>{const b=document.querySelector('.back-to-top');const u=()=>{b.hidden=window.scrollY<280};window.addEventListener('scroll',u,{passive:true});u()})();</script>
 </div>
