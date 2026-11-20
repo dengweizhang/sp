@@ -35,11 +35,12 @@ description: 将真实 SAS/SP/CDISC/TFL 编程问题压缩成极简、连续编�
 
 1. 读取 GitHub 仓库 `dengweizhang/sp` 当前的 `public/sas-notes/index.html`，**不要凭对话记忆覆盖站点最新内容**。
 2. 确认问题是新条目还是既有条目的修订。修订原条目不重复编号；新增条目使用下一个编号。
-3. 更新目录 `nav.sas-toc` 的 `href="#note-NN"` 与正文 `section#note-NN`，一一对应。
+3. 更新可折叠目录 `details.sas-toc > nav` 中的 `href="#note-NN"` 与正文 `section#note-NN`，一一对应。使用原生 `<details>`/`<summary>`，默认收起，无需 JavaScript。
 4. 新增条目放入 `SP_NOTES_START` 与 `SP_NOTES_END` 注释之间；不破坏其他笔记。
-5. 仅在必要时更新 `public/knowledge-index.json` 中 SAS 笔记条目的关键词；新增/修改站点版本号时保持首页、正文页、README 中一致。
-6. 校验：编号连续且无重复、锚点有效、HTML 合法、代码已做静态检查、敏感内容为零、没有过长文本。
-7. 提交 GitHub，并向用户给出笔记链接与具体变更。**GitHub 提交不等于 Cloudflare 已上线**；除非真实打开生产页面验证，否则不要声称已部署完成。
+5. **首页置顶约定**：`public/index.html` 中 `/sas-notes/` 始终是文章目录第一条；其他文章依次排列。首页文章序号与本页独立笔记编号是两套序列，不要混用。
+6. 仅在必要时更新 `public/knowledge-index.json` 中 SAS 笔记条目的关键词；新增/修改站点版本号时保持首页、正文页、README 中一致。
+7. 校验：编号连续且无重复、锚点有效、HTML 合法、代码已做静态检查、敏感内容为零、没有过长文本。
+8. 提交 GitHub，并向用户给出笔记链接与具体变更。**GitHub 提交不等于 Cloudflare 已上线**；除非真实打开生产页面验证，否则不要声称已部署完成。
 
 ## 最小内容模板
 
@@ -52,11 +53,13 @@ description: 将真实 SAS/SP/CDISC/TFL 编程问题压缩成极简、连续编�
 </section>
 ```
 
-目录新增对应项：
+目录新增对应项（插入现有可折叠 `<details class="sas-toc"><summary>目录 · NN 条笔记</summary><nav>…</nav></details>` 的 `nav` 内）：
 
 ```html
 <a href="#note-NN"><span class="sas-no">NN</span>技术关键词：具体问题</a>
 ```
+
+目录显示数量与真实条目数同步更新。
 
 ## 整理步骤（内容层）
 
