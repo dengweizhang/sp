@@ -363,3 +363,58 @@ code{font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow
   body .sas-code code{color:#26323a}
   body .site-footer,body .library-meta,body .sas-meta{color:#616a70}
 }
+
+/* V0.3.5 · Desktop reading typography.
+   Actual issue was the thin-stroked Songti/SimSun fallback, not only gray.
+   Preserve editorial serif headings; make body and tables system-sans for legibility. */
+@media screen and (min-width:701px){
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",
+                "Microsoft YaHei","Noto Sans CJK SC","Source Han Sans SC",sans-serif;
+    font-weight:400;
+    color:#20272d;
+    -webkit-font-smoothing:auto;
+  }
+  body .article-header h1,
+  body .article-body h2,
+  body .article-body h3{
+    font-family:var(--serif);
+    color:#181e23;
+    font-weight:700;
+  }
+  body .article-body,
+  body .article-body p,
+  body .article-body li,
+  body .article-body table td,
+  body .indication-lead p,
+  body .indication-case p,
+  body .indication-template{
+    color:#263039;
+  }
+  body .article-lead,
+  body .breadcrumb,
+  body .article-body .note,
+  body .article-body .sas-boundary,
+  body .article-body .learning-qc,
+  body .article-body .lx-caution,
+  body .article-body .rl-footnote,
+  body .entry-info small{
+    color:#3f4a53;
+  }
+  body .toc-inline summary,
+  body .toc-inline nav a,
+  body .sas-toc summary,
+  body .sas-toc a{
+    color:#424c55;
+  }
+  body .article-body table th{
+    color:#242c32;
+    font-weight:650;
+  }
+  body .indication-table{font-size:14px}
+  body .indication-table td:first-child{font-size:14px}
+  body .indication-table td small{
+    font-size:12px;
+    color:#4d5861;
+  }
+}
