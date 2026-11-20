@@ -1,0 +1,125 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fff"><meta name="description" content="PK 浓度统计量完整详解：N、n、BLQ、Mean、SD、CV%、GeoMean、GeoSD、GeoCV%、Median、Min、Max 的含义、公式、SAS 与 QC。">
+<link rel="canonical" href="https://sp.769967.xyz/sas-learning/pk-concentration/"><link rel="stylesheet" href="/assets/style.css"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><title>PK 浓度统计量：含义、公式与 TFL 实现 · SP</title>
+<style>
+.lx-head{padding:23px 0 18px}.lx-head h1{font-size:25px;margin:11px 0 8px}.lx-head p{font-size:14px;color:#696969;line-height:1.9;max-width:840px}
+.lx-nav{display:flex;flex-wrap:wrap;gap:7px 16px;padding:10px 0;margin:0 0 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:12px}
+.lx-section{border-bottom:1px solid var(--line);padding:10px 0 20px;scroll-margin-top:70px}.lx-section h2{font-size:20px;margin:16px 0 10px}
+.lx-section h3{font-size:15px;margin:21px 0 9px}.lx-section p,.lx-section li{font-size:14px;line-height:1.85}
+.lx-section small{color:#888}
+.lx-table{font-size:12.5px;min-width:725px;line-height:1.65}.lx-table th{font-size:12px}
+.lx-table td:first-child{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:650;white-space:nowrap;width:125px}
+.lx-table code{font-size:12px}.lx-formula{border-left:2px solid #bacac8;background:#fafafa;padding:11px 14px;margin:12px 0;font:13px/1.9 ui-monospace,Menlo,Consolas,monospace;overflow:auto}
+.learning-code{padding:12px 14px;background:#f8f8f8;border:1px solid #ececec;border-radius:4px;overflow-x:auto;white-space:pre}
+.learning-code code{font:12px/1.65 ui-monospace,Menlo,Consolas,monospace;white-space:pre;overflow-wrap:normal}
+.lx-caution{font-size:13px;color:#666;border-left:2px solid #d1cfca;padding:5px 13px;margin:15px 0}
+.lx-sources{font-size:12px;line-height:2;color:#777;padding:16px 0 30px}.lx-sources a,.lx-section a{color:#245e81;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:680px){.lx-head h1{font-size:23px}.learning-code code{font-size:11px}}
+</style></head><body><div class="shell" id="top">
+<header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">系统专题</a></nav></header>
+<header class="lx-head"><nav class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PK 浓度统计量</nav><h1>PK 浓度统计量：含义、公式与 TFL 实现</h1><p>不只是会算：要能解释为什么报告 Mean/CV，也报告 GeoMean/GeoCV，知道 N 与 n 的区别，以及 BLQ 如何改变统计量。</p></header>
+<main class="article-body">
+<nav class="lx-nav" aria-label="专题目录"><a href="#list">统计量清单</a><a href="#meaning">含义与公式</a><a href="#example">算例</a><a href="#code">SAS 实现</a><a href="#pkparam">浓度 vs PK 参数</a><a href="#qc">BLQ 与 QC</a></nav>
+<section class="lx-section" id="list"><h2>01 · 浓度 Table 的统计量清单</h2>
+<p>以我们讨论过的 PK Concentration Summary Shell 为结构参考：按分析物、给药组和采样时点分层。字段标签可能写成 <code>BQL / BLQ</code>、<code>GeoMean / Geomean</code>、<code>GeoCV% / CVB%</code>，以实际 SAP / Table Shell 为准。</p>
+<div class="table-wrap"><table class="lx-table"><thead><tr><th>统计量</th><th>含义</th><th>你应如何解释</th></tr></thead><tbody>
+<tr><td>N</td><td>PK 分析集分母（受试者数）</td><td>该组属于 PK 分析集的人数，通常不随采样时点变化</td></tr>
+<tr><td>n</td><td>实际可用于该时点统计的浓度数</td><td>通常为非缺失有效分析值数；不能直接等同于 N</td></tr>
+<tr><td>n of BLQ</td><td>低于定量下限的观察数</td><td>体现该时点低浓度数据占比与数据可解释性</td></tr>
+<tr><td>Mean</td><td>算术均值</td><td>原尺度平均浓度，较易受很高的个体浓度影响</td></tr>
+<tr><td>SD</td><td>标准差</td><td>原尺度离散程度，与浓度同单位</td></tr>
+<tr><td>CV%</td><td>算术变异系数（%）</td><td>SD 相对 Mean 的大小，便于跨时间点比较相对变异</td></tr>
+<tr><td>Median</td><td>中位数（P50）</td><td>对极端高值较不敏感的典型浓度</td></tr>
+<tr><td>Min / Max</td><td>最小值、最大值</td><td>展示个体范围，及时发现异常单位或离群值</td></tr>
+<tr><td>GeoMean</td><td>几何均值</td><td>基于 ln(浓度) 平均再反变换；适用于全部为正的分析数据</td></tr>
+<tr><td>GeoSD</td><td>几何标准差</td><td>通常为 exp[SD(ln(浓度))]，是无单位的乘法型离散因子</td></tr>
+<tr><td>GeoCV%</td><td>几何变异系数（%）</td><td>由 ln(浓度) 的方差计算，与算术 CV% 不是一回事</td></tr>
+</tbody></table></div>
+<p class="lx-caution"><strong>特别注意：</strong>历史 Shell 有 <code>Geostd</code> 和 <code>CVB%</code> 这样的列名。<code>GeoSD</code> 有时可能被用于指代对数尺度 SD，<code>CVB%</code> 也可能在某些分析中有特定含义；上表按通常的描述统计公式讲解，正式映射必须核对 Shell 脚注和 Spec。</p>
+</section>
+<section class="lx-section" id="meaning"><h2>02 · Mean、CV% 与几何统计量，区别在哪里？</h2>
+<h3>算术尺度：描述实际浓度的大小及波动</h3>
+<div class="lx-formula">Mean = Σx / n<br>SD = sqrt( Σ(x − Mean)² / (n − 1) )<br>CV% = 100 × SD / Mean</div>
+<p><strong>Mean</strong> 用加法计算平均值；<strong>SD</strong> 反映典型值与均值的离散程度；<strong>CV%</strong> 把 SD 转为相对百分比。例如 CV%=50%，意思是标准差约等于算术均值的一半，<strong>并非“有 50% 的受试者偏离均值”</strong>。</p>
+<h3>对数尺度：描述倍数变化与相对离散</h3>
+<div class="lx-formula">y = ln(x)，只对正值有效<br>GeoMean = exp( Mean(y) )<br>GeoSD = exp( SD(y) )<br>GeoCV% = 100 × sqrt( exp( SD(y)² ) − 1 )</div>
+<p><strong>GeoMean</strong> 代表乘法尺度的中心，右偏数据中往往比算术 Mean 更接近主体人群的典型浓度。<strong>GeoSD</strong> 不是通常意义的“浓度单位的标准差”：例如 GeoSD=2 意味着以 GeoMean 为中心的乘法因子是 ×2 / ÷2。<strong>GeoCV%</strong> 根据对数尺度方差转换得到相对变异程度；两种 CV 在大幅偏态的数据中可能差很多。</p>
+<p>当数据近似对数正态时，约 68% 的观察值可落在 <code>[GeoMean/GeoSD, GeoMean×GeoSD]</code> 附近。这是依赖分布假设的解释，不是所有样本的保证。</p>
+</section>
+<section class="lx-section" id="example"><h2>03 · 用三个浓度看出本质差异</h2>
+<p>示意数据：10、20、40 ng/mL，三个值围绕 20 以「×2、÷2」变化。</p>
+<div class="table-wrap"><table class="lx-table"><thead><tr><th>统计量</th><th>示例结果</th><th>理解</th></tr></thead><tbody>
+<tr><td>Mean</td><td>23.33 ng/mL</td><td>被 40 这一高值向上拉</td></tr>
+<tr><td>SD</td><td>15.28 ng/mL</td><td>浓度原尺度波动</td></tr>
+<tr><td>CV%</td><td>65.47%</td><td>15.28 / 23.33</td></tr>
+<tr><td>GeoMean</td><td>20.00 ng/mL</td><td>10、20、40 的乘法中心</td></tr>
+<tr><td>GeoSD</td><td>2.00</td><td>大约乘二或除二的因子</td></tr>
+<tr><td>GeoCV%</td><td>78.54%</td><td>由 SD(ln x)≈0.6931 转换</td></tr>
+<tr><td>Median</td><td>20 ng/mL</td><td>排序后居中的浓度</td></tr>
+<tr><td>Min / Max</td><td>10 / 40 ng/mL</td><td>实际观测范围</td></tr>
+</tbody></table></div>
+<p class="lx-caution">上面结果为公式算例，非真实试验数据。GeoCV% 的计算与算术 CV% 的分母并无直接关系，不能把算术 SD 除以 GeoMean 来代替。</p>
+</section>
+<section class="lx-section" id="code"><h2>04 · SAS 实现：原尺度和对数尺度分开汇总</h2>
+<p>先用 <code>PROC SUMMARY</code> 算 Mean/SD/CV%，再对正值取 <code>LOG()</code> 算几何统计量，最后合并。下面可复制学习；正式代码仍需先从 ADPC 选择正确的分析标志、剂量组、分析物、参考时间与唯一记录。</p>
+<pre class="learning-code"><code>/* 演示用受试者浓度值，不代表真实 PC/ADPC 数据 */
+data pk_demo;
+  length usubjid $8 trt $8 blqfl $1;
+  input usubjid $ trt $ tpt aval1 blqfl $;
+  if aval1 &gt; 0 then ln_aval = log(aval1);
+datalines;
+01 A 1 10 N
+02 A 1 20 N
+03 A 1 40 N
+01 A 2 0 Y
+02 A 2 12 N
+03 A 2 24 N
+;
+run;
+
+/* ① 原尺度：NOBS / Mean / SD / CV / 中位数 / 极值 */
+proc summary data=pk_demo nway;
+  class trt tpt;
+  var aval1;
+  output out=arith(drop=_type_ _freq_)
+      n=n mean=mean std=sd cv=cv_pct
+      median=median min=min max=max;
+run;
+
+/* ② 对数尺度：GeoMean、GeoSD、GeoCV */
+proc summary data=pk_demo nway;
+  class trt tpt;
+  var ln_aval;
+  output out=logs(drop=_type_ _freq_)
+      n=n_positive mean=mean_log std=sd_log;
+run;
+
+/* ③ 合并；如果某组存在0或负数，不悄悄改用正数子集 */
+data summary_demo;
+  merge arith logs;
+  by trt tpt;
+  if n&gt;0 and n_positive=n then geomean=exp(mean_log);
+  if n&gt;=2 and n_positive=n then do;
+    geosd  = exp(sd_log);
+    geocv_pct = 100*sqrt(exp(sd_log**2)-1);
+  end;
+  /* n=1 时 SD / CV 通常不可计算 */
+run;
+
+/* ④ N（分析集人数）与 n（实际可分析浓度数）独立计算
+   正式表中的 N 应从 ADSL + PK 分析集定义衍生；
+   BLQ 数量应从保留 BLQ 状态的浓度记录计算。 */</code></pre>
+<p><strong>为何要判断 <code>n_positive=n</code>？</strong> 如果一组含零，而 SAS 对数步骤跳过零，直接计算会让 GeoMean 只针对「大于零的子集」，与算术统计的分析人数不同。是否这样做必须由方案定义，不能悄悄改变分析集。</p>
+<p class="lx-caution"><strong>注意：</strong>以上假设每个受试者×分析物×组别×时间点只对应一条用于统计的记录。正式输出的 <code>n</code> 是 PROC SUMMARY 对非缺失值的记录计数；若存在重复记录，应先按 Spec 整理，不能默认这就是去重受试者数。</p>
+</section>
+<section class="lx-section" id="pkparam"><h2>05 · 浓度 Table 与 PK 参数 Table 不要混淆</h2>
+<p><strong>PK 浓度汇总</strong>通常逐采样时点计算均值、变异、几何统计量，并可能包含 n of BLQ。<strong>PK 参数汇总</strong>则按 <code>PARAMCD</code>（如 CMAX、AUCLST、TMAX）计算分析参数的分布。</p>
+<p>此前项目中，PK 参数表曾约定：<code>ANL01FL='Y'</code> 才纳入统计；<code>N</code> 为 PK 分析集人数，<code>n</code> 为非缺失参数数；<strong>Tmax</strong> 只展示 <code>n、Median、Min、Max</code>，其他统计量按项目规定显示 NC/NA。浓度表不能直接套用 Tmax 的特殊规则。</p>
+<p class="lx-caution">历史讨论还包括不同阶段 SAD/MAD/FE 的参数展示差异、有效数字位数，以及 <code>PPCAT + PPTPTREF</code> 的分组需求。这些属于项目级规则，不能作为 CDISC 强制要求。</p>
+</section>
+<section class="lx-section" id="qc"><h2>06 · BLQ、NC 和真实 TFL 最容易出错的地方</h2>
+<p><strong>BLQ（Below Limit of Quantification）</strong> 表示低于定量下限，不能直接理解成一个数值 0。若项目规定 BLQ=0，算术 Mean/SD 会包含该 0，但取对数无法直接纳入；若 BLQ 设缺失，则 n、均值等都会受影响。</p>
+<p>既往 Shell 片段曾出现过按 <code>BQL 数量 / 分母 &gt; 2/3</code> 标星并将部分统计量置为 <code>NC</code> 的做法。<strong>这是项目自定义展示规则，不是公认的统一阈值。</strong> 使用前需要核对真正的分母、BLQ 取值、是否有可测浓度以及脚注定义。</p>
+<p>建议独立 QC：<strong>人群 N、有效 n、BLQ 数、n_positive、零值/缺失、分析物、给药组、时间点、单位、舍入位数、单个受试者重复记录</strong>。CV% 在 Mean=0、SD 在 n&lt;2、几何 CV% 在对数样本不足时，不应强行计算一个数字。</p>
+</section>
+<aside class="lx-sources"><strong>参考：</strong><a href="https://blogs.sas.com/content/iml/2019/10/02/geometric-mean-deviation-cv-sas.html" target="_blank" rel="noopener noreferrer">SAS 官方博客 · 几何均值/几何 SD/几何 CV 的公式</a>；<a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473537.htm" target="_blank" rel="noopener noreferrer">PROC MEANS</a>；<a href="https://www.accessdata.fda.gov/drugsatfda_docs/nda/2015/207865Orig1s000ClinPharmR.pdf" target="_blank" rel="noopener noreferrer">FDA 临床药理审评报告中的几何 CV 示例</a>。<br><strong>来源边界：</strong>统计公式参考公开资料；表头字段与 Tmax/BLQ 约定依据之前的项目讨论。代码是教学示例，未在本次会话中的 SAS 环境实际运行。</aside>
+</main><footer class="site-footer"><span><a href="/sas-learning/">← 系统专题</a> · by dw</span><span>V0.3.1</span></footer></div></body></html>
