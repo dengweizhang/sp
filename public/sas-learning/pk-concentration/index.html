@@ -16,10 +16,10 @@
 @media(max-width:680px){.lx-head h1{font-size:23px}.learning-code code{font-size:11px}}
 </style><script src="/assets/code-copy.js?v=0.3.3" defer></script></head><body><div class="shell" id="top">
 <header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">系统专题</a></nav></header>
-<header class="lx-head"><nav class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PK 浓度统计量</nav><h1>PK 浓度统计量：含义、公式与 TFL 实现</h1><p>不只是会算：要能解释为什么报告 Mean/CV，也报告 GeoMean/GeoCV，知道 N 与 n 的区别，以及 BLQ 如何改变统计量。</p></header>
+<header class="lx-head"><nav class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PK 浓度统计量</nav><h1>PK 浓度统计量：含义、公式与 TFL 实现</h1><p>一张浓度汇总表看起来只是几行数字。为什么同一个时点既有 Mean，又有 GeoMean？为什么有人进入 N，却没有进入 n？BLQ 一多，统计量甚至可能显示 NC。我们沿着这些疑问，从数据口径走到统计公式，再看 SAS 如何实现。</p></header>
 <main class="article-body">
-<nav class="lx-nav" aria-label="专题目录"><a href="#list">统计量清单</a><a href="#meaning">含义与公式</a><a href="#example">算例</a><a href="#code">SAS 实现</a><a href="#pkparam">浓度 vs PK 参数</a><a href="#qc">BLQ 与 QC</a></nav>
-<section class="lx-section" id="list"><h2>01 · 浓度 Table 的统计量清单</h2>
+<nav class="lx-nav" aria-label="专题目录"><a href="#list">N 和 n 是谁</a><a href="#meaning">两套统计尺度</a><a href="#example">三个浓度的故事</a><a href="#code">落到 SAS</a><a href="#pkparam">与 PK 参数的区别</a><a href="#qc">BLQ 的后果</a></nav>
+<section class="lx-section" id="list"><h2>先分清 N 和 n：一张浓度表究竟在统计谁？</h2>
 <p>以我们讨论过的 PK Concentration Summary Shell 为结构参考：按分析物、给药组和采样时点分层。字段标签可能写成 <code>BQL / BLQ</code>、<code>GeoMean / Geomean</code>、<code>GeoCV% / CVB%</code>，以实际 SAP / Table Shell 为准。</p>
 <div class="table-wrap"><table class="lx-table"><thead><tr><th>统计量</th><th>含义</th><th>你应如何解释</th></tr></thead><tbody>
 <tr><td>N</td><td>PK 分析集分母（受试者数）</td><td>该组属于 PK 分析集的人数，通常不随采样时点变化</td></tr>
@@ -36,7 +36,7 @@
 </tbody></table></div>
 <p class="lx-caution"><strong>特别注意：</strong>历史 Shell 有 <code>Geostd</code> 和 <code>CVB%</code> 这样的列名。<code>GeoSD</code> 有时可能被用于指代对数尺度 SD，<code>CVB%</code> 也可能在某些分析中有特定含义；上表按通常的描述统计公式讲解，正式映射必须核对 Shell 脚注和 Spec。</p>
 </section>
-<section class="lx-section" id="meaning"><h2>02 · Mean、CV% 与几何统计量，区别在哪里？</h2>
+<section class="lx-section" id="meaning"><h2>为什么同一批浓度，需要两套描述方式？</h2>
 <h3>算术尺度：描述实际浓度的大小及波动</h3>
 <div class="lx-formula">Mean = Σx / n<br>SD = sqrt( Σ(x − Mean)² / (n − 1) )<br>CV% = 100 × SD / Mean</div>
 <p><strong>Mean</strong> 用加法计算平均值；<strong>SD</strong> 反映典型值与均值的离散程度；<strong>CV%</strong> 把 SD 转为相对百分比。例如 CV%=50%，意思是标准差约等于算术均值的一半，<strong>并非“有 50% 的受试者偏离均值”</strong>。</p>
@@ -45,7 +45,7 @@
 <p><strong>GeoMean</strong> 代表乘法尺度的中心，右偏数据中往往比算术 Mean 更接近主体人群的典型浓度。<strong>GeoSD</strong> 不是通常意义的“浓度单位的标准差”：例如 GeoSD=2 意味着以 GeoMean 为中心的乘法因子是 ×2 / ÷2。<strong>GeoCV%</strong> 根据对数尺度方差转换得到相对变异程度；两种 CV 在大幅偏态的数据中可能差很多。</p>
 <p>当数据近似对数正态时，约 68% 的观察值可落在 <code>[GeoMean/GeoSD, GeoMean×GeoSD]</code> 附近。这是依赖分布假设的解释，不是所有样本的保证。</p>
 </section>
-<section class="lx-section" id="example"><h2>03 · 用三个浓度看出本质差异</h2>
+<section class="lx-section" id="example"><h2>10、20、40：三个浓度揭示的乘法尺度</h2>
 <p>示意数据：10、20、40 ng/mL，三个值围绕 20 以「×2、÷2」变化。</p>
 <div class="table-wrap"><table class="lx-table"><thead><tr><th>统计量</th><th>示例结果</th><th>理解</th></tr></thead><tbody>
 <tr><td>Mean</td><td>23.33 ng/mL</td><td>被 40 这一高值向上拉</td></tr>
@@ -59,7 +59,7 @@
 </tbody></table></div>
 <p class="lx-caution">上面结果为公式算例，非真实试验数据。GeoCV% 的计算与算术 CV% 的分母并无直接关系，不能把算术 SD 除以 GeoMean 来代替。</p>
 </section>
-<section class="lx-section" id="code"><h2>04 · SAS 实现：原尺度和对数尺度分开汇总</h2>
+<section class="lx-section" id="code"><h2>怎样让 SAS 同时保留原尺度和对数尺度？</h2>
 <p>先用 <code>PROC SUMMARY</code> 算 Mean/SD/CV%，再对正值取 <code>LOG()</code> 算几何统计量，最后合并。下面可复制学习；正式代码仍需先从 ADPC 选择正确的分析标志、剂量组、分析物、参考时间与唯一记录。</p>
 <pre class="learning-code"><code>/* 演示用受试者浓度值，不代表真实 PC/ADPC 数据 */
 data pk_demo;
@@ -111,15 +111,15 @@ run;
 <p><strong>为何要判断 <code>n_positive=n</code>？</strong> 如果一组含零，而 SAS 对数步骤跳过零，直接计算会让 GeoMean 只针对「大于零的子集」，与算术统计的分析人数不同。是否这样做必须由方案定义，不能悄悄改变分析集。</p>
 <p class="lx-caution"><strong>注意：</strong>以上假设每个受试者×分析物×组别×时间点只对应一条用于统计的记录。正式输出的 <code>n</code> 是 PROC SUMMARY 对非缺失值的记录计数；若存在重复记录，应先按 Spec 整理，不能默认这就是去重受试者数。</p>
 </section>
-<section class="lx-section" id="pkparam"><h2>05 · 浓度 Table 与 PK 参数 Table 不要混淆</h2>
+<section class="lx-section" id="pkparam"><h2>浓度表和 Cmax、Tmax 参数表，是同一种统计吗？</h2>
 <p><strong>PK 浓度汇总</strong>通常逐采样时点计算均值、变异、几何统计量，并可能包含 n of BLQ。<strong>PK 参数汇总</strong>则按 <code>PARAMCD</code>（如 CMAX、AUCLST、TMAX）计算分析参数的分布。</p>
 <p>此前项目中，PK 参数表曾约定：<code>ANL01FL='Y'</code> 才纳入统计；<code>N</code> 为 PK 分析集人数，<code>n</code> 为非缺失参数数；<strong>Tmax</strong> 只展示 <code>n、Median、Min、Max</code>，其他统计量按项目规定显示 NC/NA。浓度表不能直接套用 Tmax 的特殊规则。</p>
 <p class="lx-caution">历史讨论还包括不同阶段 SAD/MAD/FE 的参数展示差异、有效数字位数，以及 <code>PPCAT + PPTPTREF</code> 的分组需求。这些属于项目级规则，不能作为 CDISC 强制要求。</p>
 </section>
-<section class="lx-section" id="qc"><h2>06 · BLQ、NC 和真实 TFL 最容易出错的地方</h2>
+<section class="lx-section" id="qc"><h2>为什么一个 BLQ，就可能改变整张表的解释？</h2>
 <p><strong>BLQ（Below Limit of Quantification）</strong> 表示低于定量下限，不能直接理解成一个数值 0。若项目规定 BLQ=0，算术 Mean/SD 会包含该 0，但取对数无法直接纳入；若 BLQ 设缺失，则 n、均值等都会受影响。</p>
 <p>既往 Shell 片段曾出现过按 <code>BQL 数量 / 分母 &gt; 2/3</code> 标星并将部分统计量置为 <code>NC</code> 的做法。<strong>这是项目自定义展示规则，不是公认的统一阈值。</strong> 使用前需要核对真正的分母、BLQ 取值、是否有可测浓度以及脚注定义。</p>
 <p>建议独立 QC：<strong>人群 N、有效 n、BLQ 数、n_positive、零值/缺失、分析物、给药组、时间点、单位、舍入位数、单个受试者重复记录</strong>。CV% 在 Mean=0、SD 在 n&lt;2、几何 CV% 在对数样本不足时，不应强行计算一个数字。</p>
 </section>
 <aside class="lx-sources"><strong>参考：</strong><a href="https://blogs.sas.com/content/iml/2019/10/02/geometric-mean-deviation-cv-sas.html" target="_blank" rel="noopener noreferrer">SAS 官方博客 · 几何均值/几何 SD/几何 CV 的公式</a>；<a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473537.htm" target="_blank" rel="noopener noreferrer">PROC MEANS</a>；<a href="https://www.accessdata.fda.gov/drugsatfda_docs/nda/2015/207865Orig1s000ClinPharmR.pdf" target="_blank" rel="noopener noreferrer">FDA 临床药理审评报告中的几何 CV 示例</a>。<br><strong>来源边界：</strong>统计公式参考公开资料；表头字段与 Tmax/BLQ 约定依据之前的项目讨论。代码是教学示例，未在本次会话中的 SAS 环境实际运行。</aside>
-</main><footer class="site-footer"><span><a href="/sas-learning/">← 系统专题</a> · by dw</span><span>V0.3.3</span></footer></div></body></html>
+</main><footer class="site-footer"><span><a href="/sas-learning/">← 系统专题</a> · by dw</span><span>V0.3.4</span></footer></div></body></html>
