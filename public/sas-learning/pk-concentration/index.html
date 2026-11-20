@@ -1,5 +1,5 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fff"><meta name="description" content="PK 浓度统计量完整详解：N、n、BLQ、Mean、SD、CV%、GeoMean、GeoSD、GeoCV%、Median、Min、Max 的含义、公式、SAS 与 QC。">
-<link rel="canonical" href="https://sp.769967.xyz/sas-learning/pk-concentration/"><link rel="stylesheet" href="/assets/style.css?v=0.3.3"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><title>PK 浓度统计量：含义、公式与 TFL 实现 · SP</title>
+<link rel="canonical" href="https://sp.769967.xyz/sas-learning/pk-concentration/"><link rel="stylesheet" href="/assets/style.css?v=0.3.4"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><title>PK 浓度统计量：含义、公式与 TFL 实现 · SP</title>
 <style>
 .lx-head{padding:23px 0 18px}.lx-head h1{font-size:25px;margin:11px 0 8px}.lx-head p{font-size:14px;color:#696969;line-height:1.9;max-width:840px}
 .lx-nav{display:flex;flex-wrap:wrap;gap:7px 16px;padding:10px 0;margin:0 0 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:12px}
@@ -14,7 +14,7 @@
 .lx-caution{font-size:13px;color:#666;border-left:2px solid #d1cfca;padding:5px 13px;margin:15px 0}
 .lx-sources{font-size:12px;line-height:2;color:#777;padding:16px 0 30px}.lx-sources a,.lx-section a{color:#245e81;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:680px){.lx-head h1{font-size:23px}.learning-code code{font-size:11px}}
-</style><script src="/assets/code-copy.js?v=0.3.3" defer></script></head><body><div class="shell" id="top">
+</style><script src="/assets/code-copy.js?v=0.3.4" defer></script></head><body><div class="shell" id="top">
 <header class="site-header"><a class="brand" href="/">SP.</a><nav class="tool-links"><a href="/sas-notes/">SAS NOTES</a><a href="/sas-learning/">系统专题</a></nav></header>
 <header class="lx-head"><nav class="breadcrumb"><a href="/sas-learning/">SAS 系统专题</a> / PK 浓度统计量</nav><h1>PK 浓度统计量：含义、公式与 TFL 实现</h1><p>一张浓度汇总表看起来只是几行数字。为什么同一个时点既有 Mean，又有 GeoMean？为什么有人进入 N，却没有进入 n？BLQ 一多，统计量甚至可能显示 NC。我们沿着这些疑问，从数据口径走到统计公式，再看 SAS 如何实现。</p></header>
 <main class="article-body">
