@@ -12,4 +12,4 @@ Do not write confidential CRO/clinical trial data to this public repository.
 
 ## SAS learning tracks
 
-When the user wants a complete foundational-to-advanced tutorial for PROC SQL, PROC FREQ, descriptive statistics, PROC POWER, or SAS graphics, read the same Skill and follow the two-tier architecture. Maintain `public/sas-learning/` topic pages, keep short practical tips inside `/sas-notes/`, and update the knowledge index, sitemap, and roadmap as needed. Use public/synthetic SAS data; mark examples not run in the user's environment.
+When the user wants to explore PROC SQL, PROC FREQ, descriptive statistics, PROC POWER, or SAS graphics deeply, read the same Skill and follow the two-tier architecture. Use natural question-driven prose based on observed programming problems; never force a three-level basics/practice/advanced template. Maintain `public/sas-learning/` question-led topic pages, keep reusable practical notes inside `/sas-notes/` (PROC REPORT spanning columns and RTF controls are consolidated in note 06), and update the knowledge index, sitemap, and roadmap as needed. Use public/synthetic SAS data; mark examples not run in the user's environment.
