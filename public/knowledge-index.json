@@ -1,9 +1,9 @@
 {
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "公开文章索引；新增文章时维护此文件和首页目录。",
   "articles": [
     {
-      "title": "SAS 实战笔记：01–04 极简速查",
+      "title": "SAS 实战笔记：PROC FORMAT、字符串与缺失函数速查",
       "url": "/sas-notes/",
       "keywords": [
         "SAS",
@@ -49,7 +49,38 @@
         "02",
         "03",
         "04",
-        "SAS 实战笔记"
+        "SAS 实战笔记",
+        "CATT",
+        "TRANSTRN",
+        "TRANSLATE",
+        "COMPBL",
+        "SCAN",
+        "COUNTW",
+        "SUBSTR",
+        "SUBSTRN",
+        "UPCASE",
+        "LOWCASE",
+        "PROPCASE",
+        "TRIM",
+        "TRIMN",
+        "LENGTH",
+        "LENGTHN",
+        "LENGTHC",
+        "FIND",
+        "FINDW",
+        "INDEX",
+        "COUNT",
+        "COUNTC",
+        "ANYDIGIT",
+        "ANYALPHA",
+        "PRXMATCH",
+        "PRXCHANGE",
+        "MISSING",
+        "NMISS",
+        "CMISS",
+        "COALESCE",
+        "COALESCEC",
+        "N function"
       ]
     },
     {
