@@ -60,3 +60,11 @@
 - PROC POWER: https://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/statug_power_syntax.htm
 - PROC SGPLOT: https://support.sas.com/documentation/cdl/en/grstatproc/62603/HTML/default/sgplot-stmt.htm
 - PRX functions: https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p1vz3ljudbd756n19502acxazevk.htm
+
+## V0.3.1 已完成：解释性专题
+
+- ✅ PK 浓度 Table：`/sas-learning/pk-concentration/`，定义与公式完整覆盖 N、n、n of BLQ、Mean、SD、CV%、Median、Min、Max、GeoMean、GeoSD、GeoCV%；以 10/20/40 浓度说明算术/几何尺度，并提供可独立检查的 SAS 示例。
+- ✅ PROC REPORT/RTF：`/sas-learning/report-rtf/`，分清跨列组标题与 RTF STYLE、CELLWIDTH、原始 `~R/RTF` 控制字，增加对照与版式 QC。
+- ✅ 速查页：原 06 保留跨列核心，新增 09 PK 统计量、10 RTF 设置，目录持续 01–10 可折叠。
+- 待验证：真实用户所在 SAS 版本对 raw RTF 头部效果和 ODS TAGSETS.RTF 选项的表现、Shell 中 Geostd/CVB% 的确切定义及 BLQ/NC/N 口径。
+- 原则补充：概念型主题不能为了短小而删掉定义、公式、为什么和使用条件；速查与深学各承担不同任务。
