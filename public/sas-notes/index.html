@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="SAS 实战问题笔记：PICTURE 格式、PUT/INPUT、CATX 与 TFL n (%) 拼接；以问题复盘和可运行测试代码持续积累。">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="canonical" href="https://sp.769967.xyz/sas-notes/">
+<link rel="stylesheet" href="/assets/style.css">
+<title>SAS 实战问题笔记 · SP</title>
+<style>
+.sas-note-meta{font:11px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#8a8a8a;letter-spacing:.04em;margin:14px 0 8px}
+.sas-note-entry{border-top:1px solid var(--line);padding-top:8px;margin:18px 0 30px}
+.sas-note-entry h2{margin-top:13px}
+.sas-note-date{font:12px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#888}
+.sas-code{background:#f8f8f8;border:1px solid #ececec;border-radius:5px;overflow:auto;padding:13px 15px;margin:12px 0 19px;line-height:1.6;white-space:pre;tab-size:4}
+.sas-code code{font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,"Microsoft YaHei",monospace;overflow-wrap:normal;white-space:pre}
+.sas-note-output{background:#fafafa;border-left:2px solid #d3d3d3;padding:9px 13px;margin:12px 0 20px;overflow:auto}
+.sas-note-output code{white-space:pre;font-size:12.5px}
+.sas-note-section{border-top:1px solid var(--line);margin-top:32px;padding-top:6px}
+.sas-note-links a{color:var(--accent);text-decoration:underline;text-underline-offset:3px;text-decoration-color:#c5d2d4}
+.sas-note-tip{font-size:13px;color:#606a69}
+@media print{.site-header,.back-to-top{display:none}.sas-code{white-space:pre-wrap;overflow:visible}.shell{width:100%}}
+</style>
+</head>
+<body>
+<div class="shell" id="top">
+<header class="site-header">
+<a class="brand" href="/" aria-label="SP 首页">SP.</a>
+<nav class="tool-links" aria-label="常用工具">
+<a href="https://xpt.769967.xyz" target="_blank" rel="noopener noreferrer">XPT <span aria-hidden="true">↗</span></a>
+<a href="https://ct.769967.xyz" target="_blank" rel="noopener noreferrer">CT <span aria-hidden="true">↗</span></a>
+</nav>
+</header>
+<header class="article-header">
+<nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / SAS 实战问题笔记</nav>
+<h1>SAS 实战问题笔记</h1>
+<p class="article-lead">真实 TFL / ADaM / SDTM 编程中遇到的问题，按“现象 → 原因 → 修复 → 验证 → 边界”留下可复用的答案。持续更新，不堆砌理论。</p>
+<div class="sas-note-meta">SAS DEBUG LOG · 首篇 2026-11-20 · 1 条实战记录</div>
+</header>
+<main class="article-body">
+<details class="toc-inline" open><summary>本页目录 · 可持续追加</summary>
+<nav aria-label="笔记导航">
+<a href="#note-001">001 · n (%) 格式的多余空格</a>
+<a href="#format-guide">基础 · PROC FORMAT</a>
+<a href="#put-input">基础 · PUT 与 INPUT</a>
+<a href="#string-tools">基础 · 字符拼接与空格</a>
+<a href="#test-code">可运行测试代码</a>
+<a href="#pitfalls">边界与 QC</a>
+<a href="#sources">来源与更新方式</a>
+</nav></details>
+<div class="sp-learning-lead">
+<strong>这本笔记怎么用</strong>
+<p>按实际问题建立独立条目；每条保留最终可用的代码和导致问题的原因。下面的 PCT、COUNT 数据均为脱敏构造示例，不涉及项目原始数据。今后可以在本页继续追加 <code>002</code>、<code>003</code>……，首页入口保持不变。</p>
+</div>
+<!-- SAS_NOTES_BEGIN: append new case sections before SAS_NOTES_END; update TOC and entry counter -->
+<article class="sas-note-entry" id="note-001" aria-labelledby="note-001-title">
+<div class="sas-note-date">NOTE 001 · 2026-11-20 · PROC FORMAT / TFL / n (%)</div>
+<h2 id="note-001-title">百分比 PICTURE 格式：为什么 COUNT 与括号之间多出空格？</h2>
+<h3>真实问题</h3>
+<p>TFL 宏将字符型 <code>COUNT</code> 和 <code>PCT</code> 拼为 <code>n (%)</code>。例如某些行显示为 <code>64  (100)</code>、<code>63 ( 49.6)</code>、<code>6 (  9.5)</code>。想统一为：<strong>COUNT 与左括号之间只保留一个空格</strong>；括号内部保留原设计的位数对齐。</p>
+<h3>原来的拼接表达式</h3>
+<pre class="sas-code"><code>compress(COUNT)||put(input(compress(PCT),BEST.),pctfmt.)</code></pre>
+<p>问题不在比例计算，而在 <code>PUT(...,pctfmt.)</code> 生成的字符结果可能带有左侧填充空格；运算符 <code>||</code> 原样保留这部分空格。<code>COMPRESS(COUNT)</code> 只处理 COUNT 一侧，不会清掉 PUT 返回值左边的空格。</p>
+<h3>最终修复（本次实测已解决）</h3>
+<pre class="sas-code"><code>catx(' ',
+    compress(COUNT),
+    put(input(compress(PCT),BEST.),pctfmt.)
+)</code></pre>
+<p><code>CATX(' ', a, b)</code> 会先去掉每个参数的首尾空格，再用<strong>一个空格</strong>连接非空参数；它不会去掉括号内已有的空格。这里仍沿用原 <code>pctfmt.</code>，不需要额外用 <code>TRANWRD()</code> 硬匹配两个空格。</p>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>输入示例</th><th>原格式中关注的字符</th><th>最终目标</th></tr></thead><tbody>
+<tr><td>COUNT=6，PCT=9.5</td><td>括号内部两个空格</td><td><code>6 (  9.5)</code></td></tr>
+<tr><td>COUNT=63，PCT=49.6</td><td>括号内部一个空格</td><td><code>63 ( 49.6)</code></td></tr>
+<tr><td>COUNT=64，PCT=100</td><td>格式可能在括号外补空格</td><td><code>64 (100)</code></td></tr>
+<tr><td>COUNT=1，PCT=0</td><td>零百分比映射为空格</td><td><code>1</code></td></tr>
+</tbody></table></div>
+<p class="sas-note-tip">小结：格式负责百分比怎么显示，拼接函数负责字段之间的间隔。把这两个责任分开，才能避免反复修改格式模板。</p>
+</article>
+<!-- SAS_NOTES_END -->
+<section class="sas-note-section" id="format-guide">
+<h2>基础 01 · PROC FORMAT 到底在做什么？</h2>
+<p><strong>Format 只决定值如何显示，不会改变原变量的存储值。</strong> 相同的数值可以输出为数字、文字标签、日期或自定义模板。<code>PROC FORMAT</code> 是创建自定义格式/输入格式的过程，常用三种语句：</p>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>语句</th><th>作用</th><th>典型使用</th></tr></thead><tbody>
+<tr><td><code>VALUE</code></td><td>数值 → 显示文本</td><td><code>agegrp.</code> 年龄分层</td></tr>
+<tr><td><code>VALUE $name</code></td><td>字符 → 显示文本</td><td><code>$yn.</code> Y/N 显示 Yes/No</td></tr>
+<tr><td><code>PICTURE</code></td><td>数值 → 按数字模板显示</td><td>百分比、金额、括号、零位填充</td></tr>
+<tr><td><code>INVALUE</code></td><td>字符输入 → 数值</td><td>将 Yes/No 读取成 1/0</td></tr>
+</tbody></table></div>
+<pre class="sas-code"><code>proc format;
+    value agegrp low-&lt;18 = 'Under 18'
+                 18-&lt;65 = '18–64'
+                 65-high = '65+';
+    value $yn 'Y'='Yes' 'N'='No' other='Unknown';
+    invalue ynnum 'Yes'=1 'No'=0 other=.;
+run;
+
+data demo;
+    age=45; flag='Y'; raw='12.5';
+    age_label = put(age,agegrp.);   /* numeric -&gt; character */
+    flag_label = put(flag,$yn.);   /* character -&gt; character */
+    pct_num = input(raw,best.);   /* character -&gt; numeric */
+    yn = input('Yes',ynnum.);     /* character -&gt; numeric via INVALUE */
+run;</code></pre>
+<h3>读懂本次 pctfmt. 的每一行</h3>
+<pre class="sas-code"><code>proc format;
+    picture pctfmt (round)
+        0              = " "       (noedit)
+        0&lt;-&lt;0.1        = "(&lt;0.1)"  (noedit)
+        0.1-&lt;9.95      = "09.9)"   (prefix="(  ")
+        9.95-&lt;99.95    = "00.0)"   (prefix="( ")
+        99.95-high     = "(100)"  (noedit);
+run;</code></pre>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>写法</th><th>含义</th></tr></thead><tbody>
+<tr><td><code>PICTURE pctfmt</code></td><td>定义数值显示格式，使用时写 <code>pctfmt.</code>（有句点）</td></tr>
+<tr><td><code>0&lt;-&lt;0.1</code></td><td>严格大于 0、严格小于 0.1；边界是否包含由 <code>&lt;</code> 控制</td></tr>
+<tr><td><code>ROUND</code></td><td>根据模板与乘数，在格式化数字时四舍五入；不是修改原始变量</td></tr>
+<tr><td><code>09.9)</code> / <code>00.0)</code></td><td>数值编辑模板；零是数字占位符，末尾 <code>)</code> 是文字</td></tr>
+<tr><td><code>PREFIX="(  "</code></td><td>在有效数字前设置前缀，包括设计中的括号和空格</td></tr>
+<tr><td><code>NOEDIT</code></td><td>让模板中的数字作为固定文字显示，例如 <code>(100)</code>；但结果仍可能受到格式总宽度对齐影响</td></tr>
+</tbody></table></div>
+<p><strong>重要边界：</strong>上面的 <code>99.95-high = "(100)" (noedit)</code> 会将<strong>所有大于等于 99.95</strong> 的输入显示为 <code>(100)</code>，包括大于 100 的值。这只有在业务上保证百分比最大为 100、并认可该显示约定时才适用。若百分比可能超过 100，应单独重设区间与模板，不要直接沿用该分支。</p>
+</section>
+<section class="sas-note-section" id="put-input">
+<h2>基础 02 · INPUT() 与 PUT() 如何区分？</h2>
+<p>对当前宏，记住这一条数据流最有用：</p>
+<div class="pk-formula">字符型 PCT → <strong>INPUT()</strong> → 数值百分比 → <strong>PUT()</strong> → 可显示的字符结果 → <strong>CATX()</strong> → n (%)</div>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>函数</th><th>接收</th><th>返回</th><th>典型示例</th></tr></thead><tbody>
+<tr><td><code>INPUT(source,informat.)</code></td><td>字符文本 + 输入格式（informat）</td><td>通常为数值，也可以是字符</td><td><code>input('12.5',best.)</code> → 数值 12.5</td></tr>
+<tr><td><code>PUT(source,format.)</code></td><td>一个值 + 显示格式（format）</td><td>字符</td><td><code>put(12.5,pctfmt.)</code> → 格式化字符串</td></tr>
+<tr><td><code>FORMAT var fmt.;</code></td><td>变量 + 显示格式</td><td>仍为原变量类型</td><td><code>format age agegrp.;</code> 只修改显示</td></tr>
+</tbody></table></div>
+<h3>逐层解剖原表达式</h3>
+<pre class="sas-code"><code>compress(PCT)                        /* 删除 PCT 内的空格 */
+input(compress(PCT),BEST.)           /* 字符 '12.5' -&gt; 数值 12.5 */
+put(input(compress(PCT),BEST.),pctfmt.) /* 数值 -&gt; 格式化字符 */
+compress(COUNT)||...                 /* COUNT 与格式化字符直接相连 */</code></pre>
+<p><strong>两个容易混淆的地方：</strong><code>INPUT</code> 的第二个参数是 informat；<code>PUT</code> 的第二个参数是 format。<code>BEST.</code> 在上述 INPUT 调用中表示读取普通数值文本的输入格式，<code>pctfmt.</code> 则是我们定义的数值输出格式。<code>PUT</code> 返回字符不代表原数值被修改。</p>
+<p>如果 <code>PCT</code> 原本就是数值型，不需要先 <code>INPUT</code>；如果 <code>COUNT</code> 原本是数值型，建议先用 <code>PUT(COUNT,BEST.)</code> 转为字符，避免隐式转换。</p>
+<pre class="sas-code"><code>/* COUNT / PCT 都是字符：沿用本篇处理 */
+result = catx(' ',compress(COUNT),put(input(compress(PCT),best.),pctfmt.));
+
+/* 如果 COUNT / PCT 本身均为数值型：不要做多余的 INPUT 转换 */
+result = catx(' ',strip(put(COUNT,best.)),put(PCT,pctfmt.));</code></pre>
+</section>
+<section class="sas-note-section" id="string-tools">
+<h2>基础 03 · ||、CATX、STRIP、COMPRESS、TRANWRD 怎么选？</h2>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>写法</th><th>主要行为</th><th>何时用</th></tr></thead><tbody>
+<tr><td><code>a || b</code></td><td>直接拼接；原有前后空格可能保留</td><td>确实需要原始空格时</td></tr>
+<tr><td><code>CATX(' ',a,b)</code></td><td>去掉各参数首尾空格，再插入一个分隔空格</td><td>本次 <code>COUNT + 百分比</code> 首选</td></tr>
+<tr><td><code>STRIP(x)</code></td><td>删除首尾空格，不改变内部空格</td><td>清理单个字段首尾</td></tr>
+<tr><td><code>COMPRESS(x)</code></td><td>默认删除所有空格，也会删内部空格</td><td>清理无须保留内部空格的原始字符串</td></tr>
+<tr><td><code>TRANWRD(x,a,b)</code></td><td>按固定子串替换</td><td>有明确固定文本需替换；不宜依赖空格个数</td></tr>
+<tr><td><code>QUOTE(x)</code></td><td>给文本加引号，方便在 Log 中辨认前导空格</td><td>排查显示问题</td></tr>
+</tbody></table></div>
+<p><code>CATX()</code> 会去掉字符串首尾空格，但<strong>保留内部空格</strong>，因此 <code>( 12.5)</code> 的对齐设计不受影响。与此不同，对格式化百分比再次使用 <code>COMPRESS()</code> 会把括号内部有意保留的空格也清除。</p>
+</section>
+<section class="sas-note-section" id="test-code">
+<h2>完整可运行的 SAS 测试代码</h2>
+<p>复制到 SAS 直接执行，模拟字符型 COUNT、PCT，并且将原表达式与修复后的结果并排输出。为检查前导空格，先生成 <code>raw_visible</code>、<code>final_visible</code> 变量，再通过 <code>PUTLOG</code> 输出，不在 PUTLOG 中直接嵌套函数调用。</p>
+<pre class="sas-code"><code>/* NOTE 001: 使用与实际 TFL 宏相同的字段类型与表达式 */
+proc format;
+    picture pctfmt (round)
+        0              = " "       (noedit)
+        0&lt;-&lt;0.1        = "(&lt;0.1)"  (noedit)
+        0.1-&lt;9.95      = "09.9)"   (prefix="(  ")
+        9.95-&lt;99.95    = "00.0)"   (prefix="( ")
+        99.95-high     = "(100)"  (noedit);
+run;
+
+data pct_cases;
+    length COUNT PCT $12;
+    input COUNT $ PCT $;
+    datalines;
+1 0
+2 0.05
+3 0.1
+4 5
+5 9.95
+6 12.5
+7 50.4
+8 99.95
+9 100
+;
+run;
+
+data pct_check;
+    set pct_cases;
+    length pct_show $20 result_raw result_final $60
+           raw_visible final_visible $120;
+
+    /* INPUT：PCT 字符 -&gt; 数值；PUT：数值 -&gt; 格式化字符 */
+    pct_show = put(input(compress(PCT),best.),pctfmt.);
+
+    /* 原表达式：|| 保留 PUT 的前导空格 */
+    result_raw = compress(COUNT)||
+                 put(input(compress(PCT),best.),pctfmt.);
+
+    /* 推荐：只留下 COUNT 与括号之间一个分隔空格 */
+    result_final = catx(' ',compress(COUNT),
+                   put(input(compress(PCT),best.),pctfmt.));
+
+    /* QUOTE 可看清空格；PUTLOG 输出变量而不是函数调用 */
+    raw_visible   = quote(trim(result_raw));
+    final_visible = quote(trim(result_final));
+    putlog COUNT= PCT= raw_visible= final_visible=;
+run;
+
+proc print data=pct_check noobs;
+    var COUNT PCT raw_visible final_visible;
+run;</code></pre>
+<p class="sas-note-tip">重点查看 <code>final_visible</code> 引号内，COUNT 与 <code>(</code> 之间是否只有一个空格。测试覆盖 0、0.05、9.95、12.5、50.4、99.95、100 等边界；它不代表真实临床项目的百分比校验规则。</p>
+</section>
+<section class="sas-note-section" id="pitfalls">
+<h2>边界与 QC 清单</h2>
+<ul>
+<li><strong>0% 隐藏：</strong>本次格式把数值 0 映射为空格，因此 <code>CATX()</code> 拼接后只显示 COUNT；需要显示 <code>(0)</code> 的项目应另定规则。</li>
+<li><strong>不等于 100 的上界：</strong>本次 <code>99.95-high</code> 是固定字符串映射，不会保留超出 100 的真实值；百分比在某些计算场景可能超过 100，必须先定义业务范围。</li>
+<li><strong>缺失值：</strong>字符型 PCT 为空或非数值文本时，<code>INPUT(...,BEST.)</code> 可能返回缺失并产生无效数据提示；生产宏应检查原值、分母与缺失规则。</li>
+<li><strong>比例的尺度：</strong>若 PCT 是 0.125 而想显示 12.5%，需要确认上游是否已经乘以 100；本格式不自动把比例乘 100。</li>
+<li><strong>固定宽度与对齐：</strong>去掉外部填充空格适合 n (%) 输出；若 PROC REPORT 依赖整列宽度对齐，还需检查列宽、字体和 RTF/PDF 效果。</li>
+<li><strong>变量类型：</strong>确认 COUNT 与 PCT 是字符还是数值；不要仅靠自动类型转换。</li>
+</ul>
+</section>
+<section class="sas-note-section sas-note-links" id="sources">
+<h2>参考资料与维护方式</h2>
+<ul class="pk-references">
+<li><a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473467.htm" target="_blank" rel="noopener noreferrer">SAS 官方 · PROC FORMAT / PICTURE Statement ↗</a></li>
+<li><a href="https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473495.htm" target="_blank" rel="noopener noreferrer">SAS 官方 · Filling a Picture Format（PREFIX / FILL）↗</a></li>
+<li><a href="https://documentation.sas.com/" target="_blank" rel="noopener noreferrer">SAS Documentation · 查询 CATX、INPUT、PUT、STRIP、COMPRESS ↗</a></li>
+</ul>
+<p>维护约定：<strong>一条问题一个编号</strong>；每条包括发生场景、复现表达式、根因、最终修复、完整测试和适用边界。以后新增内容直接追加到同一个 <code>public/sas-notes/index.html</code>，并同步更新本页目录与站点知识索引。GitHub 提交保留修改历史。</p>
+<p class="sas-note-tip">知识笔记整理与官方函数定义参考来源不同：NOTE 001 的问题、实际修复来自本次 SAS 调试；一般语法说明参照 SAS 官方文档。具体项目的 SAP、Spec 优先决定显示标准。</p>
+</section>
+</main>
+<footer class="site-footer"><span><a href="/">← 返回首页</a> · by dw</span><span>V0.2.9</span></footer>
+<a class="back-to-top" href="#top" aria-label="回到顶部" title="回到顶部" hidden>↑</a>
+<script>(()=>{const b=document.querySelector('.back-to-top');const u=()=>{b.hidden=window.scrollY<280};window.addEventListener('scroll',u,{passive:true});u()})();</script>
+</div>
+</body>
+</html>
