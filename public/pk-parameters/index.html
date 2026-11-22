@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="常用 PK 参数的定义与计算方法：Cmax、Tmax、AUC、Lambda_z、半衰期、清除率、MRT、波动指数与常见 NCA 注意事项。">
+  <meta name="description" content="PK 参数、Lambda_z、BQL/NC、Rsq_adj 与 %AUCex 质量判定，ADPP 分析标志与 NCA 公式。">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="canonical" href="https://sp.769967.xyz/pk-parameters/">
@@ -23,7 +23,7 @@
     <header class="article-header">
       <nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / 常用 PK 参数</nav>
       <h1>常用 PK 参数</h1>
-      <p class="article-lead">14 个常用 PK 参数的定义、计算方法及 QC 注意事项。以常见 NCA 方法为基础，具体计算设置以研究方案、SAP 和 PK 分析计划为准。</p>
+      <p class="article-lead">14 个常用 PK 参数的定义、计算方法及 λz 衍生关系，涵盖 BQL/NC、Rsq_adj、%AUCex 与 ADPP QC。具体计算以研究方案、SAP 和 PK 分析计划为准。</p>
       <p style="font-size:12px;color:#777;margin:9px 0 0">相关专题：<a href="/sas-learning/pk-concentration/" style="color:#245e81;text-decoration:underline">PK 浓度 Table 的 Mean / CV% / GeoMean / GeoCV% / BLQ 统计含义与 SAS 实现 ↗</a></p>
     </header>
     <main class="article-body" id="main-content">
@@ -32,7 +32,7 @@
         <nav aria-label="本页目录">
           <a href="#parameters">1. 常用参数</a>
           <a href="#calculation">2. 参数计算方法</a>
-          <a href="#lambda-z">3. Lambda_z 评估</a>
+          <a href="#lambda-z">3. 数据处理与 λz 质量判定</a>
           <a href="#example">4. 手算示例</a>
           <a href="#scope">5. 使用说明与来源</a>
         </nav>
@@ -198,21 +198,89 @@
             <p>部分分析规定采用 <code>Ctau,ss</code> 代替 <code>Cmin,ss</code>：此时公式变为 <code>100 × (Cmax,ss − Ctau,ss) / Cavg,ss</code>。还应核对项目报告中 DF 是以百分数还是无量纲小数呈现。</p>
           </div>
         </section>
-        <section aria-labelledby="lambda-z">
-          <h2 id="lambda-z">3. Lambda_z 评估注意事项</h2>
-          <p>Lambda_z 通常由末端对数线性消除阶段的浓度数据拟合得到。原始笔记记录的实践要点如下：</p>
-          <ul>
-            <li>将浓度取对数后与时间进行线性回归，估计末端斜率。</li>
-            <li>仅使用能代表末端对数线性消除阶段的数据点，通常至少需要 3 个有效点。</li>
-            <li>可先尝试自动选择末端拟合范围；如不合适，再结合曲线检查并指定合理的时间范围。</li>
-          </ul>
-          <aside class="note" aria-label="项目笔记阈值说明">
-            <p><strong>原笔记中的判断参考（并非通用标准）</strong></p>
-            <p>拟合相关性：记录了 <code>R² ≥ 0.80</code> 的参考阈值；AUCinf 外推比例：记录了 <code>&lt; 20%</code> 的参考阈值，以及 <code>&gt; 40%</code> 时需特别审慎的情形。例外应具有记录和合理解释。</p>
-            <p>上述阈值可能因项目要求、软件、分析计划不同而变化；<code>R²</code> 也不等同于 <code>Rsq_adj</code>。</p>
-          </aside>
-        </section>
 
+        <section aria-labelledby="lambda-z">
+          <h2 id="lambda-z">3. PK 数据处理与 λz 参数的 QC 判定</h2>
+          <p>处理顺序是：<strong>原始浓度 → NCA 计算用浓度 → 个体 PK 参数 → 参数级统计纳入</strong>。缺失、NC 和“计算成功但不参与统计”是三种不同情况。以下阈值为匿名 SAP 教学示例，并非 CDISC 统一规定。</p>
+          <h3 id="pk-missing">3.1 缺失浓度、NC 与统计排除</h3>
+          <div class="table-wrap"><table>
+            <thead><tr><th>情况</th><th>个体 Listing</th><th>汇总与模型</th></tr></thead>
+            <tbody>
+              <tr><td>PK 浓度未采集或缺失</td><td>保留原始缺失状态</td><td>不插补，不作为有效浓度计算或汇总</td></tr>
+              <tr><td>参数无法从有效浓度计算（NC）</td><td>可按 Shell 显示 <code>NC</code>（Not Calculable）</td><td>作为缺失，不参与描述统计、方差分析或食物影响模型</td></tr>
+              <tr><td>参数已计算，但 QC 不合格</td><td>保留计算值、质量指标及排除原因</td><td>用参数级分析标志排除，不应简单清空原始数值</td></tr>
+            </tbody>
+          </table></div>
+          <p><code>NC</code> 是字符型展示概念，数值型 ADPP <code>AVAL</code> 不应写入字符 <code>NC</code>。仅因统计不纳入而清空 AVAL，会损害 QC 的可追溯性。</p>
+
+          <h3 id="pk-bql">3.2 BQL（低于定量下限）按位置处理</h3>
+          <p>浓度用于 NCA 时，常见示例规则如下；<strong>计算用 0 不等于原始检测值为 0</strong>。记录与 Listing 应保留原始 BQL 信息。</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>BQL 出现位置</th><th>NCA 使用</th><th>核查点</th></tr></thead>
+            <tbody>
+              <tr><td>Tmax 前的 BQL</td><td>0</td><td>不把 0 用于 ln(C) 末端回归</td></tr>
+              <tr><td>Tmax 后的 BQL</td><td>缺失</td><td>包括末端连续 BQL</td></tr>
+              <tr><td>两个可定量浓度之间的单个 BQL</td><td>缺失</td><td>不能擅自置 0 使区间 AUC 偏低</td></tr>
+              <tr><td>末端连续 BQL 后再次出现的可定量值</td><td>按该示例视为缺失</td><td>检查异常回升及 SAP 约定</td></tr>
+              <tr><td>个体浓度–时间图</td><td>峰前 BQL 为 0，峰后 BQL 缺失</td><td>绘图规则与原始 Listing 分开管理</td></tr>
+            </tbody>
+          </table></div>
+          <p>例如 <code>0h:BQL → 1h:2 → 2h:BQL → 4h:6 → 8h:BQL</code>，计算输入可变成 <code>0 → 2 → 缺失 → 6 → 缺失</code>。跨越缺失时间点的积分方式仍取决于 NCA 配置，不可自行补点。</p>
+
+          <h3 id="pk-fit">3.3 λz 为什么至少需要 3 个非零浓度？</h3>
+          <p>从末端消除相选择<strong>至少 3 个正值、可定量且适合对数线性拟合的浓度点</strong>，做 <code>ln(C)</code> 对时间的线性回归。要求不只是 3 个非零数，还必须位于合理的末端消除阶段，斜率应为负。</p>
+          <div class="pk-formula">ln(C) = α − λz × t；λz = −slope；t½ = ln(2)/λz</div>
+          <p>两个点虽然能确定直线，却不足以可靠评价消除相拟合质量。拟合点数、时间跨度、观察曲线及调整后的决定系数 <code>Rsq_adj</code> 都要结合判断；普通 <code>R²</code> 不能替代 <code>Rsq_adj</code>。</p>
+          <div class="pk-formula">Rsq_adj = 1 − (1 − R²) × (n − 1)/(n − 2)（单自变量含截距，n≥3）</div>
+          <p>示例判定：<code>Rsq_adj &lt; 0.80</code>，λz 与基于 λz 计算的其他参数<strong>不参与</strong>描述统计、方差分析和食物影响分析；刚好 <code>0.80</code> 不触发“低于”这一条件。</p>
+
+          <h3 id="pk-dependency">3.4 基于 λz 计算的参数有哪些？</h3>
+          <p><strong>两条主要路径：</strong>① λz 直接产生 t½、外推 AUCinf 和 AUMCinf；② AUCinf、AUMCinf 再参与 MRTinf、CL、CL/F、Vz、Vss 等计算。</p>
+          <div class="pk-formula">λz → t½；λz → AUCinf → CL / CL/F → Vz / Vz/F</div>
+          <div class="pk-formula">λz → AUMCinf；AUMCinf + AUCinf → MRTinf → Vss（IV）</div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>参数</th><th>典型计算依赖（单次给药 NCA）</th><th>Rsq_adj &lt; 0.8</th><th>%AUCex &gt; 20%</th></tr></thead>
+            <tbody>
+              <tr><td><strong>λz、t½</strong></td><td>末端回归；<code>t½=0.693/λz</code></td><td>排除</td><td>不因此单独排除</td></tr>
+              <tr><td><strong>AUCinf</strong>（Obs/Pred）</td><td><code>AUClast + Clast/λz</code></td><td>排除</td><td>排除</td></tr>
+              <tr><td><strong>AUMCinf</strong></td><td>末端外推含 <code>Clast/λz²</code></td><td>排除</td><td>不一定*</td></tr>
+              <tr><td><strong>MRTinf</strong></td><td><code>AUMCinf/AUCinf</code>（输注需校正）</td><td>排除</td><td>排除</td></tr>
+              <tr><td><strong>CL、CL/F</strong>（单次）</td><td><code>Dose/AUCinf</code></td><td>排除</td><td>排除</td></tr>
+              <tr><td><strong>Vz、Vz/F</strong></td><td><code>CL/λz</code> 或 <code>(CL/F)/λz</code></td><td>排除</td><td>排除</td></tr>
+              <tr><td><strong>Vss</strong>（IV）</td><td><code>CL × MRT</code>，依赖 AUCinf</td><td>排除</td><td>排除</td></tr>
+              <tr><td><strong>AUCinf/Dose</strong>及其他 AUCinf 衍生比值</td><td>直接使用 AUCinf</td><td>排除</td><td>排除</td></tr>
+              <tr><td><strong>Cmax、Tmax、AUClast</strong></td><td>观测峰值、达峰时点和实测范围积分</td><td>通常保留</td><td>通常保留</td></tr>
+              <tr><td><strong>AUCtau、AUCint、Ctrough、DF</strong></td><td>规定区间/稳态数据，无需末端外推时</td><td>通常保留**</td><td>通常保留**</td></tr>
+            </tbody>
+          </table></div>
+          <p><small>* <code>AUMCinf</code> 依赖 λz，但不由 AUCinf 数值直接计算。若规则只限制“基于 AUCinf 的参数”，仅 %AUCex 超标并不自动推出 AUMCinf 必须排除；应核对 SAP 是否另作规定。** AUCtau 或区间 AUC 如实际使用末端外推，其依赖关系需要重新判定。稳态 <code>CLss/F=Dose/AUCtau,ss</code> 通常不属于单次 AUCinf 分支。</small></p>
+
+          <h3 id="pk-exclusion">3.5 Rsq_adj 与 %AUCex 控制的是不同集合</h3>
+          <div class="pk-formula">%AUCex = 100 × (AUCinf − AUClast) / AUCinf</div>
+          <p>当 <code>%AUCex &gt; 20%</code>，按此示例规则只排除 <strong>AUCinf 及由 AUCinf 计算的其他参数</strong>；当 <code>Rsq_adj &lt; 0.80</code>，排除范围更广，覆盖 λz 及整条 λz 衍生参数链。如果两项同时不满足，采用两个排除集合的并集。</p>
+          <p><strong>虚构例子：</strong>Rsq_adj = 0.92、%AUCex = 28%，则 t½ 通常仍可分析，AUCinf、CL/F 不纳入；若 Rsq_adj = 0.75、%AUCex = 12%，即使外推比例低，t½、AUCinf、CL/F 也应依照 λz 质量规则排除。等于 20% 不触发“高于 20%”条件。</p>
+
+          <h3 id="pk-sp">3.6 ADPP / TFL 程序如何实现？</h3>
+          <p>按 <strong>受试者 × 分析物 × 给药周期/分析时段</strong> 汇总拟合点数、Rsq_adj、%AUCex 等 QC 信息，再按 PARAMCD 标记是否依赖 λz 或 AUCinf。对每条参数赋分析标志（如 <code>ANL01FL</code>）及排除原因，不要整个人删除或抹掉已计算的 AVAL。</p>
+          <pre><code>/* 教学伪代码：依赖分类按本项目 PARAMCD Spec 配置
+   未在 SAS 实际执行，不能直接复制替代生产逻辑 */
+bad_lz = missing(lambda_z) or n_lz &lt; 3
+         or missing(rsq_adj) or rsq_adj &lt; 0.80;
+bad_aucinf = bad_lz or
+             (not missing(auc_ex_pct) and auc_ex_pct &gt; 20);
+
+if missing(aval) then anl01fl = '';
+else if lz_dep='Y' and bad_lz then anl01fl = '';
+else if aucinf_dep='Y' and bad_aucinf then anl01fl = '';
+else anl01fl = 'Y';</code></pre>
+          <p><small>缺少拟合诊断数据时，应标记待复核/NC 原因，不应默认为合格。<code>lz_dep</code>、<code>aucinf_dep</code> 为教学用元数据，不是 CDISC 标准字段。QC 要追溯同一受试者、分析物、周期的终末回归，验证列表保留、统计排除以及模型筛选是否一致。</small></p>
+
+          <h3 id="pk-summary">3.7 PK 参数描述统计及对数变换</h3>
+          <div class="pk-formula">CV% = 100 × SD / Mean</div>
+          <div class="pk-formula">GeoMean = exp[Mean(ln x)]；GeoSD = exp[SD(ln x)]</div>
+          <div class="pk-formula">GeoCV% = 100 × √(exp{SD(ln x)²} − 1)</div>
+          <p>原尺度 Mean、SD、CV% 与对数尺度 GeoMean、GeoSD、GeoCV% 不可混用。几何统计仅对正数适用；<code>GeoCV%</code> 不是 <code>SD / GeoMean</code>。Tmax 常以 n、Median、Min、Max 为主，具体保留统计量见 Shell/SAP。另见 <a href="/sas-learning/pk-concentration/">PK 浓度统计量专题</a>。</p>
+        </section>
         <section aria-labelledby="example">
           <h2 id="example">4. 手算核对示例</h2>
           <p>假设相邻样本分别为 <code>t₀ = 0 h, C₀ = 2 ng/mL</code> 和 <code>t₁ = 2 h, C₁ = 6 ng/mL</code>，采用线性梯形法：</p>
@@ -225,16 +293,17 @@
         </section>
         <section aria-labelledby="scope">
           <h2 id="scope">5. 使用说明与来源</h2>
-          <p>参数清单及 Lambda_z 实务注意事项来自个人 Notion「SP统计编程」笔记；第 2 节计算公式与第 4 节示例为后续补充，主要依据 Phoenix WinNonlin 的 NCA 官方说明，并非原笔记内容。</p>
+          <p>PK 参数术语和计算公式参考公开 CDISC 术语及 Certara Phoenix NCA 文档。第 3 节是经过去标识化整理的通用 SAP 规则教学示例；其中的阈值和 BQL 规则不能视为 CDISC、监管机构对所有项目的统一要求。</p>
           <p>适用范围以血浆/血清浓度的常见 NCA 为主。BQL 处理、采样时点、给药途径、首次给药与稳态、梯形法、末端拟合范围、obs/pred 外推方式及参数命名必须与具体 SAP / PK 分析计划一致。本文所列名称沿用个人笔记，<strong>不应直接视为 CDISC 规定的唯一 PARAMCD</strong>。</p>
           <ul class="pk-references">
             <li><a href="https://onlinehelp.certara.com/phoenix/8.3/topics/NCA_parameter_formulas.htm" target="_blank" rel="noopener noreferrer">Certara Phoenix · NCA parameter formulas ↗</a></li>
             <li><a href="https://onlinehelp.certara.com/phoenix/8.3/topics/ncacomprules.htm" target="_blank" rel="noopener noreferrer">Certara Phoenix · NCA computation rules ↗</a></li>
             <li><a href="https://onlinehelp.certara.com/phoenix/8.3/topics/ncaparamformulas.htm" target="_blank" rel="noopener noreferrer">Certara Phoenix · Noncompartmental analysis ↗</a></li>
+            <li><a href="https://onlinehelp.certara.com/phoenix/8.8/Phoenix_UserDocs/NCA_Object/Lambda_Z_or_Slope_Estimation_settings.htm" target="_blank" rel="noopener noreferrer">Certara Phoenix · Lambda Z estimation settings ↗</a></li>
           </ul>
         </section>
     </main>
-    <footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.3.7</span></footer>
+    <footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.3.9</span></footer>
     <a class="back-to-top" href="#top" aria-label="一键回到顶部" title="回到顶部" hidden>↑</a>
     <script>
       (() => {

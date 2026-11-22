@@ -1,6 +1,12 @@
 # SP · Clinical Statistical Programming
 
-**V0.3.8** — 新增 C-QTc 浓度–效应分析学习专题；SAS 01–09 速查与原有专题保持不变，AI 继续隐藏。
+**V0.3.9** — 常用 PK 参数扩充 BQL/NC、λz 衍生关系及参数级分析排除规则；AI 继续隐藏。
+
+## V0.3.9：常用 PK 参数 NCA / λz QC
+
+- `/pk-parameters/` 增加数据缺失、BQL、NC 与计算成功但不纳入统计的区分，末端拟合至少三点的理由以及 Rsq_adj / %AUCex 两条独立示例判定规则。
+- 加入 t½、AUCinf、AUMCinf、MRTinf、CL/F、Vz/F、Vss 等参数依赖矩阵、ADPP 参数级分析标志伪代码与描述统计公式。
+- 使用匿名、通用教学示例；未公开项目编号、申办方或患者资料。提交 GitHub 不等于已确认 Cloudflare 生产发布。
 
 ## V0.3.8：C-QTc 与 ADEG / ADPC 学习专题
 
