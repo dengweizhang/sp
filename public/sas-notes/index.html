@@ -115,7 +115,7 @@ run;</code></pre>
 <section class="sas-note" id="note-04" aria-labelledby="title-04">
 <h2 id="title-04"><span class="sas-no">04</span>SAS 常用字符串与缺失函数</h2>
 <p><strong>速查 42 项。</strong>按用途分类，<strong>加粗函数</strong>为 SP/TFL 高频用法；示例中的 <code>s</code> 是字符串、<code>x</code> 是变量。只列最有用的规则。</p>
-<nav class="sas-fn-jump" aria-label="函数类别速跳"><a href="#fn-join">拼接与分隔</a><a href="#fn-clean">空格与字符清理</a><a href="#fn-extract">提取、拆分与长度</a><a href="#fn-find">查找、匹配与计数</a><a href="#fn-replace">替换与正则</a><a href="#fn-case">大小写</a><a href="#fn-missing">缺失判断与取首个非缺失值</a><a href="#fn-convert">类型与格式转换</a></nav>
+<nav class="sas-fn-jump" aria-label="函数类别速跳"><a href="#fn-join">拼接与分隔</a><a href="#fn-clean">空格与字符清理</a><a href="#fn-extract">提取、拆分与长度</a><a href="#fn-find">查找、匹配与计数</a><a href="#fn-replace">替换与正则</a><a href="#fn-tranwrd">TRANWRD</a><a href="#fn-case">大小写</a><a href="#fn-missing">缺失判断与取首个非缺失值</a><a href="#fn-convert">类型与格式转换</a></nav>
 <h3 class="sas-fn-group" id="fn-join">拼接与分隔</h3>
 <div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
 <thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
@@ -166,12 +166,13 @@ run;</code></pre>
 <div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
 <thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
 <tbody>
-<tr><td><strong><code>TRANWRD</code></strong></td><td><code>tranwrd(s,'old','new')</code></td><td>将所有匹配子串替换成新文本</td></tr>
+<tr id="fn-tranwrd"><td><strong><code>TRANWRD</code></strong></td><td><code>tranwrd(s,'old','new')</code></td><td>替换全部匹配子串，区分大小写</td></tr>
 <tr><td><code>TRANSTRN</code></td><td><code>transtrn(s,'old','')</code></td><td>可把匹配子串真正替换为空串</td></tr>
 <tr><td><code>TRANSLATE</code></td><td><code>translate(s,'_',' ')</code></td><td>逐字符替换：空格改下划线</td></tr>
 <tr><td><strong><code>PRXMATCH</code></strong></td><td><code>prxmatch('/^AE/',s)</code></td><td>正则匹配，返回位置；不匹配为 0</td></tr>
 <tr><td><code>PRXCHANGE</code></td><td><code>prxchange('s/ +/ /',-1,s)</code></td><td>正则全局替换连续空格</td></tr>
 </tbody></table></div>
+<p class="sas-boundary"><strong>TRANWRD 示例：</strong><code>tranwrd('AE Severe Severe','Severe','Grade 3')</code> → <code>AE Grade 3 Grade 3</code>。替换<strong>所有</strong>匹配子串；如果要真正删除匹配内容，使用 <code>TRANSTRN(s,'old',trimn(''))</code>，而不是 <code>TRANWRD(s,'old','')</code>（后者会替换成一个空格）。<a href="https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0pgemqcslm9uen1tvr5gcrusgrw.htm" target="_blank" rel="noopener noreferrer">SAS 官方说明</a></p>
 <h3 class="sas-fn-group" id="fn-case">大小写</h3>
 <div class="table-wrap sas-fn-wrap"><table class="learning-table sas-fn-table">
 <thead><tr><th>函数</th><th>示例</th><th>一句话作用</th></tr></thead>
