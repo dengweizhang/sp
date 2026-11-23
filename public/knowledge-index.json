@@ -1,6 +1,6 @@
 {
-  "version": "0.3.10",
-  "description": "公开知识索引：SAS 速查与系统专题、临床统计、临床药理、Findings→BDS 与 C-QTc 浓度–效应分析，以及 AE 部分日期、TEAE 计数与 TFL 交付复核案例。",
+  "version": "0.3.9",
+  "description": "公开知识索引：SAS 速查与系统专题、临床统计、临床药理、Findings→BDS 与 C-QTc 浓度–效应分析。",
   "articles": [
     {
       "title": "SAS 实战笔记 01–09：函数、Unicode、PROC REPORT/RTF、正则与 PK 浓度",
@@ -114,61 +114,6 @@
         "RTF格式",
         "ODS TAGSETS.RTF",
         "Report样式"
-      ]
-    },
-    {
-      "title": "TEAE 表怎么数人头？从 ADSL、ADAE 到 n (%)",
-      "url": "/teae-counting/",
-      "keywords": [
-        "TEAE",
-        "ADAE",
-        "ADSL",
-        "OCCDS",
-        "TRTEMFL",
-        "SAFFL",
-        "Big N",
-        "SOC",
-        "PT",
-        "n (%)",
-        "分析人群",
-        "受试者去重",
-        "SAS",
-        "QC"
-      ]
-    },
-    {
-      "title": "AE 只记录到月份时，怎么判断是否发生在给药后？",
-      "url": "/ae-partial-dates/",
-      "keywords": [
-        "AE",
-        "ADAE",
-        "AESTDTC",
-        "ASTDT",
-        "ASTDTF",
-        "TRTSDT",
-        "TRTEMFL",
-        "部分日期",
-        "日期插补",
-        "TEAE",
-        "ADaM",
-        "QC"
-      ]
-    },
-    {
-      "title": "PROC COMPARE 通过以后，最终 RTF 还要查什么？",
-      "url": "/tfl-qc/",
-      "keywords": [
-        "TFL",
-        "TLF",
-        "QC",
-        "RTF",
-        "ODS",
-        "PROC COMPARE",
-        "PROC REPORT",
-        "Big N",
-        "表头",
-        "脚注",
-        "交付验收"
       ]
     },
     {
