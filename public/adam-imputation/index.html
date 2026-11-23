@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="系统归纳 ADaM 中日期/时间补值、LOCF/WOCF、NRI、多重插补、BLQ、访视派生与 TTE 删失，并区分 CDISC 规范、受控术语和项目 SAP。">
+<meta name="theme-color" content="#ffffff"><link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="canonical" href="https://sp.769967.xyz/adam-imputation/">
+<link rel="stylesheet" href="/assets/style.css">
+<title>ADaM 填补与衍生方法总览 · SP</title></head><body><div class="shell" id="top">
+<header class="site-header"><a class="brand" href="/" aria-label="SP 首页">SP.</a><nav class="tool-links" aria-label="常用工具"><a href="https://xpt.769967.xyz" target="_blank" rel="noopener noreferrer">XPT <span aria-hidden="true">↗</span></a><a href="https://ct.769967.xyz" target="_blank" rel="noopener noreferrer">CT <span aria-hidden="true">↗</span></a></nav></header>
+<header class="article-header"><nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / ADaM 填补与衍生方法</nav><h1>ADaM 填补与衍生方法总览</h1>
+<p class="article-lead">从日期补值到多重插补、从 BLQ 到删失，按真实工作场景建立可追溯的 ADaM 处理方法地图。</p></header>
+<main class="article-body" id="main-content"><details class="toc-inline"><summary>本页目录</summary><nav aria-label="本页目录"><a href="#principle">1. 先分清三类“填补”</a>
+<a href="#datetime">2. 部分日期与时间</a>
+<a href="#locf">3. 纵向观测值与插补</a>
+<a href="#responder">4. 分类结局与失败判定</a>
+<a href="#bql">5. BLQ、LOD/LLOQ 与数值边界</a>
+<a href="#baseline">6. 基线、访视和派生记录</a>
+<a href="#tte">7. TTE 删失与时间归因</a>
+<a href="#dt">8. DTYPE / DTF / TMF 对照</a>
+<a href="#trace">9. 如何做可追溯的 ADaM</a>
+<a href="#practice">10. 项目检查表与面试自测</a>
+<a href="#sources">11. 官方依据与边界</a></nav></details>
+
+<div class="sp-learning-lead">
+<strong>一篇处理“ADaM 中所有常见填补逻辑”的工作索引</strong>
+<p>本文按实际工作场景覆盖日期/时间、连续型、二分类、检出限、基线、访视、TTE 和敏感性分析等主要类别，尽量系统而非仅列 LOCF。<strong>但 ADaM 没有“穷尽所有研究填补算法”的固定清单</strong>：任何具体项目都可能追加 SAP 定义的规则。</p>
+<p>文中区分三层：<strong>① CDISC 规范要求怎样表达与追溯；② CDISC CT 提供哪些受控值；③ 项目 Protocol / SAP / Spec 才决定何时、如何填补。</strong>这比照抄某个项目的日期补值逻辑更稳妥。</p>
+</div>
+<section aria-labelledby="principle">
+<h2 id="principle">1. 先分清三类“填补”</h2>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>类别</th><th>解释</th><th>ADaM 里可能看到</th></tr></thead>
+<tbody>
+<tr><td>缺失数据插补<br><small>Imputation</small></td><td>对原本缺少分析值的时间点或终点赋予估计/约定值</td><td><code>DTYPE=LOCF/WOCF/BLOCF</code>；MI 衍生数据；NRI 分析响应标记</td></tr>
+<tr><td>日期/时间元素填补<br><small>Partial date/time</small></td><td>已知部分日期，按预定规则补全年月日或时分秒</td><td><code>ASTDT</code>、<code>AENDT</code>、<code>ASTDTF</code>、<code>AENDTF</code>、<code>*TMF</code></td></tr>
+<tr><td>分析值派生<br><small>Derivation</small></td><td>原值并非缺失，而是从多个观测生成新的统计量或分析记录</td><td><code>DTYPE=AVERAGE/MAXIMUM/MINIMUM/LOV/COPY</code>；<code>BASE</code>、<code>CHG</code></td></tr>
+</tbody></table></div>
+<p><strong>关键原则：</strong>并非所有 <code>DTYPE</code> 非空记录都等于“原始数据缺失”。有些是派生汇总（如 AVERAGE），有些是复制到特定分析时间点（COPY、LOV）。反过来，缺失数据的模型化处理也未必会在 BDS 中显示为一条 <code>DTYPE</code> 记录。</p>
+<p>ADaMIG v1.3 §3.1.3 提供日期/时间填补标志命名及取值原则，§4.5.1 则给出 LOCF/WOCF 新增时间点记录示例。<strong>这属于数据表达规范，不是必须对所有研究使用 LOCF 的要求。</strong></p>
+</section>
+
+<section aria-labelledby="datetime">
+<h2 id="datetime">2. 部分日期与时间：最常见，也最容易影响安全性</h2>
+<p>在 AE、CM、MH、EX、死亡日期等分析中，可能面对 <code>2026-11</code>、<code>2026</code>、缺少日/时分的日期。必须先判断这项分析为什么需要完整日期，才能选择是否以及如何补值。</p>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>场景</th><th>常见可选策略（非 CDISC 统一规定）</th><th>必须检查</th></tr></thead>
+<tbody>
+<tr><td>AE 起始日期</td><td>缺日可考虑月初/首次给药日等边界规则；也可能通过区间比较避免填补</td><td>TEAE 分类是否偏向保守；是否跨首次给药；完整日期是否被改动</td></tr>
+<tr><td>AE 结束日期</td><td>缺日可考虑月末/研究结束边界；需防止早于开始日期</td><td>持续事件、治疗期归属、起止顺序</td></tr>
+<tr><td>CM 起止日期</td><td>按与给药的重叠关系做保守/相应边界判断</td><td>是否并用药、开始/结束与研究治疗交集</td></tr>
+<tr><td>MH 起止日期</td><td>可能仅用于既往史分类、持续性判断或计算病程</td><td>不能将所有不完整既往史日期机械补为 01JAN</td></tr>
+<tr><td>首次/末次给药时间</td><td>若需要补值，规则应特别谨慎；有时应保留未知而不强行赋值</td><td>TEAE、相对日、PK 采血间隔、暴露持续时间是否被影响</td></tr>
+<tr><td>时分秒缺失</td><td>可依据 SAP 约定 00:00、23:59、秒数置零或不填补</td><td>“只收集到分钟”与“本应收集秒但缺失”不同</td></tr>
+<tr><td>完全缺失的日期</td><td>可能按规则保留缺失、从相关证据推断区间，或设保守分类</td><td>不得无依据凭空生成精确日</td></tr>
+</tbody></table></div>
+<h3>2.1 代表性日期标志：<code>*DTF</code></h3>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>来源精度</th><th>分析日期示意</th><th>标志（最高填补级别）</th></tr></thead>
+<tbody>
+<tr><td><code>2026-11-08</code></td><td>2026-11-08</td><td>空（未补）</td></tr>
+<tr><td><code>2026-11</code></td><td>2026-11-01（假定月初）</td><td><code>D</code>：补日</td></tr>
+<tr><td><code>2026</code></td><td>2026-01-01（假定年初）</td><td><code>M</code>：补月，可能同时补日</td></tr>
+<tr><td>缺年（有月/日）</td><td>依据规则补全年份</td><td><code>Y</code>：补年</td></tr>
+</tbody></table></div>
+<p>这里“01”仅用于演示<strong>某种允许的项目规则</strong>。ADaMIG v1.3 表 3.1.3.1 明确说明日期补值标志并不隐含具体的补值算法；例如只缺月时，项目规则可能连日一并重新决定。</p>
+<p><strong>时间标志 <code>*TMF</code>：</strong><code>H</code> 代表整个时间被补；<code>M</code> 代表分钟及秒被补；<code>S</code> 代表只补秒。当本来就不收集秒且统一拼成 00，规则与原本需要收集秒而某次缺失不同。是否需要 <code>DTF/TMF</code> 要看相应变量是否确实发生填补。</p>
+<div class="sp-learning-example"><strong>TEAE 不是先“随便补一个日期”再判断</strong>
+<p>例如 AE 起始只知道 <code>2026-11</code>，首次给药发生在 11 月 15 日。实际 AE 可能在给药前也可能在给药后；SAP 可要求保守视为 TEAE，也可先判断日期区间。<strong>先决定分析问题与保守规则，再衍生日期/标志</strong>。不可把“缺失日一律补 01”误说成 CDISC 强制规则。</p></div>
+</section>
+
+<section aria-labelledby="locf">
+<h2 id="locf">3. 连续型纵向数据：LOCF 之外还有很多方法</h2>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>方法</th><th>是什么</th><th>典型注意点</th></tr></thead>
+<tbody>
+<tr><td><code>LOCF</code><br>Last Observation Carried Forward</td><td>用上一个合格的非缺失观测值代替缺失访视值</td><td>合格来源、停药后能否携带、最大间隔，不能默认适用于所有主要分析</td></tr>
+<tr><td><code>BLOCF</code><br>Baseline Observation Carried Forward</td><td>用非缺失基线观测值代替后续缺失值</td><td>相当于施加特定缺失后结果假设，可能有偏倚</td></tr>
+<tr><td><code>SOCF</code><br>Screening Observation Carried Forward</td><td>用筛选期值进行替代</td><td>筛选期与基线不一定相同</td></tr>
+<tr><td><code>NOCB</code><br>Next Observation Carried Backward</td><td>用后一个非缺失值回填更早时间点</td><td>会使用后续信息；不能默认用于前瞻性判定</td></tr>
+<tr><td><code>WOCF</code><br>Worst Observation Carried Forward</td><td>按受试者已观察到的最差结局替代相关缺失时间点</td><td>需要明确“最差”的方向和数据范围</td></tr>
+<tr><td><code>BOCF</code><br>Best Observation Carried Forward</td><td>用截至规定时间点已观察的最佳值填补</td><td>与 <code>BOC</code>（最佳观测结果）有所区分</td></tr>
+<tr><td><code>POCF</code><br>Penultimate Observation Carried Forward</td><td>使用倒数第二个合格观测值</td><td>不同于普通 LOCF</td></tr>
+<tr><td><code>MOV</code> / <code>MOTH</code></td><td>分别用指定组的观测均值 / 参照组均值代替</td><td>需要明确组别、时间点及统计假设</td></tr>
+<tr><td><code>INTERP</code> / <code>EXTRAP</code></td><td>已知数据点之间插值 / 超出观测范围外推</td><td>方法、模型、边界、临床合理性必须预定义</td></tr>
+<tr><td><code>ML</code></td><td>最大似然估计方法对应的受控术语</td><td>不等于“随便用模型预测值填写 AV​AL”</td></tr>
+</tbody></table></div>
+<p>这些是 CDISC ADaM <code>DTYPE</code> 受控术语中可以出现的类型，<strong>不是建议全部采用</strong>。不同药物、终点与 Estimand 可能会限制乃至不允许某些单值插补。</p>
+<h3>3.1 现代临床试验中常见的模型处理</h3>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>策略</th><th>直观理解</th><th>ADaM 的可能表达</th></tr></thead>
+<tbody>
+<tr><td>MMRM（无显式单值填补）</td><td>使用可观测纵向数据，依赖模型及缺失机制假设进行估计</td><td>主要分析 BDS 数据可能不新增填补行；模型使用实际可分析观测</td></tr>
+<tr><td>MI（Multiple Imputation）</td><td>多次生成符合模型假设的缺失值，分别分析，再合并估计</td><td>可有每次插补的编号、数据集/补充变量与合并分析结果；以 Spec 为准</td></tr>
+<tr><td>Reference-based MI</td><td>如 J2R、CIR 等，按预定义参考组轨迹处理某些 ICE 后的缺失</td><td>敏感性分析的假设、插补数据与结果明确标识</td></tr>
+<tr><td>Delta-adjusted / Tipping point</td><td>改变插补假设或偏移量，评估结论何时翻转</td><td>方案场景编号、Delta、插补副本、模型结果</td></tr>
+<tr><td>Pattern-mixture / Selection model</td><td>对缺失模式或缺失机制进行建模</td><td>方法学决定数据准备方式，不能只看 DTYPE 推断模型</td></tr>
+</tbody></table></div>
+<p><strong>分清两层：</strong>Estimand 处理停药、救援用药等 ICE 的策略；MI/MMRM 等是估计该目标所用的方法。没有填补记录不代表不需要解释缺失机制。</p>
+</section>
+
+<section aria-labelledby="responder">
+<h2 id="responder">4. 二分类和复合终点：NRI / Failure 与极端情景</h2>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>策略</th><th>典型思路</th><th>风险点</th></tr></thead>
+<tbody>
+<tr><td>NRI（Non-responder Imputation）</td><td>满足规则的缺失响应 / 停药 / 使用救援治疗按“未响应”计</td><td>哪些情况触发、是否与 ICE 策略一致，不能所有缺失都判失败</td></tr>
+<tr><td>Composite failure</td><td>将某个 ICE（如启动救援治疗）直接纳入失败定义</td><td>这是终点定义/Estimand 策略，未必是缺失值插补</td></tr>
+<tr><td><code>WC</code> / <code>BC</code></td><td>假定最差 / 最佳可能的结局进行分析</td><td>常用于界限或敏感性情景，非普遍主分析</td></tr>
+<tr><td><code>WOV</code> / <code>WOC</code> / <code>BOC</code></td><td>组内最差观测值、受试者最差/最佳观测结果</td><td>观测范围、严重性/改善方向需固定</td></tr>
+<tr><td>Missing category</td><td>分类缺失另设 “Missing/Unknown” 类别，用于描述性汇总</td><td>并非赋予某个临床反应值；分母/Unknown 含义必须清楚</td></tr>
+</tbody></table></div>
+<div class="sp-learning-example"><strong>示意：减重达标率</strong><p>若某周评价受试者是否达到 ≥5% 体重下降，真实观测结果、因停药而按复合失败规则判定，以及对真正缺失体重的 NRI，要在 Spec 中区分来源。不能只写一句“缺失=否”，就混淆了终点定义与缺失假设。</p></div>
+</section>
+
+<section aria-labelledby="bql">
+<h2 id="bql">5. BLQ、LOD/LLOQ、PK 浓度与实验室指标</h2>
+<p>低于定量下限（BLQ/BQL）与常规“未采集”不是同一种缺失。尤其 PK / PD 中，它可能影响 AUC、末端消除拟合和剂量–暴露估计。</p>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>策略 / DTYPE</th><th>含义</th><th>注意事项</th></tr></thead>
+<tbody>
+<tr><td><code>LLOQ</code> / <code>HALFLLOQ</code></td><td>用定量下限 / 其一半代替</td><td>需知道每个分析物、实验室与时间对应的真实 LLOQ</td></tr>
+<tr><td><code>LLOD</code> / <code>HALFLLOD</code></td><td>用检测下限 / 其一半代替</td><td>LOD（检出限）与 LOQ（定量限）不是同义词</td></tr>
+<tr><td><code>ULOQ</code> / <code>ULOD</code></td><td>用上侧定量/检测界限替代</td><td>适用规则及高值的方向必须明确</td></tr>
+<tr><td>零值替代</td><td>例如特定 PK NCA 的给药前 BLQ 按 0 处理</td><td>在给药前、峰前、峰后可能采用不同规则；这不是全局标准</td></tr>
+<tr><td>保留缺失 / 排除拟合点</td><td>不强行给定浓度，按预定义原则处理</td><td>影响 AUC、Tlast、Lambda_z 及可计算性</td></tr>
+<tr><td>模型化删失处理</td><td>将低于下限的观测作为删失/有限检测信息纳入模型</td><td>某些 PopPK 方法可使用，不能直接套用 NCA 浓度表替代规则</td></tr>
+</tbody></table></div>
+<p><strong>两个 QC 检查：</strong>（1）BLQ 在 SDTM 中如何保留原始定性结果与定量限；（2）ADPC/ADPP 的分析浓度、可分析标志、模型/规则是否一致。不要在 SDTM 原数据上不可逆地覆盖 <code>&lt;LLOQ</code>。</p>
+</section>
+
+<section aria-labelledby="baseline">
+<h2 id="baseline">6. 基线、访视窗与派生记录：不全叫插补</h2>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>场景</th><th>可能做法</th><th>为什么不必然属于缺失填补</th></tr></thead>
+<tbody>
+<tr><td>缺失基线</td><td>不算 CHG；选择合格的较早观测；按预设均值构建基线；极少数情形另有插补</td><td>选择基线或构建基线是分析定义；并不保证存在真实缺失值</td></tr>
+<tr><td>访视窗口选择</td><td>根据目标日、实际日、优先级从多个记录选出一个</td><td><code>ANL01FL</code>、<code>AVISIT</code>、<code>AWTARGET</code>、<code>AWTDIFF</code> 常体现选取逻辑</td></tr>
+<tr><td>Endpoint 记录</td><td>最近一次合格观测复制到特定端点，例如 <code>DTYPE=LOV</code></td><td>有时只是派生的分析端点记录，并非填补缺失访视</td></tr>
+<tr><td>汇总派生</td><td><code>AVERAGE</code>、<code>MAXIMUM</code>、<code>MINIMUM</code></td><td>从观测记录汇总；不一定缺失</td></tr>
+<tr><td><code>PHANTOM</code></td><td>创建预设时间点的空分析记录，<code>AVAL</code> 依然缺失</td><td>增加记录本身并未填出数值</td></tr>
+<tr><td>标准化与换算</td><td>单位转换、正常范围/CTCAE 分级、比例/变化量计算</td><td>属于衍生，不是自动“缺什么补什么”</td></tr>
+</tbody></table></div>
+<p>ADaMIG v1.3 §4.5.2–4.5.4 提供派生基线、Endpoint、最大/最小值、访视窗和 <code>ANLzzFL</code> 的示例。<strong>同一个 AVISIT 出现观察值、LOCF 值和 WOCF 值时，必须使用正确的 DTYPE/分析标志进行筛选</strong>，否则分析可能重复计数。</p>
+</section>
+
+<section aria-labelledby="tte">
+<h2 id="tte">7. 时间到事件：删失不是“填补一个事件日期”</h2>
+<p><code>ADTTE</code> 常按方案确定事件发生、删失和起始日，并衍生 <code>AVAL</code> 与 <code>CNSR</code>。例如 PFS 可能因缺少规定的肿瘤评估、启动后续治疗或较长的评估间隔而触发不同删失规则。</p>
+<p><strong>删失（Censoring）不是假定患者在删失日发生了事件</strong>，也不是简单用“随访末日填补缺失进展日”。事件日期的定义、检测窗口和删失规则都来自 SAP。</p>
+<div class="sp-learning-example"><strong>示意：PFS</strong><p>研究结束时未观察到进展/死亡，可能根据最后一次符合要求的充分评估日期设定删失。该规则不能简单等同于把缺失的进展日期补为最后访视日期；不同的缺失评估情景需分别处理。</p></div>
+</section>
+
+<section aria-labelledby="dt">
+<h2 id="dt">8. 重要变量与 CDISC DTYPE 受控值速查</h2>
+<p>以下是从 CDISC ADaM IG v1.3 与 NCI EVS 受控术语中归纳的<strong>部分高频代码</strong>，同时标注其性质。术语版本会更新；是否允许用于某变量，须核对研究锁定的 CT 版本、Define-XML 与 Spec。</p>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>类别</th><th>DTYPE / 标记</th><th>如何使用</th></tr></thead>
+<tbody>
+<tr><td>携带观测</td><td><code>LOCF</code> <code>BLOCF</code> <code>SOCF</code> <code>NOCB</code> <code>POCF</code> <code>WOCF</code> <code>BOCF</code></td><td>依据预定时间与受试者范围进行替代</td></tr>
+<tr><td>最佳/最差情景</td><td><code>WC</code> <code>BC</code> <code>WOC</code> <code>BOC</code> <code>WOV</code></td><td>可能是插补，也可能是提取极端观测值</td></tr>
+<tr><td>均值/模型</td><td><code>MOV</code> <code>MOTH</code> <code>ML</code></td><td>明确数据来源、分组、算法及目的</td></tr>
+<tr><td>定量边界</td><td><code>LLOD</code> <code>HALFLLOD</code> <code>LLOQ</code> <code>HALFLLOQ</code> <code>ULOD</code> <code>ULOQ</code></td><td>按检测/定量界限及 SAP 使用</td></tr>
+<tr><td>插值/外推</td><td><code>INTERP</code> <code>EXTRAP</code></td><td>依赖区间/模型与边界规则</td></tr>
+<tr><td>派生/复制</td><td><code>LOV</code> <code>LVPD</code> <code>COPY</code> <code>AVERAGE</code> <code>MAXIMUM</code> <code>MINIMUM</code></td><td>不必然意味着源值缺失</td></tr>
+<tr><td>空占位记录</td><td><code>PHANTOM</code></td><td>创建时间点，但 AVAL 保持缺失</td></tr>
+<tr><td>日期与时间</td><td><code>*DTF</code>：<code>D/M/Y</code>；<code>*TMF</code>：<code>H/M/S</code></td><td>最高填补级别；只在确实填补时设置</td></tr>
+</tbody></table></div>
+<p><strong>额外提醒：</strong><code>DTYPE=LOCF</code> 等受控代码只是表达方法类别，填补值的来源记录、跨访视条件及是否因停药而改变都要由 metadata / SAP 进一步说明。<code>DTYPE</code> 不等于日期填补标志 <code>*DTF</code>。</p>
+</section>
+
+<section aria-labelledby="trace">
+<h2 id="trace">9. 从 SDTM 到 ADaM：什么叫可追溯？</h2>
+<div class="sp-learning-grid">
+<div class="sp-learning-cell"><strong>① 保留来源</strong><span>保留需要的 <code>--DTC</code>、<code>--SEQ</code>、分析日期/分析值及源数据路径；避免覆盖收集值</span></div>
+<div class="sp-learning-cell"><strong>② 保留规则</strong><span>在 Spec/Define 明确逻辑、变量、方法、边界、缺失适用条件和项目假设</span></div>
+<div class="sp-learning-cell"><strong>③ 保留身份</strong><span>对于新生成的记录，记录 <code>DTYPE</code>、<code>AVISIT</code>、<code>ANLxxFL</code> 和必要的来源链接</span></div>
+<div class="sp-learning-cell"><strong>④ 保留验证</strong><span>编写 QC 场景，验证边界、同日给药、部分缺失、多个候选来源及不同分析版本</span></div>
+</div>
+<div class="sp-learning-example">
+<strong>一个小型 LOCF 示意（非强制算法）</strong>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>USUBJID</th><th>AVISIT</th><th>AVAL</th><th>DTYPE</th><th>来源</th></tr></thead>
+<tbody>
+<tr><td>01</td><td>Week 1</td><td>120</td><td>空</td><td>原始观察</td></tr>
+<tr><td>01</td><td>Week 2</td><td>120</td><td><code>LOCF</code></td><td>Week 1 的合格记录</td></tr>
+</tbody></table></div>
+<p>原始 Week 1 不能被直接覆盖成 Week 2；应记录 Week 2 的填补来源或保持足够的关联信息。若同一周还存在 WOCF 行，TFL 必须明确筛选哪一种分析场景。</p>
+</div>
+</section>
+
+<section aria-labelledby="practice">
+<h2 id="practice">10. ADaM 填补逻辑 QC 清单与面试题</h2>
+<div class="indication-quiz">
+<details><summary>Q1. 缺失的 AE 开始日期一定补为当月 1 日吗？</summary><p>不是。先看 SAP 目的（如 TEAE 归类），根据部分日期与首次给药的关系采用项目规则；CDISC 规定的是补值标志的表达，不规定一律月初。</p></details>
+<details><summary>Q2. DTYPE=AVERAGE 是否代表“缺失值插补”？</summary><p>未必。它通常表示基于多个观测值派生汇总记录，可能完全没有缺失。</p></details>
+<details><summary>Q3. NRI 是不是必须把 AVAL 改成 0？</summary><p>不一定。要看二分类参数的编码（0/1、Y/N 或其他）和是否采用新增记录、参数/标志，不能简单以数值 0 概括所有情况。</p></details>
+<details><summary>Q4. MMRM 必须产生所有缺失访视的填补行吗？</summary><p>通常不需要。MMRM 可基于观察记录和模型假设进行推断。若 SAP 另有敏感性分析或辅助推导，则按相应 Spec。</p></details>
+<details><summary>Q5. BLQ 值能否全部补 0？</summary><p>不能。应区分给药前、峰前、峰后以及 NCA/PopPK 等分析目的，按照具体规则与定量限处理。</p></details>
+<details><summary>Q6. TTE 中 CNSR=1 是否代表把失访后的事件日期补出来？</summary><p>不代表。删失记录了截至所知时点的事件观察信息，不是将未知事件时间制造成一个已发生事件。</p></details>
+</div>
+<h3>实际项目建议建立的审核矩阵</h3>
+<div class="table-wrap"><table class="learning-table">
+<thead><tr><th>检查项</th><th>应该记录</th></tr></thead>
+<tbody>
+<tr><td>何时触发</td><td>变量缺失形式、分析人群、评价时点、停药/救援治疗条件</td></tr>
+<tr><td>如何计算</td><td>填补方向、来源优先级、边界日/时间、候选记录与相同值决胜规则</td></tr>
+<tr><td>如何标识</td><td>DTYPE、DTF/TMF、ANLxxFL、原始与分析日期、分析记录层级</td></tr>
+<tr><td>如何检验</td><td>样例、边界用例、独立 QC、TFL 分母/人群/参数一致性</td></tr>
+</tbody></table></div>
+<p>面试时能回答“为什么采用某种缺失策略、在 ADaM 怎样表达、有什么分析风险”，比只背 LOCF 的全称有价值。</p>
+</section>
+
+<section aria-labelledby="sources">
+<h2 id="sources">11. 官方依据、来源版本与适用范围</h2>
+<p><strong>上传文件依据：</strong>CDISC ADaM v2.1（分析数据追溯与衍生原则）；CDISC ADaMIG v1.3，重点参考 §3.1.3（Date and Time Imputation Flag Variables）、§4.5.1（Timepoint Imputation）、§4.5.2–§4.5.4（基线与分析记录标记）；此外参考 OCCDS IG v1.1 中的 ADAE/ADCM 日期与属性调整示例。</p>
+<p><strong>扩展整理：</strong>缺失数据模型、NRI、Reference-based MI、Tipping Point 等是常见 SAP/统计方法应用场景，不表示 ADaMIG v1.3 逐项规定了实现标准。受控术语取值应核对项目使用的 CT 版本。</p>
+<ul class="pk-references">
+<li><a href="https://www.cdisc.org/standards/foundational/adam/adamig-v1-3" target="_blank" rel="noopener noreferrer">CDISC · ADaMIG v1.3 ↗</a></li>
+<li><a href="https://www.cdisc.org/standards/foundational/adam" target="_blank" rel="noopener noreferrer">CDISC · ADaM 标准资料 ↗</a></li>
+<li><a href="https://evs.nci.nih.gov/ftp1/CDISC/ADaM/ADaM%20Terminology.html" target="_blank" rel="noopener noreferrer">NCI EVS · ADaM Controlled Terminology（含 DTYPE）↗</a></li>
+<li><a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/e9r1-statistical-principles-clinical-trials-addendum-estimands-and-sensitivity-analysis-clinical" target="_blank" rel="noopener noreferrer">ICH E9(R1) · Estimands and Sensitivity Analysis ↗</a></li>
+<li><a href="/clinical-statistics/">站内 · 临床试验统计学基础 ↗</a></li>
+</ul>
+</section>
+</main>
+<footer class="site-footer"><span><a href="/">← 返回首页</a></span><span>V0.2.9</span></footer>
+<a class="back-to-top" href="#top" aria-label="回到顶部" title="回到顶部" hidden>↑</a>
+<script>(()=>{const b=document.querySelector('.back-to-top');const f=()=>b.hidden=window.scrollY<280;window.addEventListener('scroll',f,{passive:true});f()})()</script>
+</div></body></html>
