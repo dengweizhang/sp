@@ -10,6 +10,9 @@
   <link rel="stylesheet" href="/assets/style.css?v=0.3.7">
   <title>TEAE 表怎么数人头？从 ADSL、ADAE 到 n (%) · SP</title>
   <script src="/assets/code-copy.js?v=0.3.4" defer></script>
+  <style>
+    #sas pre { overflow-x: auto; padding: 12px; background: var(--soft); }
+  </style>
 </head>
 <body>
 <div class="shell" id="top">
@@ -119,7 +122,7 @@ proc sql;
   group by population, trta;
 quit;</code></pre>
 </details>
-<p>教学代码使用虚构数据，未在 SAS 环境执行。可以手工复核三个边界：给 S01 再加一条恶心，受试者数不变。去掉 S02 会改变分母。亚组 B 的分母只有 1，核对输出表头和百分比时应使用同一个人群。若某组 <code>N=0</code>，百分比不可计算，按 Shell 约定显示。</p>
+<p>教学代码使用虚构数据，未在 SAS 环境执行。手工复核时，给 S01 再加一条恶心，恶心仍只计同一受试者 1 人。去掉 S02 会改变分母。亚组 B 的分母只有 1，核对输出表头和百分比时应使用同一个人群。若某组 <code>N=0</code>，百分比不可计算，按 Shell 约定显示。</p>
 <p>参考资料 <a href="https://www.cdisc.org/standards/foundational/adam/adam-structure-occurrence-data-implementation-guide-v1-1">CDISC ADaM OCCDS v1.1</a></p>
 </section>
 <section aria-label="相关阅读">
