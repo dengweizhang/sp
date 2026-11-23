@@ -1,6 +1,6 @@
 # SP · Clinical Statistical Programming
 
-**V0.3.9** — 常用 PK 参数扩充 BQL/NC、λz 衍生关系及参数级分析排除规则；AI 继续隐藏。
+**V0.3.10** — 新增 ADaM 填补与衍生方法、药物上市前监管递交两篇深度笔记；AI 继续隐藏。
 
 ## V0.3.9：常用 PK 参数 NCA / λz QC
 
@@ -222,3 +222,10 @@
 - 保留后续功能：紧凑、悬浮的 `Copy` 按钮（PC hover/focus 显示，触屏仍可点击），保留 SAS 知识库新增内容和链接。
 - 页面通过 `style.css?v=0.3.7` 刷新样式缓存；站点版本号为 V0.3.7，而视觉基准是 V0.3.1，并非整体功能回滚。
 - 以后除非用户明确提出，不再统一调深字号/字重或替换原有衬线字体；视觉偏好优先于未经实际浏览器验证的“理论对比度最优”。
+
+## V0.3.10：ADaM 填补逻辑与药物上市监管递交
+
+- 新增 `/adam-imputation/`：CDISC ADaM v2.1 / ADaMIG v1.3 中日期/时间填补标志、DTYPE 派生逻辑、LOCF/WOCF；结合官方 DTYPE 受控术语和常见 SAP 方法，系统归纳 NRI、MI、BLQ、TTE、基线与 QC。
+- 新增 `/drug-submission/`：从 IND/CTA 到 NDA/BLA/MAA，解释 CTD/eCTD 五模块、FDA 数据包、Define-XML/cSDRG/ADRG/程序、ISS/ISE 及 FDA/NMPA 2026 年更新。
+- 保留已有的 9 篇主页文章和 SAS 学习子文章，现主页有 11 篇顶层条目。索引、sitemap 同步更新。
+- AI 继续隐藏停用；两篇不使用外部运行脚本或拖动交互。
