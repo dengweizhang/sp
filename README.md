@@ -1,6 +1,12 @@
 # SP · Clinical Statistical Programming
 
-**V0.3.9** — 常用 PK 参数扩充 BQL/NC、λz 衍生关系及参数级分析排除规则；AI 继续隐藏。
+**V0.3.10** — 新增临床统计编程案例，覆盖 AE 部分日期、TEAE 计数和最终 TFL 复核。
+
+## V0.3.10 · 临床统计编程案例
+
+- `/teae-counting/` 展示不同分析人群的分母、受试者去重、SOC/PT 粒度和模拟 SAS 示例。
+- `/ae-partial-dates/` 展示如何结合原始日期精度、分析窗和项目规则解释事件时间归类。
+- `/tfl-qc/` 从模拟的报表列错配出发，串联数据集验证、最终 RTF 检查及交付核对。
 
 ## V0.3.9：常用 PK 参数 NCA / λz QC
 
