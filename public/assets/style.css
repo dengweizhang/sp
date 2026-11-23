@@ -330,3 +330,22 @@ code{font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow
 .code-copy-button.is-copied{color:#245c47;background:#eff7f3;border-color:#bdd7ca}
 .code-copy-button.is-error{color:#8b3939;background:#fff4f3;border-color:#e7c3bd}
 @media(max-width:700px){.code-copy-button{right:9px;min-height:28px}}
+
+
+/* ADaM methods + regulatory submission field guides */
+.submission-flow{display:flex;align-items:stretch;gap:6px;margin:16px 0 17px;max-width:900px}
+.submission-flow>div{min-width:0;flex:1;border-top:2px solid #bbcfc9;background:#fafbf9;padding:10px 8px;display:flex;flex-direction:column;gap:5px}
+.submission-flow>div span{color:#849994;font:600 10px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.submission-flow>div strong{font-size:13px;line-height:1.5}
+.submission-flow>div small{font-size:11px;color:#777;line-height:1.65}
+.submission-flow>em{align-self:center;color:#adb9b5;font:18px Georgia,serif;font-style:normal}
+.submission-checklist{border-top:1px solid var(--line);margin:12px 0 19px}
+.submission-checklist>div{display:grid;grid-template-columns:145px 1fr;gap:12px;border-bottom:1px solid var(--line);padding:12px 2px}
+.submission-checklist strong{font-size:13px}
+.submission-checklist span{font-size:13px;line-height:1.8;color:#666}
+@media(max-width:800px){
+ .submission-flow{flex-wrap:wrap}
+ .submission-flow>div{flex-basis:100%;padding:8px 12px}
+ .submission-flow>em{text-align:center;width:100%}
+ .submission-checklist>div{grid-template-columns:1fr;gap:4px}
+}
