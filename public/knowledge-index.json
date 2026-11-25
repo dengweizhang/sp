@@ -3,7 +3,7 @@
   "description": "公开知识索引：SAS、CDISC、统计/药理、Findings/BDS、C-QTc、ADaM 填补逻辑与上市监管递交。",
   "articles": [
     {
-      "title": "SAS 实战笔记 01–09：函数、Unicode、PROC REPORT/RTF、正则与 PK 浓度",
+      "title": "SAS 实战笔记 01–10：函数、Unicode、PROC REPORT/RTF、正则与 PK 浓度、ADAE 与 KM",
       "url": "/sas-notes/",
       "keywords": [
         "SAS",
@@ -113,7 +113,24 @@
         "BLQ",
         "RTF格式",
         "ODS TAGSETS.RTF",
-        "Report样式"
+        "Report样式",
+        "ADAE",
+        "AEGRPID",
+        "ISRFL",
+        "ISRTTO",
+        "ISRDUR",
+        "ISRCNSR",
+        "注射部位反应",
+        "Injection Site Reaction",
+        "Kaplan-Meier",
+        "PROC LIFETEST",
+        "删失",
+        "RELREC",
+        "AEOUT",
+        "事件级",
+        "持续时间",
+        "首次发生时间",
+        "10"
       ]
     },
     {

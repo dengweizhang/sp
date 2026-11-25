@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="SAS 实战速查 01–09：PROC FORMAT、CATX、字符串函数、ODS Unicode、PROC REPORT 跨列标题、PRXMATCH 正则与 ODS RTF 分页。">
+<meta name="description" content="SAS 实战速查 01–10：PROC FORMAT、CATX、字符串函数、ODS Unicode、PROC REPORT 跨列标题、PRXMATCH 正则与 ODS RTF 分页。">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="canonical" href="https://sp.769967.xyz/sas-notes/">
@@ -58,11 +58,11 @@
 <nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / SAS 实战笔记</nav>
 <h1>SAS 实战笔记</h1>
 <p class="article-lead">只留能解决问题的内容。按编号查找：结论、代码、必要边界。</p>
-<div class="sas-meta">SAS FIELD NOTES · 09 NOTES · UPDATED 2026-11-20</div>
+<div class="sas-meta">SAS FIELD NOTES · 10 NOTES · UPDATED 2026-11-25</div>
 </header>
 <main class="article-body">
 <p class="sas-ending" style="margin:2px 0 13px">系统学习：<a href="/sas-learning/" style="color:#245e81;text-decoration:underline">SQL / FREQ / PK 浓度 / REPORT RTF / POWER / 绘图 ↗</a></p>
-<details class="sas-toc"><summary>目录 · 09 条笔记</summary>
+<details class="sas-toc"><summary>目录 · 10 条笔记</summary>
 <nav aria-label="SAS 笔记目录">
 <a href="#note-01"><span class="sas-no">01</span> TFL n (%) 多出空格</a>
 <a href="#note-02"><span class="sas-no">02</span> PROC FORMAT：VALUE / PICTURE / INVALUE</a>
@@ -73,6 +73,7 @@
 <a href="#note-07"><span class="sas-no">07</span> PRXMATCH / PRXCHANGE 正则</a>
 <a href="#note-08"><span class="sas-no">08</span> ODS RTF：标题与分页</a>
 <a href="#note-09"><span class="sas-no">09</span> PK 浓度统计量：CV%、GeoMean 等</a>
+<a href="#note-10"><span class="sas-no">10</span> ADAE：AEGRPID、注射部位反应持续时间与 KM 删失</a>
 </nav>
 </details>
 <!-- SP_NOTES_START: add subsequent notes as 05, 06...; mirror the numbered table of contents -->
@@ -222,7 +223,7 @@ title2 "mm^{super 2} and H^{sub 2}O";
 <p class="sas-boundary"><strong>注意：</strong><code>^{unicode ...}</code> 与 <code>^{super ...}</code> 属于 ODS inline formatting，不是 PROC FORMAT；ODS LISTING 目的地不支持相同的 ODS inline 表现。RTF 和 TAGSETS.RTF 需要分别验证。</p>
 </section>
 <section class="sas-note" id="note-06" aria-labelledby="title-06">
-<span id="note-10" aria-hidden="true"></span><!-- legacy bookmark points to merged note 06 -->
+
 <h2 id="title-06"><span class="sas-no">06</span>PROC REPORT：跨列标题与 RTF 排版</h2>
 <p><strong>问题从哪里来？</strong>一份 Listing 中，Alcohol History 需要横跨 <code>col3–col6</code>，Smoking History 需要横跨 <code>col7–col10</code>；同时组标题还要居中、带底边框。其实这是<strong>两件事</strong>：哪些列属于一组，以及这一组如何显示。</p>
 <h3>先决定表头结构：COLUMN 的括号</h3>
@@ -304,6 +305,51 @@ geomean = exp(mean_log);
 geosd   = exp(sd_log);
 geocv   = 100*sqrt(exp(sd_log**2)-1);</code></pre>
 <p class="sas-boundary"><strong>注意：</strong>原项目浓度 Shell 涉及 N、n、n of BLQ、Mean、SD、CV%、Median、Min、Max、GeoMean、GeoSD、GeoCV%；n 和分母 N 不同，BLQ 与几何统计必须先明确方案规则。<a href="/sas-learning/pk-concentration/">查看完整含义、算例和 TFL/SAS 代码 ↗</a></p>
+</section>
+<section class="sas-note" id="note-10" aria-labelledby="title-10">
+<h2 id="title-10"><span class="sas-no">10</span>ADAE：AEGRPID、注射部位反应持续时间与 KM 删失</h2>
+<p><strong>问题：</strong>同一 AE 因 Grade 变化而拆成多条记录；首次注射部位反应（ISR）按受试者统计，持续时间却按独立事件统计。如果直接按 AESEQ 计数或计算持续时间，就会把一个事件拆成多个。</p>
+<h3>先明确 AE Summary 的数据来源</h3>
+<p>提前退出研究：通过 DS 与 AE 的事件级 RELREC 关联识别，不等同于 AEACN=DRUG WITHDRAWN（永久停药）。胃肠疾病可按 MedDRA SOC，食欲下降可按 PT（范围由 SAP 确定）。ISR、AESI 优先检查 AE/SUPPAE 是否已有直接采集的属性；FA 可提供反应评估细节。低血糖等 CE 事件只有在存在可靠的 AE 级链接时才可回填 AE 标志；不能仅凭 USUBJID 匹配。AESI 的低血糖分级等条件由 SAP 定义。跨域匹配生成的 Flag 属于 Derived。</p>
+<p>RELREC 应在同一 STUDYID、USUBJID、RELID 内按 RDOMAIN、IDVAR、IDVARVAL 定位记录，不能假定 DSSEQ=AESEQ。多条 FA/CE 关联同一 AE 时先归并为事件属性，避免放大 ADAE 行数。TEAE 与 TRAE 通过 TRTEMFL 和治疗相关条件进一步筛选，特殊分类 Flag 不必重复包含 TEAE 条件。</p>
+<h3>四个变量就能支持两类分析</h3>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>Variable</th><th>Label（≤40 字符）</th><th>粒度与用途</th></tr></thead><tbody>
+<tr><td><code>ISRFL</code></td><td>Injection Site Reaction Flag</td><td>AE 记录；Y/空，Char 1</td></tr>
+<tr><td><code>ISRTTO</code></td><td>Time to First ISR (days)</td><td>受试者；仅首次合格事件赋值</td></tr>
+<tr><td><code>ISRDUR</code></td><td>Duration of ISR (days)</td><td>事件；至恢复或删失的观察时间</td></tr>
+<tr><td><code>ISRCNSR</code></td><td>ISR Censoring Indicator</td><td>事件；0=观察到恢复，1=删失，空=非代表记录（示例规则）</td></tr>
+</tbody></table></div>
+<p>后三个变量为 Num 8；以上均为自定义衍生变量，并非 CDISC 指定的 ISR 变量。通过 USUBJID + AEGRPID 识别事件；先确定合格事件，再保留该事件所有相关分段（不能先过滤掉可能标志不同的后续分段）。同一 AEGRPID 必须确实代表同一个事件；缺失组号不能直接归为一组，时间并列需规定稳定排序键。</p>
+<h3>为什么把 ISRDUR 和 ISRCNSR 放到最后一条？</h3>
+<p>最后一条按事件时间顺序确定，而不是默认最大 AESEQ。这样可以直接利用该记录的 AEOUT 进行最终转归汇总，避免重复计数或将中间 Grade 的转归误作最终转归。不能修改继承的 AEOUT、ASTDT、AENDT 来迎合事件级统计。首次发生时间则仅放在每位受试者最早合格发生记录上。</p>
+<p>虚构算例：首次给药 01JAN，EOS 20JAN；假设日期计算包含起始日，且无提前删失。</p>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>AEGRPID / AESEQ</th><th>ASTDT–AENDT</th><th>AEOUT</th><th>ISRTTO</th><th>ISRDUR</th><th>ISRCNSR</th></tr></thead><tbody>
+<tr><td>1 / 1</td><td>03JAN–05JAN</td><td>Not recovered</td><td>3</td><td>.</td><td>.</td></tr>
+<tr><td>1 / 2</td><td>05JAN–08JAN</td><td>Recovered</td><td>.</td><td>6</td><td>0</td></tr>
+<tr><td>2 / 3</td><td>10JAN–12JAN</td><td>Not recovered</td><td>.</td><td>.</td><td>.</td></tr>
+<tr><td>2 / 4</td><td>12JAN–.</td><td>Recovering</td><td>.</td><td>11</td><td>1</td></tr>
+</tbody></table></div>
+<p><strong>关键：</strong>6 天是观察到的恢复时间，11 天是截至 EOS 的观察时间，并不表示事件实际在第 11 天恢复。未恢复的事件也需要 ISRDUR，否则 KM 会丢失其风险集信息。ISRCNSR=0 与 1 都有分析意义，并非仅对未恢复事件赋值。</p>
+<h3>英文 Spec 示例（规则须按 SAP 确认）</h3>
+<div class="table-wrap"><table class="learning-table"><thead><tr><th>Variable</th><th>Derivation</th></tr></thead><tbody>
+<tr><td>ISRFL</td><td>Set to "Y" if the corresponding AE record is identified as an injection site reaction based on the prespecified source and criteria. Otherwise, leave blank.</td></tr>
+<tr><td>ISRTTO</td><td>For each subject, set to the earliest eligible ISR onset date minus TRTSDT plus 1. Populate only on the first qualifying record, using a prespecified tie-breaker. Otherwise, leave blank.</td></tr>
+<tr><td>ISRDUR</td><td>For each eligible ISR episode identified by USUBJID and AEGRPID, set to the resolution date minus the episode onset date plus 1 if the final outcome is "RECOVERED/RESOLVED" or "RECOVERED/RESOLVED WITH SEQUELAE" and a valid resolution date within follow-up is available. Otherwise, use EOSDT instead of the resolution date if censoring at EOS is specified. Populate only on the last chronological record of the episode.</td></tr>
+<tr><td>ISRCNSR</td><td>For the last chronological record of each eligible ISR episode, set to 0 if resolution is observed with a valid date within follow-up; set to 1 if the episode is censored according to the prespecified rule. Otherwise, leave blank.</td></tr>
+</tbody></table></div>
+<p><code>minus</code> = 减去；<code>plus 1</code> = 再加 1。03JAN − 01JAN = 2 个日历日间隔，加 1 = 第 3 个日历日；同日发生为 1。首次发生时间若 Shell 明确 +1 就照此实现；持续时间是否 +1、用日期还是日期时间必须独立确认，不能从前一个公式推断。</p>
+<h3>KM 与 TFL 如何取数</h3>
+<p>首次发生时间：对 Safety Set 内非缺失 ISRTTO 作描述性统计，每人最多一个值。事件转归：选每个事件末条记录，按最终 AEOUT 汇总受试者数 n、比例 n/N 和事件数 E；Censored 是分析状态，可与 AEOUT 类别重叠，不应无条件相加。KM 用 ISRDUR 与 ISRCNSR 配对，一条记录代表一次独立的 ISR episode。</p>
+<pre class="sas-code"><code>/* 教学代码：假设删失规则已确定、事件级变量已衍生 */
+proc lifetest data=adae method=km alpha=0.05;
+    where saffl="Y" and not missing(isrdur)
+          and isrcnsr in (0,1);
+    time isrdur*isrcnsr(1);
+    strata trtan;
+run;</code></pre>
+<p>KM 曲线表示尚未恢复的估计概率；下降至 75%、50%、25% 分别对应恢复时间 Q1、Median、Q3。未达到相应阈值则分位数不可估计（NE），不是程序错误。具体取决于恢复与删失的时间顺序，不仅是恢复比例。若需要分位数 95% CI，按 SAP 确认 Brookmeyer–Crowley 方法及置信区间变换。多个事件来自同一受试者时，常规 KM 置信区间的独立性假设需要统计师确认。</p>
+<p class="sas-boundary"><strong>QC / 定稿边界：</strong>已恢复但恢复日期缺失，须明确是排除 KM 还是 EOS 删失；两者不能混用。若选择排除，最终转归表仍应保留该事件，可另按 AEGRPID 取末条，或约定额外的排除编码；不能仅凭 ISRDUR 非缺失计数。EOSDT 不代表最后已知未恢复日期的通用标准；死亡作为竞争事件及其处理也须预先定义。检查日期缺失/倒置、补值标志、给药前已发生但给药后加重的事件归因、治疗期划分和事件键唯一性。上述 SAS 为教学示例，未在 SAS 环境运行。</p>
+<p class="sas-boundary">参考：CDISC ADaM OCCDS IG v1.1 §2.1、§2.3、§3.2；SDTMIG v3.4 §8.2 RELREC；<a href="https://www.cdisc.org/standards/foundational/adam">CDISC ADaM 标准</a>。本文为通用教学案例，不代表任何具体研究的最终 SAP 或真实数据。</p>
 </section>
 <!-- SP_NOTES_END -->
 <p class="sas-ending">每次只新增一条有复用价值的记录；没有验证的结论要标明待验证。<a href="https://documentation.sas.com/" target="_blank" rel="noopener noreferrer">SAS 官方文档 ↗</a></p>
