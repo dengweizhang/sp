@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="CTCAE v5.0 低钠血症分级、未知症状策略、SAS 实现、LB 与 AE/MH 一致性核查及 QC。"><meta name="theme-color" content="#ffffff"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://sp.769967.xyz/ctcae-lab-grading/"><link rel="stylesheet" href="/assets/style.css?v=0.3.7"><title>CTCAE 实验室分级：数值、症状与 AE/MH 一致性核查 · SP</title><script src="/assets/code-copy.js?v=0.3.4" defer></script></head>
+<body><div class="shell" id="top"><header class="site-header"><a class="brand" href="/" aria-label="SP 首页">SP.</a><nav class="tool-links" aria-label="常用工具"><a href="https://xpt.769967.xyz" target="_blank" rel="noopener noreferrer">XPT ↗</a><a href="https://ct.769967.xyz" target="_blank" rel="noopener noreferrer">CT ↗</a></nav></header><header class="article-header"><nav class="breadcrumb" aria-label="面包屑导航"><a href="/">首页</a> / CTCAE 专题</nav><h1>CTCAE 实验室分级：数值、症状与 AE/MH 一致性核查</h1><p class="article-lead">从一个血钠 127 mmol/L 的分级分歧出发，理解为什么 CTCAE Check 不是简单的 IF ELSE。</p></header><main class="article-body"><details class="toc-inline"><summary>本页目录 · 从问题出发</summary><nav aria-label="专题目录"><a href="#why">1. 为什么同样的 127 mmol/L，可能是两个等级？</a><a href="#policy">2. 没有症状信息，为什么不能直接说是 Grade 2？</a><a href="#sas">3. 如何把规则写成可审查的 SAS？</a><a href="#flow">4. 为什么 LB 与 AE/MH 不宜直接按等级相等来核查？</a><a href="#compare">5. 多个 AE 等级比较时，NOT 和 OR 会怎样出错？</a><a href="#qc">6. 一次规则变更，应该验证哪些下游结果？</a><a href="#tool">7. 规则查询工具应该承担什么角色？</a><a href="#refs">8. 参考与适用范围</a></nav></details><section id="why"><h2>1. 为什么同样的 127 mmol/L，可能是两个等级？</h2><p>做 LB CTCAE Check 时，一个很容易被忽略的问题是：血钠为 127 mmol/L，程序算出 Grade 3，研究者却报告 Grade 2。究竟是研究者填错了，还是程序的分级规则不完整？</p><p>CTCAE（Common Terminology Criteria for Adverse Events）是对不良事件严重程度的分级体系，而不是一张单纯的实验室数值阈值表。以 v5.0 为例，低钠血症的 Grade 2 和 Grade 3 在同一血钠区间内，取决于是否存在相关临床症状。</p><div class="table-wrap"><table class="learning-table"><thead><tr><th>Grade</th><th>低钠血症（Hyponatremia）</th><th>高钠血症（Hypernatremia）</th></tr></thead><tbody><tr><td>1</td><td>130 ≤ Na &lt; LLN</td><td>ULN &lt; Na ≤ 150</td></tr><tr><td>2</td><td>125–129 且无症状</td><td>150 &lt; Na ≤ 155，或已开始干预</td></tr><tr><td>3</td><td>125–129 且有症状；120–124 不论症状</td><td>155 &lt; Na ≤ 160，或有住院指征</td></tr><tr><td>4</td><td>Na &lt; 120，或危及生命的后果</td><td>Na &gt; 160，或危及生命的后果</td></tr><tr><td>5</td><td>相关死亡</td><td>相关死亡</td></tr></tbody></table></div><p>单位均为 mmol/L；依据 NCI CTCAE v5.0 第 85–86 页。原文分号表示“或”，不是所有条件同时成立。表中整数区间在小数结果中的边界实现应由项目约定，例如 125 ≤ Na &lt; 130；不能自行将小数四舍五入。数值触发较低等级也不能排除符合更高等级的临床条件。</p></section>
+<section id="policy"><h2>2. 没有症状信息，为什么不能直接说是 Grade 2？</h2><p>症状存在、明确无症状、未采集或未知，是三种不同状态。实验室报告通常只提供结果、单位和正常参考范围；即使 EDC 中有 CS/NCS 判断，也不能用它替代低钠相关症状。没有 AE 记录同样不能证明无症状。</p><div class="table-wrap"><table class="learning-table"><thead><tr><th>Na</th><th>症状</th><th>数值筛查可支持的等级</th><th>按未知取较高</th><th>按未知取较低</th></tr></thead><tbody><tr><td>127</td><td>明确无症状</td><td>2</td><td>2</td><td>2</td></tr><tr><td>127</td><td>明确有症状</td><td>3</td><td>3</td><td>3</td></tr><tr><td>127</td><td>未知</td><td>2 或 3</td><td>3（暂定）</td><td>2（暂定）</td></tr><tr><td>122</td><td>未知</td><td>3</td><td>3</td><td>3</td></tr><tr><td>119</td><td>未知</td><td>4</td><td>4</td><td>4</td></tr></tbody></table></div><p>上表假设没有已知危及生命或相关死亡等更高等级信息。两种未知策略都只是项目定义的操作规则：取较高适合偏重敏感度的筛查，可能产生较多假阳性；取较低可以减少误报，却可能漏掉有症状的 Grade 3。最透明的方式是保留可能范围与人工核查标记。若交付要求单一等级，应由医学与统计团队确认采用哪种策略，并在规格及版本记录中写明。</p><p>例如从“120 ≤ Na &lt; 130 统一为 3”改成“125 ≤ Na &lt; 130 暂定 2，120 ≤ Na &lt; 125 为 3”，改变的是未知信息处理规则，不是 CTCAE 原文，也没有新增症状证据。</p></section>
+<section id="sas"><h2>3. 如何把规则写成可审查的 SAS？</h2><p>下面是重新编写的教学示例，不依赖任何项目程序。只计算低方向的实验室数值筛查等级。假设已确认血液标本、标准化单位及数值，小数使用左闭右开区间；SYMPFL 为自定义的医学确认标记（Y/N/未知），不是标准 CDISC 变量。</p><pre><code>/* Numeric screening example; not a final AE grade */
+length reviewfl $1 sympfl $1;
+call missing(atoxgrln, reviewfl, grade_min, grade_max);
+
+if lbtestcd = 'SODIUM' and
+   upcase(strip(lbstresu)) in ('MMOL/L','MEQ/L')
+   and not missing(aval) then do;
+    if aval &lt; 120 then atoxgrln = 4;
+    else if aval &lt; 125 then atoxgrln = 3;
+    else if aval &lt; 130 then do;
+        if sympfl = 'Y' then atoxgrln = 3;
+        else if sympfl = 'N' then atoxgrln = 2;
+        else do;
+            grade_min = 2;
+            grade_max = 3;
+            reviewfl = 'Y';
+            /* Optional approved screening convention:
+               atoxgrln = 2;  (lower)
+               atoxgrln = 3;  (upper) */
+        end;
+    end;
+    else if not missing(anrlo) then do;
+        if aval &lt; anrlo then atoxgrln = 1;
+        else atoxgrln = 0;
+    end;
+end;
+if not missing(atoxgrln) then do;
+    grade_min = atoxgrln;
+    if reviewfl ne 'Y' then grade_max = atoxgrln;
+end;
+/* Preserve range 2–3 if a provisional grade is selected. */
+if reviewfl = 'Y' then grade_min = 2;</code></pre><p>这里 Grade 0 表示低方向未触发数值分级，并非 NCI 定义的 AE 等级，也不代表高方向正常。不要在末尾用 <code>if missing(atoxgrln) and not missing(aval) then atoxgrln=0;</code> 统一兜底：单位不匹配、参考范围缺失、症状未知都可能被错误变成 0。对特殊缺失值使用 <code>missing()</code>；转换失败、带 &lt; 或 &gt; 的原始结果应保留限定符，不能直接当精确值。</p><p>钠为一价离子，同一分析物的 mmol/L 与 mEq/L 数值相等，但不要把此关系推广到其他离子。高低方向应采用一致的单位校验；生命危险等临床条件由独立的医学核查流程处理。</p></section>
+<section id="flow"><h2>4. 为什么 LB 与 AE/MH 不宜直接按等级相等来核查？</h2><p>实践中常见两阶段流程：先将实验室数据标准化并计算筛查级别，再与 AE/MH 中已报告的事件、等级与日期比较。前一步回答“数值触发什么规则”，后一步回答“相关事件是否已经被恰当记录”。</p><div class="table-wrap"><table class="learning-table"><thead><tr><th>环节</th><th>关键数据</th><th>易错点</th></tr></thead><tbody><tr><td>LB → ADLB / QC 中间表</td><td>LBTESTCD、LBSTRESN/U、AVAL、ANRLO/ANRHI</td><td>单位、标本、参考范围、精度、缺失</td></tr><tr><td>低/高毒性等级</td><td>ATOXGRLN / ATOXGRHN、ATOXDSCL / ATOXDSCH</td><td>方向、术语、条件缺失、暂定与最终区分</td></tr><tr><td>AE/MH 匹配</td><td>USUBJID、事件术语/PT、起止日期、报告等级</td><td>同日多个事件、时间区间、部分日期、基线疾病及恶化</td></tr><tr><td>QC 输出</td><td>源记录标识、候选 AE/MH、差异原因、规则版本</td><td>核查提示不等于临床错误；不自动覆盖研究者等级</td></tr></tbody></table></div><p>不能只按受试者和检查项目匹配：同一血钠检查有高低两个方向，AE 的 PT 也可能不同；应采用经医学确认的方向与术语映射，结合实际采样时间、事件区间、日期精度和项目规定的匹配窗口。存在多个 AE 时，应保留候选记录而非任意截取前三条；部分日期和未结束事件需单独定义。基线已有 MH 的受试者也需要关注给药后恶化，不能因为存在同名 MH 就取消所有提示。</p><p>即使已知 AE 为 3、数值筛查为 2，也可能是由于症状、干预或其他时点的最严重表现。NCS 与高等级并存是有价值的核查线索，但 NCS 不等于无症状；CTCAE severity 也不同于 SAE seriousness 或与药物的因果关系。</p></section>
+<section id="compare"><h2>5. 多个 AE 等级比较时，NOT 和 OR 会怎样出错？</h2><p>假设 QC 的目标是：存在可比较的已匹配 AE 等级，但没有任何一个与 LB 筛查等级相同，才发出等级差异提示。以下是一个通用的布尔逻辑反例。</p><pre><code>/* Incorrect for "no matching grade" */
+not (lbgrade = g1 or lbgrade ne g2 or lbgrade ne g3)
+
+/* Candidate set: numeric grades; illustrative fixed-size case */
+array g[3] g1-g3;
+n_valid = 0;
+n_match = 0;
+do i = 1 to dim(g);
+    if not missing(g[i]) then do;
+        n_valid = n_valid + 1;
+        if g[i] = lbgrade then n_match = n_match + 1;
+    end;
+end;
+if not missing(lbgrade) and reviewfl ne 'Y' then do;
+    if n_valid = 0 then check = 'NO GRADE';
+    else if n_match = 0 then check = 'DIFFERENT';
+    else check = 'MATCH';
+end;</code></pre><p>例如 LB=3、AE=2、其余两条缺失，错误表达式中的不等条件为真，外部 NOT 使整体为假，导致漏报。真实实现宜在一对多候选集合上汇总，而不是限定三个变量。没有相关 AE、相关 AE 等级缺失、等级不同、暂定范围内一致是不同的 QC 状态。上面示例只演示已匹配候选的数值比较，未定义事件匹配本身，也不表示等级不等就需要修改 AE。</p></section>
+<section id="qc"><h2>6. 一次规则变更，应该验证哪些下游结果？</h2><div class="table-wrap"><table class="learning-table"><thead><tr><th>教学测试输入（mmol/L）</th><th>预期低方向数值筛查（LLN=135）</th></tr></thead><tbody><tr><td>119.9 / 120 / 124.9</td><td>4 / 3 / 3</td></tr><tr><td>125 / 129.9，症状未知</td><td>范围 2–3；按约定暂定，标记复核</td></tr><tr><td>125 / 129.9，明确无症状或有症状</td><td>分别为 2 或 3</td></tr><tr><td>130 / 134.9 / 135</td><td>1 / 1 / 0</td></tr><tr><td>127，单位未知；结果缺失</td><td>不判定，不置 0</td></tr><tr><td>132，LLN 缺失</td><td>不判定；参考范围缺失</td></tr><tr><td>127，已知危及生命的后果</td><td>医学评估 Grade 4，不由数值规则覆盖</td></tr></tbody></table></div><p>规则变更前后按受试者、检查、方向、时间和源记录 ID 对比，核查等级变化数量、Grade ≥3 例数、基线至最差等级 Shift Table、潜在漏报及 AE/MH QC 清单。是否影响正式 ADLB/TFL 取决于它们是否复用了同一规则。对每一处差异记录旧等级、新等级、症状信息状态、规则版本和医学确认状态。不要只看代码能否跑通。</p><p>更通用的难点还包括低钾的症状或干预条件、低钙的校正钙与离子钙、血磷依赖干预而不是单纯阈值，以及部分肝酶标准与基线状态有关。维护规则库时应按 CTCAE 版本、术语、分析物、标本、单位、方向、数值边界、临床条件及缺失策略分别建模；有些项目只能生成核查线索，不能全自动给出唯一临床等级。</p></section>
+<section id="tool"><h2>7. 规则查询工具应该承担什么角色？</h2><p><a href="https://ct.769967.xyz/" target="_blank" rel="noopener noreferrer">CT · Controlled Terminology / CTCAE Mapping ↗</a> 可以作为术语与分级条件的查阅入口。以 SODIUM 为例，同时查看 Hyponatremia 与 Hypernatremia，能直观发现两方向的分级条件并不相同。</p><p>查阅工具与自动分级引擎应分开：前者展示原始标准及条件，后者必须明确数据来源、规则版本、适用单位及未知状态如何处理。可把“仅数值可判定 / 依赖临床信息 / 信息不足待复核”作为后续工具设计的分类，而非把查阅页面直接当作最终医学判断。</p><p>本文讨论 CTCAE v5.0，不主张新项目一律使用该版本。NCI 已发布 v6.0，应以方案、SAP 和项目约定锁定版本；不要直接把旧项目阈值移植到新版本。</p></section>
+<section id="refs"><h2>8. 参考与适用范围</h2><p><a href="https://dctd.cancer.gov/research/ctep-trials/for-sites/adverse-events/ctcae-v5-8x11.pdf#page=87" target="_blank" rel="noopener noreferrer">NCI CTCAE v5.0（2017-11-27），第 85–86 页</a>：钠、钾、钙、磷分级；引言说明分号含义。</p><p><a href="https://dctd.cancer.gov/research/ctep-trials/for-sites/adverse-events" target="_blank" rel="noopener noreferrer">NCI CTCAE and AE Reporting</a>：官方版本及映射资源。<a href="https://www.cdisc.org/standards/foundational/adam/adamig-v1-3" target="_blank" rel="noopener noreferrer">CDISC ADaMIG v1.3</a>：第 3.3.7、4.9 节，毒性及双向实验室分级变量。另见本站 <a href="/bds-findings/">Findings → BDS</a>。</p><p>本文是统计编程实践笔记，案例及代码均为通用教学示例，未在 SAS 环境运行，不包含真实受试者、项目文件或内部程序。最终临床分级与项目规则应由相应医学、统计团队确认。</p></section></main><footer class="site-footer"><span>by dw · 2026-11-26</span><a href="#top">Back to top ↑</a><span>V0.3.11</span></footer></div></body></html>
