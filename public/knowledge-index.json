@@ -767,29 +767,30 @@
       ]
     },
     {
-      "title": "CTCAE 实验室分级：数值、症状与 AE/MH 一致性核查",
+      "title": "CTCAE Check：临床试验中的医学安全性核查",
       "url": "/ctcae-lab-grading/",
       "keywords": [
+        "CTCAE Check",
         "CTCAE",
-        "CTCAE 5.0",
-        "SODIUM",
-        "Hyponatremia",
-        "Hypernatremia",
-        "低钠血症",
-        "症状",
-        "Grade",
-        "ATOXGRLN",
-        "ATOXGRHN",
-        "ADLB",
+        "医学监查",
+        "Medical Monitor",
+        "MM",
+        "安全性审核",
         "AE",
         "MH",
         "LB",
-        "CS",
-        "NCS",
-        "SAS",
-        "QC",
-        "实验室分级",
-        "临床意义"
+        "VS",
+        "EG",
+        "数据传输",
+        "医学分级",
+        "低钠血症",
+        "蛋白尿",
+        "阴性",
+        "阳性",
+        "基线",
+        "临床意义",
+        "核查清单",
+        "自动化"
       ]
     }
   ]
