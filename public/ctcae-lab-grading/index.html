@@ -28,17 +28,17 @@ if lbtestcd = 'SODIUM' and
         else atoxgrln = 0;
     end;
 end;
-if not missing(atoxgrln) then do;
+if not missing(atoxgrln) and reviewfl ne 'Y' then do;
     grade_min = atoxgrln;
-    if reviewfl ne 'Y' then grade_max = atoxgrln;
-end;
-/* Preserve range 2–3 if a provisional grade is selected. */
-if reviewfl = 'Y' then grade_min = 2;</code></pre><p>这里 Grade 0 表示低方向未触发数值分级，并非 NCI 定义的 AE 等级，也不代表高方向正常。不要在末尾用 <code>if missing(atoxgrln) and not missing(aval) then atoxgrln=0;</code> 统一兜底：单位不匹配、参考范围缺失、症状未知都可能被错误变成 0。对特殊缺失值使用 <code>missing()</code>；转换失败、带 &lt; 或 &gt; 的原始结果应保留限定符，不能直接当精确值。</p><p>钠为一价离子，同一分析物的 mmol/L 与 mEq/L 数值相等，但不要把此关系推广到其他离子。高低方向应采用一致的单位校验；生命危险等临床条件由独立的医学核查流程处理。</p></section>
+    grade_max = atoxgrln;
+end;</code></pre><p>这里 Grade 0 表示低方向未触发数值分级，并非 NCI 定义的 AE 等级，也不代表高方向正常。不要在末尾用 <code>if missing(atoxgrln) and not missing(aval) then atoxgrln=0;</code> 统一兜底：单位不匹配、参考范围缺失、症状未知都可能被错误变成 0。对特殊缺失值使用 <code>missing()</code>；转换失败、带 &lt; 或 &gt; 的原始结果应保留限定符，不能直接当精确值。</p><p>钠为一价离子，同一分析物的 mmol/L 与 mEq/L 数值相等，但不要把此关系推广到其他离子。高低方向应采用一致的单位校验；生命危险等临床条件由独立的医学核查流程处理。</p></section>
 <section id="flow"><h2>4. 为什么 LB 与 AE/MH 不宜直接按等级相等来核查？</h2><p>实践中常见两阶段流程：先将实验室数据标准化并计算筛查级别，再与 AE/MH 中已报告的事件、等级与日期比较。前一步回答“数值触发什么规则”，后一步回答“相关事件是否已经被恰当记录”。</p><div class="table-wrap"><table class="learning-table"><thead><tr><th>环节</th><th>关键数据</th><th>易错点</th></tr></thead><tbody><tr><td>LB → ADLB / QC 中间表</td><td>LBTESTCD、LBSTRESN/U、AVAL、ANRLO/ANRHI</td><td>单位、标本、参考范围、精度、缺失</td></tr><tr><td>低/高毒性等级</td><td>ATOXGRLN / ATOXGRHN、ATOXDSCL / ATOXDSCH</td><td>方向、术语、条件缺失、暂定与最终区分</td></tr><tr><td>AE/MH 匹配</td><td>USUBJID、事件术语/PT、起止日期、报告等级</td><td>同日多个事件、时间区间、部分日期、基线疾病及恶化</td></tr><tr><td>QC 输出</td><td>源记录标识、候选 AE/MH、差异原因、规则版本</td><td>核查提示不等于临床错误；不自动覆盖研究者等级</td></tr></tbody></table></div><p>不能只按受试者和检查项目匹配：同一血钠检查有高低两个方向，AE 的 PT 也可能不同；应采用经医学确认的方向与术语映射，结合实际采样时间、事件区间、日期精度和项目规定的匹配窗口。存在多个 AE 时，应保留候选记录而非任意截取前三条；部分日期和未结束事件需单独定义。基线已有 MH 的受试者也需要关注给药后恶化，不能因为存在同名 MH 就取消所有提示。</p><p>即使已知 AE 为 3、数值筛查为 2，也可能是由于症状、干预或其他时点的最严重表现。NCS 与高等级并存是有价值的核查线索，但 NCS 不等于无症状；CTCAE severity 也不同于 SAE seriousness 或与药物的因果关系。</p></section>
 <section id="compare"><h2>5. 多个 AE 等级比较时，NOT 和 OR 会怎样出错？</h2><p>假设 QC 的目标是：存在可比较的已匹配 AE 等级，但没有任何一个与 LB 筛查等级相同，才发出等级差异提示。以下是一个通用的布尔逻辑反例。</p><pre><code>/* Incorrect for "no matching grade" */
 not (lbgrade = g1 or lbgrade ne g2 or lbgrade ne g3)
 
 /* Candidate set: numeric grades; illustrative fixed-size case */
+length check $12;
+call missing(check);
 array g[3] g1-g3;
 n_valid = 0;
 n_match = 0;
