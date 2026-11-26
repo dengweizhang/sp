@@ -1,6 +1,6 @@
 # SP · Clinical Statistical Programming
 
-**V0.3.11** — 新增 CTCAE 实验室分级与 AE/MH 一致性核查专题；AI 继续隐藏。
+**V0.3.11** — 新增 CTCAE Check 医学安全性核查专题；AI 继续隐藏。
 
 ## V0.3.9：常用 PK 参数 NCA / λz QC
 
@@ -232,5 +232,5 @@
 
 ## V0.3.11：CTCAE 实验室分级
 
-- 新增 `/ctcae-lab-grading/`：低钠血症症状条件、缺失策略、SAS 教学示例、AE/MH 匹配、边界 QC；链接 CT 查询工具和 NCI 原文。
-- 更新首页、知识索引及 sitemap，保留现有视觉和 AI 状态。代码未在 SAS 环境执行；无真实项目资料。
+- 新增 `/ctcae-lab-grading/`：医学监查背景、LB/VS/EG 与 AE/MH 核查流程、周期性清单、症状与定性结果分级边界；链接 CT 查询工具和 NCI 原文。
+- 更新首页、知识索引及 sitemap，保留现有视觉和 AI 状态。无 SAS 代码和真实项目资料；参考实现未实际运行验证。
