@@ -1,6 +1,6 @@
 {
-  "version": "0.3.10",
-  "description": "公开知识索引：SAS、CDISC、统计/药理、Findings/BDS、C-QTc、ADaM 填补逻辑与上市监管递交。",
+  "version": "0.3.11",
+  "description": "公开知识索引：SAS、CDISC、统计/药理、Findings/BDS、C-QTc、ADaM 填补逻辑与上市监管递交。 CTCAE 实验室分级与一致性核查。",
   "articles": [
     {
       "title": "SAS 实战笔记 01–10：函数、Unicode、PROC REPORT/RTF、正则与 PK 浓度、ADAE 与 KM",
@@ -764,6 +764,32 @@
         "审评审批",
         "QC",
         "FDA Data Standards Catalog"
+      ]
+    },
+    {
+      "title": "CTCAE 实验室分级：数值、症状与 AE/MH 一致性核查",
+      "url": "/ctcae-lab-grading/",
+      "keywords": [
+        "CTCAE",
+        "CTCAE 5.0",
+        "SODIUM",
+        "Hyponatremia",
+        "Hypernatremia",
+        "低钠血症",
+        "症状",
+        "Grade",
+        "ATOXGRLN",
+        "ATOXGRHN",
+        "ADLB",
+        "AE",
+        "MH",
+        "LB",
+        "CS",
+        "NCS",
+        "SAS",
+        "QC",
+        "实验室分级",
+        "临床意义"
       ]
     }
   ]
