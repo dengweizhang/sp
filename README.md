@@ -1,6 +1,6 @@
 # SP · Clinical Statistical Programming
 
-**V0.3.10** — 新增 ADaM 填补与衍生方法、药物上市前监管递交两篇深度笔记；AI 继续隐藏。
+**V0.3.11** — 新增 CTCAE 实验室分级与 AE/MH 一致性核查专题；AI 继续隐藏。
 
 ## V0.3.9：常用 PK 参数 NCA / λz QC
 
@@ -229,3 +229,8 @@
 - 新增 `/drug-submission/`：从 IND/CTA 到 NDA/BLA/MAA，解释 CTD/eCTD 五模块、FDA 数据包、Define-XML/cSDRG/ADRG/程序、ISS/ISE 及 FDA/NMPA 2026 年更新。
 - 保留已有的 9 篇主页文章和 SAS 学习子文章，现主页有 11 篇顶层条目。索引、sitemap 同步更新。
 - AI 继续隐藏停用；两篇不使用外部运行脚本或拖动交互。
+
+## V0.3.11：CTCAE 实验室分级
+
+- 新增 `/ctcae-lab-grading/`：低钠血症症状条件、缺失策略、SAS 教学示例、AE/MH 匹配、边界 QC；链接 CT 查询工具和 NCI 原文。
+- 更新首页、知识索引及 sitemap，保留现有视觉和 AI 状态。代码未在 SAS 环境执行；无真实项目资料。
